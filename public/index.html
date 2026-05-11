@@ -2,63 +2,81 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#0b1224" />
   <title>Quiz E4 - BTS Electrotechnique</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="connStatus" class="conn-status conn-connecting">⏳ Connexion...</div>
+  <canvas id="confetti"></canvas>
+
   <div class="container">
-    <h1>⚡ Quiz E4 - BTS Electrotechnique</h1>
-    <p class="sub">Multijoueur local - revisions sans calculatrice</p>
+    <h1>⚡ Quiz E4 BTS Electrotechnique</h1>
+    <p class="sub">Multijoueur en temps reel · Revisions sans calculatrice</p>
 
     <div id="join-card" class="card">
-      <h2>Rejoindre la partie</h2>
-      <label>Ton prenom (ou pseudo)</label>
-      <input id="name" maxlength="20" placeholder="Ex : Lea, Hugo..." />
+      <h2>👋 Rejoindre la partie</h2>
+      <label>Code de session (4 chiffres) ou laisse vide</label>
+      <input id="sessionCode" maxlength="4" placeholder="ex : 4271" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+      <label>Ton prenom</label>
+      <input id="name" maxlength="20" placeholder="Ex : Lea, Hugo..." autocomplete="off" />
       <div class="row">
-        <button id="btnJoin">Rejoindre</button>
-        <button id="btnHost" class="secondary">Je suis l'animateur</button>
+        <button id="btnJoin">🚀 Rejoindre</button>
+        <button id="btnHost" class="secondary">🎛️ Je suis animateur</button>
       </div>
-      <div class="banner" style="margin-top:14px">
-        L'animateur (un poste maitre) clique sur "Je suis l'animateur" pour piloter la partie.<br/>
-        Les autres joueurs entrent leur prenom puis "Rejoindre".
-      </div>
+      <p class="sub mt-md">Astuce : scanne le QR code affiche par l'animateur, ou tape le code a 4 chiffres.</p>
     </div>
 
     <div id="waiting-card" class="card hidden">
-      <h2>En attente du lancement par l'animateur...</h2>
-      <p class="sub">Bienvenue <strong id="myName"></strong> ! Garde l'œil sur l'ecran.</p>
-      <h3>Joueurs connectes</h3>
+      <div class="text-center">
+        <div class="my-avatar" id="myAvatar" style="background:#fbbf24">🦊</div>
+        <h2 style="display:inline-block; vertical-align:middle; margin:0">Bienvenue <span id="myName" style="color:#fde047"></span> !</h2>
+      </div>
+      <p class="sub text-center mt-md">⏳ En attente du lancement par l'animateur...</p>
+      <h2 class="mt-lg">Joueurs deja connectes</h2>
       <div id="lobbyPlayers" class="scores"></div>
     </div>
 
     <div id="game-card" class="card hidden">
-      <span class="cat-tag" id="catTag"></span>
-      <div style="float:right; color:#94a3b8" id="progress"></div>
+      <div>
+        <span class="cat-tag" id="catTag"></span>
+        <span style="float:right; color:#94a3b8; font-weight:700" id="progress"></span>
+      </div>
       <div class="question-box" id="qText"></div>
       <div id="qFormula" class="formula-box hidden"></div>
       <div id="qVisual" class="visual-box hidden"></div>
-      <div class="timer-bar"><div class="timer-bar-inner" id="timerBar" style="width:100%"></div></div>
-      <div id="phaseLabel" class="phase-label">⏱️ Question en cours...</div>
+      <div class="timer-bar" id="timerBar"><div class="timer-bar-inner" id="timerBarInner" style="width:100%"></div></div>
+      <div id="phaseLabel" class="phase-label">⏱️ Reponds mentalement !</div>
       <div class="choices" id="choices"></div>
-      <div id="answerStatus" class="banner hidden" style="margin-top:14px"></div>
+      <div id="answerStatus" class="banner hidden mt-md"></div>
       <div id="explanationBox" class="explanation-box hidden"></div>
     </div>
 
     <div id="scores-card" class="card hidden">
-      <h3>Scores</h3>
+      <h2>🏆 Scores en direct</h2>
       <div id="scores" class="scores"></div>
     </div>
 
-    <div id="end-card" class="card hidden">
-      <h2>🏁 Partie terminee !</h2>
+    <div id="end-card" class="card hidden text-center">
+      <h1 style="font-size:2.5rem; margin-bottom:6px">🎉 Partie terminee !</h1>
+      <p class="sub" id="endSub"></p>
+      <div class="podium" id="podium"></div>
+      <div id="awards" class="banner mt-md"></div>
+      <h2 class="mt-lg">📊 Tes statistiques</h2>
+      <div id="myStats" class="stats"></div>
+      <h2 class="mt-lg">Classement complet</h2>
       <div id="ranking" class="scores"></div>
-      <button id="btnAgain" style="margin-top:16px">Retour au lobby</button>
+      <button id="btnAgain" class="mt-lg">↻ Retour au lobby</button>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/sounds.js"></script>
+  <script src="/confetti.js"></script>
   <script src="/player.js"></script>
 </body>
 </html>

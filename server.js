@@ -73,11 +73,37 @@ app.get('/qr.png', async (req, res) => {
   }
 });
 
+// ===== Pool d'avatars (emoji + couleur) attribues automatiquement =====
+const AVATAR_POOL = [
+  { emoji: '🦊', color: '#f97316' }, { emoji: '🐼', color: '#64748b' },
+  { emoji: '🦁', color: '#eab308' }, { emoji: '🐯', color: '#f59e0b' },
+  { emoji: '🐸', color: '#22c55e' }, { emoji: '🦉', color: '#a78bfa' },
+  { emoji: '🐺', color: '#94a3b8' }, { emoji: '🦄', color: '#ec4899' },
+  { emoji: '🐙', color: '#a855f7' }, { emoji: '🦅', color: '#0ea5e9' },
+  { emoji: '🐲', color: '#10b981' }, { emoji: '🦊', color: '#dc2626' },
+  { emoji: '🐧', color: '#0284c7' }, { emoji: '🐝', color: '#facc15' },
+  { emoji: '🦋', color: '#06b6d4' }, { emoji: '🐢', color: '#16a34a' },
+  { emoji: '🦖', color: '#65a30d' }, { emoji: '🦈', color: '#0369a1' },
+  { emoji: '🐉', color: '#7c3aed' }, { emoji: '🦩', color: '#f472b6' },
+];
+let avatarIdx = Math.floor(Math.random() * AVATAR_POOL.length);
+function nextAvatar() {
+  const a = AVATAR_POOL[avatarIdx % AVATAR_POOL.length];
+  avatarIdx++;
+  return { emoji: a.emoji, color: a.color };
+}
+
+// Code session 4 chiffres (regenere a chaque demarrage du serveur)
+function genSessionCode() {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
 // Etat global du jeu
 const state = {
+  sessionCode: genSessionCode(),
   hostId: null,
   hostToken: null,    // jeton persistant cote client (localStorage)
-  players: {},        // socketId -> { name, score, answeredThisQuestion, lastAnswer, lastTime }
+  players: {},        // socketId -> { name, score, avatar, streak, answeredThisQuestion, lastAnswer, lastTime, totalAnswered, totalCorrect, avgTime }
   category: null,
   questions: [],      // sous-ensemble actif pour la partie
   currentIndex: -1,
@@ -89,23 +115,58 @@ const state = {
   inProgress: false,
   phase: 'idle',              // 'idle' | 'question' | 'explanation'
   history: [],                // suivi des questions posees (texte court)
+  mode: 'classic',            // 'classic' | 'survival'
 };
+
+function playerPublic(p) {
+  return {
+    name: p.name,
+    score: p.score,
+    avatar: p.avatar,
+    streak: p.streak || 0,
+    answered: !!p.answeredThisQuestion,
+    eliminated: !!p.eliminated,
+  };
+}
 
 function broadcastLobby() {
   io.emit('lobby:update', {
-    players: Object.values(state.players).map(p => ({ name: p.name, score: p.score })),
+    players: Object.values(state.players).map(playerPublic),
     categories: Object.keys(QUESTIONS),
     inProgress: state.inProgress,
     category: state.category,
+    sessionCode: state.sessionCode,
   });
 }
 
 function broadcastScores() {
   io.emit('game:scores', {
     scores: Object.values(state.players)
-      .map(p => ({ name: p.name, score: p.score }))
+      .filter(p => !p.eliminated)
+      .map(playerPublic)
       .sort((a, b) => b.score - a.score),
+    eliminated: Object.values(state.players)
+      .filter(p => p.eliminated)
+      .map(playerPublic),
   });
+}
+
+// Indicateur temps reel "qui a repondu" - throttle leger pour 10+ joueurs
+let answeredTimeout = null;
+function broadcastAnswered() {
+  if (answeredTimeout) return;
+  answeredTimeout = setTimeout(() => {
+    answeredTimeout = null;
+    io.emit('game:answered', {
+      statuses: Object.values(state.players)
+        .filter(p => !p.eliminated)
+        .map(p => ({
+          name: p.name,
+          avatar: p.avatar,
+          answered: !!p.answeredThisQuestion,
+        })),
+    });
+  }, 100);
 }
 
 function shuffle(arr) {
@@ -117,28 +178,38 @@ function shuffle(arr) {
   return a;
 }
 
-function startGame(category, nbQuestions, difficulty) {
+function startGame(category, nbQuestions, difficulty, mode) {
   state.category = category;
+  state.mode = mode === 'survival' ? 'survival' : 'classic';
   let all = category === '__ALL__'
     ? Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })))
     : QUESTIONS[category].map(q => ({ ...q, cat: category }));
-  // filtrage par difficulte si demande (F/M/D, ou null pour tout)
   if (difficulty && ['F','M','D'].includes(difficulty)) {
     all = all.filter(q => q.d === difficulty);
   }
   if (all.length === 0) {
-    // fallback : pas de question pour cette combinaison → on ouvre tout
     all = Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })));
   }
   state.questions = shuffle(all).slice(0, nbQuestions || all.length);
   state.currentIndex = -1;
   state.inProgress = true;
   state.history = [];
-  // remise a zero des scores
-  Object.values(state.players).forEach(p => { p.score = 0; });
+  // remise a zero des scores + streaks + stats
+  Object.values(state.players).forEach(p => {
+    p.score = 0;
+    p.streak = 0;
+    p.totalAnswered = 0;
+    p.totalCorrect = 0;
+    p.totalTime = 0;
+    p.bestStreak = 0;
+    p.wrongQuestions = [];
+    p.eliminated = false;
+    p.lives = 3;
+  });
   io.emit('game:start', {
     total: state.questions.length,
     category: state.category,
+    mode: state.mode,
   });
   broadcastScores();
   setTimeout(nextQuestion, 1500);
@@ -180,18 +251,52 @@ function revealAnswer() {
   if (!q) return;
   state.phase = 'explanation';
 
-  // calcul scores : reponse correcte + bonus rapidite
+  // calcul scores : reponse correcte + bonus rapidite + bonus de combo
   const results = [];
   Object.entries(state.players).forEach(([id, p]) => {
-    const correct = p.lastAnswer === q.r;
-    let gained = 0;
-    if (correct) {
-      const elapsed = Math.max(0, (p.lastTime || state.questionDuration) );
-      const bonus = Math.floor((elapsed / state.questionDuration) * 500);
-      gained = 500 + bonus;
-      p.score += gained;
+    if (p.eliminated) {
+      results.push({ name: p.name, correct: false, gained: 0, answer: null, streak: 0, eliminated: true });
+      return;
     }
-    results.push({ name: p.name, correct, gained, answer: p.lastAnswer });
+    const answered = p.lastAnswer !== null && p.lastAnswer !== undefined;
+    const correct = answered && p.lastAnswer === q.r;
+    let gained = 0;
+    let comboBonus = 0;
+
+    if (answered) {
+      p.totalAnswered++;
+      p.totalTime += (state.questionDuration - (p.lastTime || 0));
+    }
+
+    if (correct) {
+      const elapsed = Math.max(0, (p.lastTime || state.questionDuration));
+      const speedBonus = Math.floor((elapsed / state.questionDuration) * 500);
+      const base = 500;
+      // bonus de combo : +50 par question de la chaine, max +300
+      p.streak = (p.streak || 0) + 1;
+      comboBonus = Math.min(300, (p.streak - 1) * 100);
+      gained = base + speedBonus + comboBonus;
+      p.score += gained;
+      p.totalCorrect++;
+      if (p.streak > (p.bestStreak || 0)) p.bestStreak = p.streak;
+    } else {
+      p.streak = 0;
+      if (answered && q.r !== undefined) {
+        p.wrongQuestions.push({ q: q.q, cat: q.cat, good: q.c[q.r], mine: p.c && p.c[p.lastAnswer] });
+      }
+      // mode survival : perte d'une vie
+      if (state.mode === 'survival') {
+        p.lives = (p.lives || 3) - 1;
+        if (p.lives <= 0) {
+          p.eliminated = true;
+        }
+      }
+    }
+    results.push({
+      name: p.name, avatar: p.avatar, correct, gained, comboBonus,
+      streak: p.streak, answer: p.lastAnswer, eliminated: !!p.eliminated,
+      lives: p.lives,
+    });
   });
 
   state.history.push({ q: q.q, cat: q.cat, good: q.c[q.r] });
@@ -207,6 +312,15 @@ function revealAnswer() {
   });
   broadcastScores();
 
+  // survival : si plus qu'un joueur, fin
+  if (state.mode === 'survival') {
+    const alive = Object.values(state.players).filter(p => !p.eliminated);
+    if (alive.length <= 1 && Object.keys(state.players).length > 1) {
+      setTimeout(endGame, 4000);
+      return;
+    }
+  }
+
   if (state.explanationTimer) clearTimeout(state.explanationTimer);
   state.explanationTimer = setTimeout(nextQuestion, state.explanationDuration);
 }
@@ -214,9 +328,32 @@ function revealAnswer() {
 function endGame() {
   state.inProgress = false;
   const ranking = Object.values(state.players)
-    .map(p => ({ name: p.name, score: p.score }))
+    .map(p => ({
+      name: p.name,
+      score: p.score,
+      avatar: p.avatar,
+      stats: {
+        answered: p.totalAnswered || 0,
+        correct: p.totalCorrect || 0,
+        accuracy: p.totalAnswered ? Math.round((p.totalCorrect / p.totalAnswered) * 100) : 0,
+        avgTime: p.totalAnswered ? Math.round((p.totalTime / p.totalAnswered) / 100) / 10 : 0,
+        bestStreak: p.bestStreak || 0,
+        eliminated: !!p.eliminated,
+      },
+    }))
     .sort((a, b) => b.score - a.score);
-  io.emit('game:end', { ranking, history: state.history });
+  // Recompenses
+  const fastestPlayer = ranking.slice().sort((a, b) => a.stats.avgTime - b.stats.avgTime)[0];
+  const bestStreakPlayer = ranking.slice().sort((a, b) => b.stats.bestStreak - a.stats.bestStreak)[0];
+  io.emit('game:end', {
+    ranking,
+    history: state.history,
+    awards: {
+      fastest: fastestPlayer ? fastestPlayer.name : null,
+      bestStreak: bestStreakPlayer ? bestStreakPlayer.name : null,
+      bestStreakValue: bestStreakPlayer ? bestStreakPlayer.stats.bestStreak : 0,
+    },
+  });
   broadcastLobby();
 }
 
@@ -243,19 +380,31 @@ io.on('connection', socket => {
 
   socket.on('player:join', name => {
     name = (name || 'Joueur').toString().slice(0, 20).trim() || 'Joueur';
+    // Si pseudo deja pris (reco), on garde l'avatar precedent
+    const existing = Object.values(state.players).find(p => p.name === name);
+    const avatar = existing ? existing.avatar : nextAvatar();
     state.players[socket.id] = {
       name,
       score: 0,
+      avatar,
+      streak: 0,
       answeredThisQuestion: false,
       lastAnswer: null,
       lastTime: null,
+      totalAnswered: 0,
+      totalCorrect: 0,
+      totalTime: 0,
+      bestStreak: 0,
+      wrongQuestions: [],
+      eliminated: false,
+      lives: 3,
     };
-    socket.emit('player:joined', { name });
+    socket.emit('player:joined', { name, avatar });
     broadcastLobby();
     broadcastScores();
   });
 
-  socket.on('host:start', ({ category, nbQuestions, difficulty } = {}) => {
+  socket.on('host:start', ({ category, nbQuestions, difficulty, mode } = {}) => {
     if (socket.id !== state.hostId) {
       console.log(`[START] refuse : ${socket.id} n'est pas l'animateur (host=${state.hostId})`);
       socket.emit('host:error', 'Vous n\'etes pas reconnu comme animateur (rechargez la page).');
@@ -277,8 +426,8 @@ io.on('connection', socket => {
       socket.emit('host:error', 'Aucun joueur connecte. Demande aux joueurs de rejoindre depuis leur navigateur.');
       return;
     }
-    console.log(`[START] ${category} - ${nbQuestions} questions - difficulte=${difficulty || 'toutes'} - ${nbPlayers} joueur(s)`);
-    startGame(category, nbQuestions, difficulty);
+    console.log(`[START] ${category} - ${nbQuestions} questions - difficulte=${difficulty || 'toutes'} - mode=${mode || 'classic'} - ${nbPlayers} joueur(s)`);
+    startGame(category, nbQuestions, difficulty, mode);
   });
 
   socket.on('host:stop', () => {
@@ -305,16 +454,18 @@ io.on('connection', socket => {
 
   socket.on('player:answer', ({ choice }) => {
     const p = state.players[socket.id];
-    if (!p || !state.inProgress) return;
+    if (!p || !state.inProgress || p.eliminated) return;
     if (p.answeredThisQuestion) return;
     if (typeof choice !== 'number' || choice < 0 || choice > 3) return;
     p.answeredThisQuestion = true;
     p.lastAnswer = choice;
-    p.lastTime = Math.max(0, state.questionDeadline - Date.now()); // ms qu'il restait
+    p.lastTime = Math.max(0, state.questionDeadline - Date.now());
     socket.emit('player:answer:ack', { choice });
+    broadcastAnswered();
 
     // si tout le monde a repondu : on revele avant la fin du timer
-    const allAnswered = Object.values(state.players).every(pl => pl.answeredThisQuestion);
+    const activePlayers = Object.values(state.players).filter(pl => !pl.eliminated);
+    const allAnswered = activePlayers.length > 0 && activePlayers.every(pl => pl.answeredThisQuestion);
     if (allAnswered) {
       if (state.questionTimer) clearTimeout(state.questionTimer);
       setTimeout(revealAnswer, 400);

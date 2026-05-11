@@ -1,4 +1,6 @@
-// Logique cote animateur
+// ============================================================
+// Logique cote animateur - Quiz BTS E4
+// ============================================================
 const socket = io({
   transports: ['websocket', 'polling'],
   reconnection: true,
@@ -11,9 +13,9 @@ const $ = id => document.getElementById(id);
 let selectedCategory = '__ALL__';
 let isHost = false;
 let timerInterval = null;
-let waitingForStart = null; // timeout pour detecter l'absence de game:start
+let waitingForStart = null;
 
-// Jeton persistant : permet de garder le role d'animateur meme apres reconnexion
+// Jeton persistant
 function getHostToken() {
   let t = localStorage.getItem('hostToken');
   if (!t) {
@@ -23,87 +25,263 @@ function getHostToken() {
   return t;
 }
 const HOST_TOKEN = getHostToken();
+function claim() { socket.emit('host:claim', { token: HOST_TOKEN }); }
 
-function claim() {
-  socket.emit('host:claim', { token: HOST_TOKEN });
-}
-
-$('btnClaim').addEventListener('click', claim);
+$('btnClaim').addEventListener('click', () => { SFX.click(); claim(); });
 
 $('btnStart').addEventListener('click', () => {
-  if (!isHost) {
-    // tentative de re-claim avant d'echouer
-    claim();
-    flashMsg('🔄 Tentative de reconnexion en tant qu\'animateur... reclique dans 1 s.', 'warn');
-    return;
-  }
+  if (!isHost) { claim(); flashMsg('🔄 Reconnexion au role d\'animateur...', 'warn'); return; }
   const nb = parseInt($('nbQuestions').value, 10);
   const diff = $('difficulty').value || null;
+  const mode = $('mode').value || 'classic';
   const diffLabel = diff === 'F' ? 'Facile' : diff === 'M' ? 'Moyen' : diff === 'D' ? 'Difficile' : 'toutes';
-  console.log('[HOST] envoi host:start', { category: selectedCategory, nbQuestions: nb, difficulty: diff });
-  flashMsg(`🚀 Lancement... (categorie : ${selectedCategory === '__ALL__' ? 'Programme complet' : selectedCategory}, ${diffLabel})`, 'info');
-  socket.emit('host:start', { category: selectedCategory, nbQuestions: nb, difficulty: diff });
-  // securite : si rien n'arrive sous 3 s, on previent
+  SFX.click();
+  flashMsg(`🚀 Lancement... ${diffLabel} · ${mode === 'survival' ? 'SURVIE' : 'classique'}`, 'info');
+  socket.emit('host:start', { category: selectedCategory, nbQuestions: nb, difficulty: diff, mode });
   if (waitingForStart) clearTimeout(waitingForStart);
   waitingForStart = setTimeout(() => {
-    flashMsg('⚠️ Pas de reponse du serveur. Verifie qu\'au moins un joueur a rejoint la partie, ou recharge la page.', 'warn');
+    flashMsg('⚠️ Pas de reponse du serveur. Au moins 1 joueur connecte ?', 'warn');
   }, 3000);
 });
 
-$('btnStop').addEventListener('click', () => {
-  if (!isHost) return;
-  if (confirm('Arreter la partie en cours ?')) socket.emit('host:stop');
-});
-
-// Bouton "Suivant" pendant la partie : revele ou passe selon la phase
-$('btnNext').addEventListener('click', () => {
-  if (!isHost) return;
-  socket.emit('host:next');
-});
+$('btnNext').addEventListener('click', () => { if (isHost) { SFX.click(); socket.emit('host:next'); } });
 $('btnStopGame').addEventListener('click', () => {
   if (!isHost) return;
   if (confirm('Arreter la partie ?')) socket.emit('host:stop');
 });
-
 $('btnAgain').addEventListener('click', () => {
+  SFX.click();
   $('end-card').classList.add('hidden');
+  $('qr-card').classList.remove('hidden');
   $('config-card').classList.remove('hidden');
 });
 
-socket.on('connect', () => {
-  // auto-claim avec jeton (re-prise du role apres reconnexion)
-  claim();
-});
+socket.on('connect', claim);
 
 socket.on('host:granted', granted => {
   isHost = granted;
   $('claimMsg').classList.remove('hidden');
   if (granted) {
-    $('claimMsg').textContent = '✅ Vous etes l\'animateur. Configurez puis lancez la partie.';
+    $('claimMsg').textContent = '✅ Vous etes l\'animateur.';
     $('claim-card').classList.add('hidden');
     $('qr-card').classList.remove('hidden');
     $('config-card').classList.remove('hidden');
     loadLanUrl();
   } else {
-    $('claimMsg').textContent = '⚠️ Un autre poste est deja animateur sur ce serveur.';
+    $('claimMsg').textContent = '⚠️ Un autre poste est deja animateur.';
   }
 });
-
-// Recuperer l'URL LAN pour l'afficher en gros
-async function loadLanUrl() {
-  try {
-    const r = await fetch('/api/lan-urls');
-    const data = await r.json();
-    const url = (data.urls && data.urls[0]) || `http://localhost:${data.port}/`;
-    $('lanUrl').textContent = url;
-  } catch (e) {
-    $('lanUrl').textContent = 'http://<adresse-de-ce-poste>:3000/';
-  }
-}
 
 socket.on('host:error', msg => {
   if (waitingForStart) { clearTimeout(waitingForStart); waitingForStart = null; }
   flashMsg('❌ ' + msg, 'err');
+});
+
+async function loadLanUrl() {
+  try {
+    const r = await fetch('/api/lan-urls');
+    const data = await r.json();
+    const url = (data.urls && data.urls[0]) || `${window.location.protocol}//${window.location.host}/`;
+    $('lanUrl').textContent = url;
+  } catch (e) {
+    $('lanUrl').textContent = window.location.origin + '/';
+  }
+}
+
+socket.on('lobby:update', data => {
+  // Code session
+  if (data.sessionCode) $('sessionCodeDisplay').textContent = data.sessionCode;
+
+  // categories
+  const list = $('catList');
+  const cats = ['__ALL__', ...data.categories];
+  list.innerHTML = cats.map(c => {
+    const label = c === '__ALL__' ? '🎓 Programme complet (tout BTS E4)' : c;
+    return `<div class="cat-item ${c===selectedCategory?'selected':''}" data-cat="${escapeAttr(c)}">${escapeHtml(label)}</div>`;
+  }).join('');
+  list.querySelectorAll('.cat-item').forEach(el => {
+    el.addEventListener('click', () => {
+      SFX.click();
+      selectedCategory = el.dataset.cat;
+      list.querySelectorAll('.cat-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+
+  // joueurs en attente
+  $('playerCount').textContent = data.players.length;
+  const box = $('players');
+  if (data.players.length === 0) {
+    box.innerHTML = '<p class="sub">Aucun joueur connecte. Demande-leur de scanner le QR.</p>';
+  } else {
+    box.innerHTML = data.players.map(p => {
+      const av = p.avatar ? `<div class="avatar" style="background:${p.avatar.color}">${p.avatar.emoji}</div>` : '';
+      return `<div class="score-card">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts">Pret a jouer</div></div></div>`;
+    }).join('');
+  }
+});
+
+socket.on('game:start', ({ mode }) => {
+  $('qr-card').classList.add('hidden');
+  $('config-card').classList.add('hidden');
+  $('end-card').classList.add('hidden');
+  $('live-card').classList.remove('hidden');
+  $('scores-card').classList.remove('hidden');
+  if (mode === 'survival') flashMsg('💀 Mode SURVIE active !', 'warn');
+});
+
+socket.on('game:question', ({ index, total, category, question, formula, svg, difficulty, choices, duration }) => {
+  $('explanationBox').classList.add('hidden');
+  $('explanationBox').innerHTML = '';
+  $('phaseLabel').textContent = '⏱️ Question en cours - les joueurs repondent...';
+  $('phaseLabel').classList.remove('phase-reveal');
+  $('btnNext').textContent = '⏭️ Reveler maintenant';
+  $('timerBar').classList.remove('urgent');
+
+  const diffBadge = difficulty === 'F' ? '<span class="diff diff-F">🟢 Facile</span>'
+                  : difficulty === 'M' ? '<span class="diff diff-M">🟡 Moyen</span>'
+                  : difficulty === 'D' ? '<span class="diff diff-D">🔴 Difficile</span>' : '';
+  $('catTag').innerHTML = escapeHtml(category) + ' ' + diffBadge;
+  $('progress').textContent = `Question ${index + 1} / ${total}`;
+  $('qText').textContent = question;
+
+  const f = $('qFormula');
+  if (formula) { f.textContent = '📐 ' + formula; f.classList.remove('hidden'); }
+  else { f.classList.add('hidden'); f.textContent = ''; }
+  const v = $('qVisual');
+  if (svg) { v.innerHTML = svg; v.classList.remove('hidden'); }
+  else { v.classList.add('hidden'); v.innerHTML = ''; }
+
+  const choicesBox = $('choices');
+  choicesBox.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  choices.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = `<span class="letter">${letters[i]}</span><span>${escapeHtml(c)}</span>`;
+    choicesBox.appendChild(div);
+  });
+
+  const start = Date.now();
+  if (timerInterval) clearInterval(timerInterval);
+  let lastSec = Math.ceil(duration / 1000);
+  timerInterval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.max(0, 100 - (elapsed / duration) * 100);
+    $('timerBarInner').style.width = pct + '%';
+    const remain = Math.ceil((duration - elapsed) / 1000);
+    if (remain <= 5 && remain !== lastSec) {
+      lastSec = remain;
+      $('timerBar').classList.add('urgent');
+      if (remain > 0) SFX.countdown();
+    }
+    if (pct <= 0) clearInterval(timerInterval);
+  }, 80);
+});
+
+socket.on('game:answered', ({ statuses }) => {
+  const box = $('answeredList');
+  if (!box) return;
+  box.innerHTML = statuses.map(p => {
+    const av = `<div class="avatar" style="background:${p.avatar ? p.avatar.color : '#fbbf24'}">${p.avatar ? p.avatar.emoji : '👤'}</div>`;
+    const label = p.answered ? '✅ A repondu' : '⏳ En reflexion';
+    return `<div class="score-card ${p.answered ? 'answered' : ''}">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts" style="font-size:0.9rem; color:${p.answered ? '#34d399' : '#94a3b8'}">${label}</div></div></div>`;
+  }).join('');
+});
+
+socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg, results, duration }) => {
+  if (timerInterval) clearInterval(timerInterval);
+  $('timerBarInner').style.width = '0%';
+  $('timerBar').classList.remove('urgent');
+  $('phaseLabel').textContent = '💡 Explication (' + Math.round((duration||20000)/1000) + 's)';
+  $('phaseLabel').classList.add('phase-reveal');
+  $('btnNext').textContent = '⏭️ Question suivante';
+
+  const choicesBox = $('choices');
+  [...choicesBox.children].forEach((b, i) => {
+    if (i === correctIndex) b.classList.add('correct');
+    else b.classList.add('dim');
+  });
+  SFX.correct();
+
+  const goodPlayers = results.filter(r => r.correct);
+  const expBox = $('explanationBox');
+  let html = `<div class="exp-title">✅ Bonne reponse : <span class="exp-answer">${escapeHtml(correctText)}</span></div>`;
+  if (formula) html += `<div class="exp-formula">📐 ${escapeHtml(formula)}</div>`;
+  if (explanation) html += `<div class="exp-text">${escapeHtml(explanation)}</div>`;
+  if (goodPlayers.length) {
+    html += `<div class="exp-players">🏆 Trouvee par : ${goodPlayers.map(p => escapeHtml(p.name) + (p.streak >= 3 ? ` 🔥×${p.streak}` : '')).join(', ')}</div>`;
+  } else {
+    html += `<div class="exp-players">😶 Personne n'a trouve.</div>`;
+  }
+  expBox.innerHTML = html;
+  expBox.classList.remove('hidden');
+
+  if (duration) {
+    const start = Date.now();
+    timerInterval = setInterval(() => {
+      const pct = Math.max(0, 100 - ((Date.now() - start) / duration) * 100);
+      $('timerBarInner').style.width = pct + '%';
+      if (pct <= 0) clearInterval(timerInterval);
+    }, 80);
+  }
+});
+
+socket.on('game:scores', ({ scores, eliminated }) => {
+  const box = $('scores');
+  let html = scores.map((s, i) => {
+    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const streak = s.streak >= 2 ? `<div class="streak">🔥${s.streak}</div>` : '';
+    const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}">${s.avatar.emoji}</div>` : '';
+    return `<div class="score-card ${cls}">${av}<div class="info"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div></div>${streak}</div>`;
+  }).join('');
+  if (eliminated && eliminated.length) {
+    html += eliminated.map(s => {
+      const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}; opacity:0.4">${s.avatar.emoji}</div>` : '';
+      return `<div class="score-card" style="opacity:0.5">${av}<div class="info"><div class="name">💀 ${escapeHtml(s.name)}</div><div class="pts">Elimine</div></div></div>`;
+    }).join('');
+  }
+  box.innerHTML = html;
+});
+
+socket.on('game:end', ({ ranking, awards }) => {
+  $('live-card').classList.add('hidden');
+  $('scores-card').classList.add('hidden');
+  $('end-card').classList.remove('hidden');
+
+  const podium = $('podium');
+  podium.innerHTML = '';
+  const top3 = ranking.slice(0, 3);
+  const medals = ['🥇', '🥈', '🥉'];
+  top3.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = `podium-spot podium-${i + 1}`;
+    const av = p.avatar ? `<div class="avatar" style="background:${p.avatar.color}">${p.avatar.emoji}</div>` : '';
+    div.innerHTML = `<div class="medal">${medals[i]}</div>${av}<div class="name">${escapeHtml(p.name)}</div><div class="pts">${p.score} pts</div>`;
+    podium.appendChild(div);
+  });
+
+  if (awards) {
+    let awardsHtml = '🏅 ';
+    if (awards.fastest) awardsHtml += `<strong>⚡ Plus rapide</strong> : ${escapeHtml(awards.fastest)}. `;
+    if (awards.bestStreak && awards.bestStreakValue >= 3) awardsHtml += `<strong>🔥 Meilleur combo</strong> : ${escapeHtml(awards.bestStreak)} (×${awards.bestStreakValue}).`;
+    $('awards').innerHTML = awardsHtml;
+  }
+
+  const rankBox = $('ranking');
+  rankBox.innerHTML = ranking.map((s, i) => {
+    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}">${s.avatar.emoji}</div>` : '';
+    const stat = s.stats ? `<div style="font-size:0.78rem; color:#94a3b8">${s.stats.correct}/${s.stats.answered} · ${s.stats.accuracy}%</div>` : '';
+    return `<div class="score-card ${cls}">${av}<div class="info"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div>${stat}</div></div>`;
+  }).join('');
+
+  SFX.victory();
+  if (window.fireConfetti) {
+    window.fireConfetti(180);
+    setTimeout(() => window.fireConfetti(120), 600);
+    setTimeout(() => window.fireConfetti(80), 1200);
+  }
 });
 
 function flashMsg(text, kind) {
@@ -116,133 +294,5 @@ function flashMsg(text, kind) {
   setTimeout(() => el.remove(), 4500);
 }
 
-socket.on('lobby:update', data => {
-  // construire la liste des categories
-  const list = $('catList');
-  const cats = ['__ALL__', ...data.categories];
-  list.innerHTML = cats.map(c => {
-    const label = c === '__ALL__' ? '🎓 Programme complet (toutes parties)' : c;
-    return `<div class="cat-item ${c===selectedCategory?'selected':''}" data-cat="${escapeAttr(c)}">${escapeHtml(label)}</div>`;
-  }).join('');
-  list.querySelectorAll('.cat-item').forEach(el => {
-    el.addEventListener('click', () => {
-      selectedCategory = el.dataset.cat;
-      list.querySelectorAll('.cat-item').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-    });
-  });
-
-  // joueurs
-  const box = $('players');
-  box.innerHTML = data.players.length
-    ? data.players.map(p => `<div class="score-card"><div class="name">${escapeHtml(p.name)}</div><div class="pts">${p.score} pts</div></div>`).join('')
-    : '<p class="sub">Aucun joueur connecte pour le moment.</p>';
-});
-
-socket.on('game:start', () => {
-  if (waitingForStart) { clearTimeout(waitingForStart); waitingForStart = null; }
-  $('qr-card').classList.add('hidden');
-  $('config-card').classList.add('hidden');
-  $('end-card').classList.add('hidden');
-  $('live-card').classList.remove('hidden');
-  $('scores-card').classList.remove('hidden');
-});
-
-socket.on('game:question', ({ index, total, category, question, formula, svg, difficulty, choices, duration }) => {
-  $('explanationBox').classList.add('hidden');
-  $('explanationBox').innerHTML = '';
-  $('phaseLabel').textContent = '⏱️ Question en cours - reponse mentale !';
-  $('phaseLabel').classList.remove('phase-reveal');
-  $('btnNext').classList.remove('hidden');
-  $('btnNext').textContent = '⏭️ Reveler maintenant';
-  const diffBadge = difficulty === 'F' ? '<span class="diff diff-F">🟢 Facile</span>'
-                  : difficulty === 'M' ? '<span class="diff diff-M">🟡 Moyen</span>'
-                  : difficulty === 'D' ? '<span class="diff diff-D">🔴 Difficile</span>'
-                  : '';
-  $('catTag').innerHTML = escapeHtml(category) + ' ' + diffBadge;
-  $('progress').textContent = `Question ${index + 1} / ${total}`;
-  $('qText').textContent = question;
-  // formule
-  const f = $('qFormula');
-  if (formula) { f.innerHTML = '📐 ' + escapeHtml(formula); f.classList.remove('hidden'); }
-  else { f.classList.add('hidden'); f.innerHTML = ''; }
-  // visuel SVG
-  const v = $('qVisual');
-  if (svg) { v.innerHTML = svg; v.classList.remove('hidden'); }
-  else { v.classList.add('hidden'); v.innerHTML = ''; }
-
-  const choicesBox = $('choices');
-  choicesBox.innerHTML = '';
-  const letters = ['A', 'B', 'C', 'D'];
-  choices.forEach((c, i) => {
-    const div = document.createElement('div');
-    div.className = 'choice';
-    div.innerHTML = `<span class="letter">${letters[i]}</span>${escapeHtml(c)}`;
-    choicesBox.appendChild(div);
-  });
-  const start = Date.now();
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    const pct = Math.max(0, 100 - ((Date.now() - start) / duration) * 100);
-    $('timerBar').style.width = pct + '%';
-    if (pct <= 0) clearInterval(timerInterval);
-  }, 50);
-});
-
-socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg, results, duration }) => {
-  if (timerInterval) clearInterval(timerInterval);
-  $('timerBar').style.width = '0%';
-  $('phaseLabel').textContent = '💡 Explication';
-  $('phaseLabel').classList.add('phase-reveal');
-  $('btnNext').classList.remove('hidden');
-  $('btnNext').textContent = '⏭️ Question suivante';
-  const choicesBox = $('choices');
-  [...choicesBox.children].forEach((b, i) => {
-    if (i === correctIndex) b.classList.add('correct');
-  });
-  const goodPlayers = results.filter(r => r.correct).map(r => r.name);
-  const expBox = $('explanationBox');
-  let html = `<div class="exp-title">✅ Bonne reponse : <span class="exp-answer">${escapeHtml(correctText)}</span></div>`;
-  if (formula) html += `<div class="exp-formula">📐 ${escapeHtml(formula)}</div>`;
-  if (explanation) html += `<div class="exp-text">${escapeHtml(explanation)}</div>`;
-  html += `<div class="exp-players">${goodPlayers.length ? '🏆 Trouvee par : ' + goodPlayers.map(escapeHtml).join(', ') : '😶 Personne n\'a trouve.'}</div>`;
-  expBox.innerHTML = html;
-  expBox.classList.remove('hidden');
-
-  // barre de progression pour la phase d'explication
-  if (duration) {
-    const start = Date.now();
-    if (timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-      const pct = Math.max(0, 100 - ((Date.now() - start) / duration) * 100);
-      $('timerBar').style.width = pct + '%';
-      if (pct <= 0) clearInterval(timerInterval);
-    }, 50);
-  }
-});
-
-socket.on('game:scores', ({ scores }) => {
-  const box = $('scores');
-  box.innerHTML = scores.map((s, i) => {
-    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    return `<div class="score-card ${cls}"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div></div>`;
-  }).join('');
-});
-
-socket.on('game:end', ({ ranking }) => {
-  $('live-card').classList.add('hidden');
-  $('qr-card').classList.remove('hidden');
-  $('config-card').classList.remove('hidden');
-  $('end-card').classList.remove('hidden');
-  const box = $('ranking');
-  box.innerHTML = ranking.map((s, i) => {
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
-    const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    return `<div class="score-card ${cls}"><div class="name">${medal} ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div></div>`;
-  }).join('');
-});
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function escapeAttr(s) { return escapeHtml(s); }

@@ -3,48 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Animateur - Quiz E4 BTS Electrotechnique</title>
+  <meta name="theme-color" content="#0b1224" />
+  <title>Animateur · Quiz E4 BTS Electrotechnique</title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <canvas id="confetti"></canvas>
+
   <div class="container">
-    <h1>🎛️ Animateur - Quiz E4</h1>
-    <p class="sub">Tableau de bord pour piloter la partie</p>
+    <h1>🎛️ Pupitre animateur</h1>
+    <p class="sub">Pilote la partie · pose les questions au vrai rythme · controle les explications</p>
 
     <div id="claim-card" class="card">
-      <h2>Devenir animateur</h2>
-      <p class="sub">Cliquer pour reserver le role d'animateur sur ce poste.</p>
-      <button id="btnClaim">Devenir animateur de la partie</button>
+      <h2>👤 Prendre la main d'animateur</h2>
+      <p class="sub">Reserve le role sur ce poste. Tu pourras lancer et controler la partie.</p>
+      <button id="btnClaim">🎯 Devenir animateur</button>
       <div id="claimMsg" class="banner hidden"></div>
     </div>
 
     <div id="qr-card" class="card hidden">
-      <h2>📱 Les joueurs scannent ce QR code pour rejoindre</h2>
+      <h2>📱 Les joueurs scannent le QR code pour rejoindre</h2>
       <div class="qr-wrap">
         <img id="qrImg" src="/qr.png" alt="QR code de connexion" />
         <div class="qr-info">
-          <p class="qr-label">Ou tapent l'adresse :</p>
+          <p class="sub" style="margin-bottom:6px">Code session a entrer manuellement :</p>
+          <div class="session-code" id="sessionCodeDisplay">----</div>
+          <p class="sub" style="margin-bottom:6px">Ou ouvrir l'URL :</p>
           <div class="qr-url" id="lanUrl">http://...:3000/</div>
-          <p class="sub" style="margin-top:14px">⚠️ Tous les joueurs doivent etre sur <strong>le meme Wi-Fi</strong> que ce poste.</p>
-          <p class="sub">Si la connexion echoue : autoriser <code>node.exe</code> dans le pare-feu Windows (reseau prive).</p>
+          <p class="sub" style="margin-top:14px">⚠️ Tous les joueurs doivent etre sur <strong>le meme reseau</strong> que ce poste (Wi-Fi du CFA, hotspot, ou URL Render).</p>
         </div>
       </div>
     </div>
 
     <div id="config-card" class="card hidden">
-      <h2>1. Choisir la categorie</h2>
-      <p class="sub">Selectionne une partie du programme (ou "Programme complet" pour balayer tout E4).</p>
+      <h2>⚙️ Configuration de la partie</h2>
+
+      <label>1. Categorie</label>
       <div class="cat-list" id="catList"></div>
 
-      <h2 style="margin-top:20px">2. Difficulte</h2>
+      <label class="mt-md">2. Difficulte</label>
       <select id="difficulty">
-        <option value="" selected>🎲 Toutes difficultes (recommande)</option>
+        <option value="" selected>🎲 Toutes difficultes (mix equilibre)</option>
         <option value="F">🟢 Facile (cours, definitions)</option>
         <option value="M">🟡 Moyen (petit calcul mental)</option>
         <option value="D">🔴 Difficile (raisonnement)</option>
       </select>
 
-      <h2 style="margin-top:20px">3. Nombre de questions</h2>
+      <label>3. Mode de jeu</label>
+      <select id="mode">
+        <option value="classic" selected>🎮 Classique (tous les joueurs jouent toutes les questions)</option>
+        <option value="survival">💀 Survie (3 erreurs = elimine, le dernier gagne)</option>
+      </select>
+
+      <label>4. Nombre de questions</label>
       <select id="nbQuestions">
         <option value="5">5 questions (sprint)</option>
         <option value="10" selected>10 questions</option>
@@ -53,47 +67,54 @@
         <option value="9999">Toutes les questions du choix</option>
       </select>
 
-      <h2>4. Joueurs connectes</h2>
+      <h2 class="mt-lg">5. Joueurs connectes (<span id="playerCount">0</span>)</h2>
       <div id="players" class="scores"></div>
 
-      <div class="row" style="margin-top:16px">
+      <div class="row mt-md">
         <button id="btnStart">🚀 Lancer la partie</button>
-        <button id="btnStop" class="danger">⏹️ Arreter</button>
-      </div>
-      <div class="banner" style="margin-top:14px" id="connectInfo">
-        Les joueurs se connectent depuis leur telephone/PC sur la meme adresse que celle de l'animateur.
       </div>
     </div>
 
     <div id="live-card" class="card hidden">
-      <span class="cat-tag" id="catTag"></span>
-      <div style="float:right; color:#94a3b8" id="progress"></div>
+      <div>
+        <span class="cat-tag" id="catTag"></span>
+        <span style="float:right; color:#94a3b8; font-weight:700" id="progress"></span>
+      </div>
       <div class="question-box" id="qText"></div>
       <div id="qFormula" class="formula-box hidden"></div>
       <div id="qVisual" class="visual-box hidden"></div>
-      <div class="timer-bar"><div class="timer-bar-inner" id="timerBar" style="width:100%"></div></div>
-      <div id="phaseLabel" class="phase-label">⏱️ Question en cours...</div>
+      <div class="timer-bar" id="timerBar"><div class="timer-bar-inner" id="timerBarInner" style="width:100%"></div></div>
+      <div id="phaseLabel" class="phase-label">⏱️ Question en cours</div>
       <div class="choices" id="choices"></div>
       <div id="explanationBox" class="explanation-box hidden"></div>
-      <div class="row" style="margin-top:14px">
-        <button id="btnNext" class="hidden">⏭️ Reveler / Question suivante</button>
+
+      <h2 class="mt-md">📊 En direct : qui a deja repondu</h2>
+      <div id="answeredList" class="scores"></div>
+
+      <div class="row mt-md">
+        <button id="btnNext">⏭️ Reveler / Suivant</button>
         <button id="btnStopGame" class="danger">⏹️ Arreter la partie</button>
       </div>
     </div>
 
     <div id="scores-card" class="card hidden">
-      <h3>Tableau des scores</h3>
+      <h2>🏆 Tableau des scores</h2>
       <div id="scores" class="scores"></div>
     </div>
 
-    <div id="end-card" class="card hidden">
-      <h2>🏁 Resultats finaux</h2>
+    <div id="end-card" class="card hidden text-center">
+      <h1 style="font-size:2.2rem">🏁 Resultats finaux</h1>
+      <div class="podium" id="podium"></div>
+      <div id="awards" class="banner mt-md"></div>
+      <h2 class="mt-lg">Classement complet</h2>
       <div id="ranking" class="scores"></div>
-      <button id="btnAgain" style="margin-top:16px">Nouvelle partie</button>
+      <button id="btnAgain" class="mt-lg">↻ Nouvelle partie</button>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/sounds.js"></script>
+  <script src="/confetti.js"></script>
   <script src="/host.js"></script>
 </body>
 </html>
