@@ -47,7 +47,14 @@ $('btnStart').addEventListener('click', () => {
 $('btnNext').addEventListener('click', () => { if (isHost) { SFX.click(); socket.emit('host:next'); } });
 $('btnStopGame').addEventListener('click', () => {
   if (!isHost) return;
-  if (confirm('Arreter la partie ?')) socket.emit('host:stop');
+  if (confirm('Arreter la partie en cours ? Le classement sera fige.')) socket.emit('host:stop');
+});
+$('btnReset').addEventListener('click', () => {
+  if (!isHost) return;
+  if (confirm('Reinitialiser TOUTE la session ? Tous les joueurs seront deconnectes et un nouveau code session sera genere.')) {
+    SFX.click();
+    socket.emit('host:reset');
+  }
 });
 $('btnAgain').addEventListener('click', () => {
   SFX.click();
@@ -108,17 +115,39 @@ socket.on('lobby:update', data => {
     });
   });
 
-  // joueurs en attente
-  $('playerCount').textContent = data.players.length;
+  // joueurs en attente (utilise playersForHost si dispo : contient les socket IDs pour kick)
+  const playersList = data.playersForHost || data.players.map(p => ({ ...p, id: null }));
+  $('playerCount').textContent = playersList.length;
   const box = $('players');
-  if (data.players.length === 0) {
-    box.innerHTML = '<p class="sub">Aucun joueur connecte. Demande-leur de scanner le QR.</p>';
+  if (playersList.length === 0) {
+    box.innerHTML = '<p class="sub">Aucun joueur connecte. Demande-leur de scanner le QR ou de taper le code session.</p>';
   } else {
-    box.innerHTML = data.players.map(p => {
+    box.innerHTML = playersList.map(p => {
       const av = p.avatar ? `<div class="avatar" style="background:${p.avatar.color}">${p.avatar.emoji}</div>` : '';
-      return `<div class="score-card">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts">Pret a jouer</div></div></div>`;
+      const kickBtn = p.id ? `<button class="kick-btn" data-id="${escapeAttr(p.id)}" data-name="${escapeAttr(p.name)}" title="Retirer ce joueur" aria-label="Kick">❌</button>` : '';
+      return `<div class="score-card player-row">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts">Pret a jouer</div></div>${kickBtn}</div>`;
     }).join('');
+    box.querySelectorAll('.kick-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const pid = btn.dataset.id;
+        const pname = btn.dataset.name;
+        if (confirm(`Retirer ${pname} de la partie ?`)) {
+          SFX.click();
+          socket.emit('host:kick', { playerId: pid });
+        }
+      });
+    });
   }
+});
+
+socket.on('session:reset', () => {
+  $('end-card').classList.add('hidden');
+  $('live-card').classList.add('hidden');
+  $('scores-card').classList.add('hidden');
+  $('qr-card').classList.remove('hidden');
+  $('config-card').classList.remove('hidden');
+  flashMsg('🔄 Session reinitialisee, nouveau code genere.', 'info');
 });
 
 socket.on('game:start', ({ mode }) => {
@@ -227,13 +256,25 @@ socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg
   }
 });
 
-socket.on('game:scores', ({ scores, eliminated }) => {
+socket.on('game:scores', ({ scores, eliminated, teamTotals }) => {
   const box = $('scores');
+  const teamBox = $('teamScores');
+  if (teamTotals) {
+    teamBox.classList.remove('hidden');
+    teamBox.innerHTML = `
+      <div class="team-totals">
+        <div class="team-badge team-red">🟥 ROUGE : <strong>${teamTotals.red}</strong> pts</div>
+        <div class="team-badge team-blue">🟦 BLEU : <strong>${teamTotals.blue}</strong> pts</div>
+      </div>`;
+  } else {
+    teamBox.classList.add('hidden');
+  }
   let html = scores.map((s, i) => {
     const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const teamClass = s.team ? ` team-${s.team}` : '';
     const streak = s.streak >= 2 ? `<div class="streak">🔥${s.streak}</div>` : '';
     const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}">${s.avatar.emoji}</div>` : '';
-    return `<div class="score-card ${cls}">${av}<div class="info"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div></div>${streak}</div>`;
+    return `<div class="score-card ${cls}${teamClass}">${av}<div class="info"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div></div>${streak}</div>`;
   }).join('');
   if (eliminated && eliminated.length) {
     html += eliminated.map(s => {

@@ -35,10 +35,14 @@
       <div class="text-center">
         <div class="my-avatar" id="myAvatar" style="background:#fbbf24">🦊</div>
         <h2 style="display:inline-block; vertical-align:middle; margin:0">Bienvenue <span id="myName" style="color:#fde047"></span> !</h2>
+        <div id="myTeam" class="hidden" style="margin-top:8px"></div>
       </div>
       <p class="sub text-center mt-md">⏳ En attente du lancement par l'animateur...</p>
       <h2 class="mt-lg">Joueurs deja connectes</h2>
       <div id="lobbyPlayers" class="scores"></div>
+      <div class="row mt-md">
+        <button id="btnLeave" class="danger">🚪 Quitter la partie</button>
+      </div>
     </div>
 
     <div id="game-card" class="card hidden">
@@ -59,6 +63,12 @@
     <div id="scores-card" class="card hidden">
       <h2>🏆 Scores en direct</h2>
       <div id="scores" class="scores"></div>
+    </div>
+
+    <div id="kicked-card" class="card hidden text-center">
+      <h1 style="font-size:2rem">👋 Tu as ete deconnecte</h1>
+      <p class="sub" id="kickedMsg">L'animateur t'a retire de la partie.</p>
+      <button id="btnRejoin" class="mt-md">↻ Reessayer</button>
     </div>
 
     <div id="end-card" class="card hidden text-center">

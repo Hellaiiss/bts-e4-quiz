@@ -61,6 +61,40 @@ $('btnAgain').addEventListener('click', () => {
   $('waiting-card').classList.remove('hidden');
 });
 
+$('btnLeave').addEventListener('click', () => {
+  if (confirm('Vraiment quitter la partie ?')) {
+    SFX.click();
+    socket.emit('player:leave');
+    setTimeout(() => window.location.reload(), 500);
+  }
+});
+
+const btnRejoin = document.getElementById('btnRejoin');
+if (btnRejoin) {
+  btnRejoin.addEventListener('click', () => {
+    localStorage.removeItem('playerName');
+    window.location.reload();
+  });
+}
+
+socket.on('player:kicked', ({ reason }) => {
+  document.getElementById('kickedMsg').textContent = reason || 'Tu as ete retire de la partie.';
+  ['join-card','waiting-card','game-card','scores-card','end-card'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('kicked-card').classList.remove('hidden');
+});
+
+socket.on('session:reset', () => {
+  document.getElementById('kickedMsg').textContent = 'La session a ete reinitialisee. Reconnecte-toi avec le nouveau code.';
+  ['join-card','waiting-card','game-card','scores-card','end-card'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  document.getElementById('kicked-card').classList.remove('hidden');
+});
+
 socket.on('player:joined', ({ name, avatar }) => {
   myName = name;
   myAvatar = avatar;
@@ -91,13 +125,28 @@ socket.on('lobby:update', data => {
   `).join('');
 });
 
-socket.on('game:start', ({ total, category, mode }) => {
+socket.on('game:start', ({ total, category, mode, modeLabel }) => {
   $('waiting-card').classList.add('hidden');
   $('end-card').classList.add('hidden');
   $('scores-card').classList.remove('hidden');
   $('game-card').classList.remove('hidden');
-  toast(`🎯 ${total} questions${mode === 'survival' ? ' · MODE SURVIE 💀' : ''}`);
+  toast(`🎯 ${total} questions · ${modeLabel || 'Classique'}`);
   SFX.victory();
+});
+
+// Affichage de l'equipe (mode teams)
+socket.on('lobby:update', data => {
+  // mise a jour de mon equipe (deja affiche en haut)
+  const me = data.players.find(p => p.name === myName);
+  const teamBox = $('myTeam');
+  if (me && me.team && teamBox) {
+    teamBox.classList.remove('hidden');
+    teamBox.innerHTML = me.team === 'red'
+      ? '<span class="team-badge team-red">🟥 EQUIPE ROUGE</span>'
+      : '<span class="team-badge team-blue">🟦 EQUIPE BLEUE</span>';
+  } else if (teamBox) {
+    teamBox.classList.add('hidden');
+  }
 });
 
 socket.on('game:question', ({ index, total, category, question, formula, svg, difficulty, choices, duration }) => {

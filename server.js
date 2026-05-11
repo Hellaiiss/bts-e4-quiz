@@ -117,41 +117,67 @@ const state = {
   inProgress: false,
   phase: 'idle',              // 'idle' | 'question' | 'explanation'
   history: [],                // suivi des questions posees (texte court)
-  mode: 'classic',            // 'classic' | 'survival'
+  mode: 'classic',            // 'classic' | 'survival' | 'marathon' | 'buzzer' | 'teams'
+  buzzerWinnerThisQuestion: null, // socketId du 1er qui a trouve (mode buzzer)
 };
 
-function playerPublic(p) {
-  return {
+// ===== Profils de duree par mode =====
+const MODE_PROFILES = {
+  classic:       { q: 25000, e: 20000, label: '🎮 Classique' },
+  survival:      { q: 25000, e: 15000, label: '💀 Survie' },
+  marathon:      { q: 12000, e: 8000,  label: '🏃 Marathon' },
+  buzzer:        { q: 20000, e: 15000, label: '⚡ Buzzer' },
+  teams:         { q: 25000, e: 20000, label: '🟦🟥 Equipes' },
+};
+
+function playerPublic(p, includeId) {
+  const out = {
     name: p.name,
     score: p.score,
     avatar: p.avatar,
+    team: p.team || null,
     streak: p.streak || 0,
     answered: !!p.answeredThisQuestion,
     eliminated: !!p.eliminated,
   };
+  if (includeId) out.id = p.id; // expose uniquement vers l'host
+  return out;
+}
+
+// Scores cumules par equipe (mode teams)
+function teamTotals() {
+  const totals = { red: 0, blue: 0 };
+  Object.values(state.players).forEach(p => {
+    if (p.team === 'red' || p.team === 'blue') totals[p.team] += p.score;
+  });
+  return totals;
 }
 
 function broadcastLobby() {
-  // On ajoute la categorie speciale "generateurs" au debut
   io.emit('lobby:update', {
-    players: Object.values(state.players).map(playerPublic),
+    players: Object.values(state.players).map(p => playerPublic(p)),
+    // On expose les sockets ID UNIQUEMENT a l'animateur (pour kick)
+    playersForHost: Object.entries(state.players).map(([id, p]) => ({ id, ...playerPublic(p) })),
     categories: [GEN_CAT, ...Object.keys(QUESTIONS)],
     inProgress: state.inProgress,
     category: state.category,
     sessionCode: state.sessionCode,
+    mode: state.mode,
   });
 }
 
 function broadcastScores() {
-  io.emit('game:scores', {
+  const payload = {
     scores: Object.values(state.players)
       .filter(p => !p.eliminated)
-      .map(playerPublic)
+      .map(p => playerPublic(p))
       .sort((a, b) => b.score - a.score),
     eliminated: Object.values(state.players)
       .filter(p => p.eliminated)
-      .map(playerPublic),
-  });
+      .map(p => playerPublic(p)),
+  };
+  if (state.mode === 'teams') payload.teamTotals = teamTotals();
+  io.emit('game:scores', payload);
 }
 
 // Indicateur temps reel "qui a repondu" - throttle leger pour 10+ joueurs
@@ -216,7 +242,18 @@ function generateParametricQuestions(n, difficulty) {
 
 function startGame(category, nbQuestions, difficulty, mode) {
   state.category = category;
-  state.mode = mode === 'survival' ? 'survival' : 'classic';
+  state.mode = MODE_PROFILES[mode] ? mode : 'classic';
+  // ajuste les durees selon le mode choisi
+  const profile = MODE_PROFILES[state.mode];
+  state.questionDuration = profile.q;
+  state.explanationDuration = profile.e;
+  // Mode equipes : on assigne aleatoirement rouge/bleu (alternance approximative)
+  if (state.mode === 'teams') {
+    const ids = shuffle(Object.keys(state.players));
+    ids.forEach((id, i) => { state.players[id].team = i % 2 === 0 ? 'red' : 'blue'; });
+  } else {
+    Object.values(state.players).forEach(p => { p.team = null; });
+  }
   let all;
   if (category === GEN_CAT) {
     // Categorie "generateurs" : on tire N questions parametrees
@@ -254,6 +291,8 @@ function startGame(category, nbQuestions, difficulty, mode) {
     total: state.questions.length,
     category: state.category,
     mode: state.mode,
+    modeLabel: profile.label,
+    questionDuration: state.questionDuration,
   });
   broadcastScores();
   setTimeout(nextQuestion, 1500);
@@ -266,6 +305,7 @@ function nextQuestion() {
     return endGame();
   }
   const q = state.questions[state.currentIndex];
+  state.buzzerWinnerThisQuestion = null;
   Object.values(state.players).forEach(p => {
     p.answeredThisQuestion = false;
     p.lastAnswer = null;
@@ -315,11 +355,18 @@ function revealAnswer() {
     if (correct) {
       const elapsed = Math.max(0, (p.lastTime || state.questionDuration));
       const speedBonus = Math.floor((elapsed / state.questionDuration) * 500);
-      const base = 500;
-      // bonus de combo : +50 par question de la chaine, max +300
+      let base = 500;
+      // Mode buzzer : 1000 pts pour le 1er, 0 pour les autres
+      if (state.mode === 'buzzer') {
+        if (state.buzzerWinnerThisQuestion && state.buzzerWinnerThisQuestion === id) {
+          base = 1000; // le seul a gagner sur cette question
+        } else if (state.buzzerWinnerThisQuestion) {
+          base = 0; // pas le 1er → 0 pts
+        }
+      }
       p.streak = (p.streak || 0) + 1;
       comboBonus = Math.min(300, (p.streak - 1) * 100);
-      gained = base + speedBonus + comboBonus;
+      gained = base + (base > 0 ? speedBonus + comboBonus : 0);
       p.score += gained;
       p.totalCorrect++;
       if (p.streak > (p.bestStreak || 0)) p.bestStreak = p.streak;
@@ -481,6 +528,56 @@ io.on('connection', socket => {
     endGame();
   });
 
+  // === Gestion des joueurs (animateur uniquement) ===
+  socket.on('host:kick', ({ playerId }) => {
+    if (socket.id !== state.hostId) return;
+    const p = state.players[playerId];
+    if (!p) return;
+    const target = io.sockets.sockets.get(playerId);
+    if (target) {
+      target.emit('player:kicked', { reason: 'L\'animateur t\'a retire de la partie.' });
+      target.disconnect(true);
+    }
+    delete state.players[playerId];
+    console.log(`[KICK] joueur ${p.name} (${playerId}) exclu par l'animateur`);
+    broadcastLobby();
+    broadcastScores();
+  });
+
+  socket.on('host:reset', () => {
+    if (socket.id !== state.hostId) return;
+    console.log('[RESET] reinitialisation totale demandee par l\'animateur');
+    // arret partie
+    if (state.questionTimer) clearTimeout(state.questionTimer);
+    if (state.explanationTimer) clearTimeout(state.explanationTimer);
+    state.inProgress = false;
+    state.phase = 'idle';
+    // deconnecter tous les joueurs (mais pas l'host)
+    Object.keys(state.players).forEach(pid => {
+      const s = io.sockets.sockets.get(pid);
+      if (s) {
+        s.emit('player:kicked', { reason: 'La session a ete reinitialisee. Reconnecte-toi.' });
+        s.disconnect(true);
+      }
+      delete state.players[pid];
+    });
+    // nouveau code session
+    state.sessionCode = genSessionCode();
+    io.emit('session:reset');
+    broadcastLobby();
+    broadcastScores();
+  });
+
+  socket.on('player:leave', () => {
+    const p = state.players[socket.id];
+    if (!p) return;
+    console.log(`[LEAVE] joueur ${p.name} a quitte`);
+    delete state.players[socket.id];
+    socket.disconnect(true);
+    broadcastLobby();
+    broadcastScores();
+  });
+
   socket.on('host:next', () => {
     if (socket.id !== state.hostId) return;
     if (!state.inProgress) return;
@@ -507,7 +604,18 @@ io.on('connection', socket => {
     socket.emit('player:answer:ack', { choice });
     broadcastAnswered();
 
-    // si tout le monde a repondu : on revele avant la fin du timer
+    const q = state.questions[state.currentIndex];
+
+    // Mode buzzer : si la reponse est correcte ET personne n'a encore gagne,
+    // ce joueur prend le buzzer ; on revele aussitot.
+    if (state.mode === 'buzzer' && q && choice === q.r && !state.buzzerWinnerThisQuestion) {
+      state.buzzerWinnerThisQuestion = socket.id;
+      if (state.questionTimer) clearTimeout(state.questionTimer);
+      setTimeout(revealAnswer, 600);
+      return;
+    }
+
+    // sinon : si tout le monde a repondu, on revele
     const activePlayers = Object.values(state.players).filter(pl => !pl.eliminated);
     const allAnswered = activePlayers.length > 0 && activePlayers.every(pl => pl.answeredThisQuestion);
     if (allAnswered) {

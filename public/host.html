@@ -54,8 +54,11 @@
 
       <label>3. Mode de jeu</label>
       <select id="mode">
-        <option value="classic" selected>🎮 Classique (tous les joueurs jouent toutes les questions)</option>
+        <option value="classic" selected>🎮 Classique (tout le monde joue toutes les questions)</option>
         <option value="survival">💀 Survie (3 erreurs = elimine, le dernier gagne)</option>
+        <option value="marathon">🏃 Marathon (12 s par question, rythme effrene)</option>
+        <option value="buzzer">⚡ Buzzer (le 1er a trouver rafle les 1000 pts)</option>
+        <option value="teams">🟦🟥 Equipes (2 equipes Rouge/Bleu equilibrees)</option>
       </select>
 
       <label>4. Nombre de questions</label>
@@ -68,10 +71,12 @@
       </select>
 
       <h2 class="mt-lg">5. Joueurs connectes (<span id="playerCount">0</span>)</h2>
+      <p class="sub">💡 Survole un joueur et clique ❌ pour le retirer.</p>
       <div id="players" class="scores"></div>
 
       <div class="row mt-md">
         <button id="btnStart">🚀 Lancer la partie</button>
+        <button id="btnReset" class="danger">🔄 Reinitialiser la session</button>
       </div>
     </div>
 
@@ -99,6 +104,7 @@
 
     <div id="scores-card" class="card hidden">
       <h2>🏆 Tableau des scores</h2>
+      <div id="teamScores" class="hidden"></div>
       <div id="scores" class="scores"></div>
     </div>
 
