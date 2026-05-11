@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1224" />
-  <title>Animateur · Quiz E4 BTS Electrotechnique</title>
+  <title>Pupitre animateur · Quiz E4</title>
   <link rel="stylesheet" href="/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,113 +13,161 @@
 <body>
   <canvas id="confetti"></canvas>
 
-  <div class="container">
-    <h1>🎛️ Pupitre animateur</h1>
-    <p class="sub">Pilote la partie · pose les questions au vrai rythme · controle les explications</p>
+  <!-- Bandeau sticky -->
+  <div class="host-topbar">
+    <div class="host-topbar-inner">
+      <span class="host-brand">🎛️ Pupitre animateur</span>
+      <span class="host-pill" id="topPlayers">👥 0 joueur</span>
+      <span class="host-pill" id="topMode">🎮 Classique</span>
+      <span class="host-pill" id="topCode">🔢 ----</span>
+      <span class="host-pill conn-status conn-connecting" id="connStatus">⏳ Connexion</span>
+    </div>
+  </div>
 
+  <div class="container">
+
+    <!-- Carte : prendre la main -->
     <div id="claim-card" class="card">
-      <h2>👤 Prendre la main d'animateur</h2>
-      <p class="sub">Reserve le role sur ce poste. Tu pourras lancer et controler la partie.</p>
+      <h1>👋 Bienvenue, formateur</h1>
+      <p class="sub">Tu vas piloter une partie de quiz pour ta classe. Clique ci-dessous pour devenir l'animateur de ce poste.</p>
       <button id="btnClaim">🎯 Devenir animateur</button>
-      <div id="claimMsg" class="banner hidden"></div>
+      <div id="claimMsg" class="banner hidden mt-md"></div>
     </div>
 
+    <!-- Carte : INVITATION des joueurs (URL + QR + code session) -->
     <div id="qr-card" class="card hidden">
-      <h2>📱 Les joueurs scannent le QR code pour rejoindre</h2>
-      <div class="qr-wrap">
-        <img id="qrImg" src="/qr.png" alt="QR code de connexion" />
-        <div class="qr-info">
-          <p class="sub" style="margin-bottom:6px">Code session a entrer manuellement :</p>
+      <h2>📱 Inviter les joueurs</h2>
+      <p class="sub">Les joueurs ouvrent l'URL ci-dessous, ou scannent le QR code avec l'appareil photo de leur telephone.</p>
+
+      <div class="invite-grid">
+        <div class="invite-qr">
+          <img id="qrImg" src="/qr.png" alt="QR code" />
+          <p class="hint">📷 Scanner avec l'app photo</p>
+        </div>
+
+        <div class="invite-info">
+          <label class="invite-label">URL a partager</label>
+          <div class="qr-url" id="lanUrl">…</div>
+          <button id="btnCopyUrl" class="secondary small">📋 Copier l'URL</button>
+
+          <label class="invite-label mt-md">Code session (saisie manuelle)</label>
           <div class="session-code" id="sessionCodeDisplay">----</div>
-          <p class="sub" style="margin-bottom:6px">Ou ouvrir l'URL :</p>
-          <div class="qr-url" id="lanUrl">http://...:3000/</div>
-          <p class="sub" style="margin-top:14px">⚠️ Tous les joueurs doivent etre sur <strong>le meme reseau</strong> que ce poste (Wi-Fi du CFA, hotspot, ou URL Render).</p>
+
+          <div class="hint mt-md">
+            💡 <strong>Astuce</strong> : projete cet ecran au tableau, les eleves se connectent en quelques secondes.
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Carte : CONFIGURATION -->
     <div id="config-card" class="card hidden">
-      <h2>⚙️ Configuration de la partie</h2>
+      <h2>⚙️ Preparer la partie</h2>
 
-      <label>1. Categorie</label>
-      <div class="cat-list" id="catList"></div>
+      <div class="config-grid">
+        <div>
+          <label>1. Theme</label>
+          <div class="cat-list" id="catList"></div>
+        </div>
 
-      <label class="mt-md">2. Difficulte</label>
-      <select id="difficulty">
-        <option value="" selected>🎲 Toutes difficultes (mix equilibre)</option>
-        <option value="F">🟢 Facile (cours, definitions)</option>
-        <option value="M">🟡 Moyen (petit calcul mental)</option>
-        <option value="D">🔴 Difficile (raisonnement)</option>
-      </select>
+        <div>
+          <label>2. Difficulte</label>
+          <select id="difficulty">
+            <option value="" selected>🎲 Toutes difficultes</option>
+            <option value="F">🟢 Facile</option>
+            <option value="M">🟡 Moyen</option>
+            <option value="D">🔴 Difficile</option>
+          </select>
 
-      <label>3. Mode de jeu</label>
-      <select id="mode">
-        <option value="classic" selected>🎮 Classique (tout le monde joue toutes les questions)</option>
-        <option value="survival">💀 Survie (3 erreurs = elimine, le dernier gagne)</option>
-        <option value="marathon">🏃 Marathon (12 s par question, rythme effrene)</option>
-        <option value="buzzer">⚡ Buzzer (le 1er a trouver rafle les 1000 pts)</option>
-        <option value="teams">🟦🟥 Equipes (2 equipes Rouge/Bleu equilibrees)</option>
-      </select>
+          <label class="mt-md">3. Mode de jeu</label>
+          <select id="mode">
+            <option value="classic" selected>🎮 Classique</option>
+            <option value="survival">💀 Survie (3 erreurs = elimine)</option>
+            <option value="marathon">🏃 Marathon (12 s / question)</option>
+            <option value="buzzer">⚡ Buzzer (1er gagne tout)</option>
+            <option value="teams">🟦🟥 Equipes (Rouge vs Bleu)</option>
+          </select>
 
-      <label>4. Nombre de questions</label>
-      <select id="nbQuestions">
-        <option value="5">5 questions (sprint)</option>
-        <option value="10" selected>10 questions</option>
-        <option value="15">15 questions</option>
-        <option value="20">20 questions</option>
-        <option value="9999">Toutes les questions du choix</option>
-      </select>
+          <label class="mt-md">4. Nombre de questions</label>
+          <select id="nbQuestions">
+            <option value="5">5 (sprint)</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="9999">Maximum</option>
+          </select>
+        </div>
+      </div>
 
-      <h2 class="mt-lg">5. Joueurs connectes (<span id="playerCount">0</span>)</h2>
-      <p class="sub">💡 Survole un joueur et clique ❌ pour le retirer.</p>
+      <h2 class="mt-lg">👥 Joueurs connectes (<span id="playerCount">0</span>)</h2>
+      <p class="sub">Survole un joueur et clique ❌ pour le retirer de la partie.</p>
       <div id="players" class="scores"></div>
 
       <div class="row mt-md">
-        <button id="btnStart">🚀 Lancer la partie</button>
-        <button id="btnReset" class="danger">🔄 Reinitialiser la session</button>
+        <button id="btnStart" class="big-cta">🚀 Lancer la partie</button>
       </div>
 
       <div class="banner mt-md">
         🧠 <strong>Anti-repetition</strong> : <span id="historyStats">…</span>
-        <button id="btnClearHistory" class="secondary" style="float:right; padding:6px 12px; font-size:0.85rem">🧹 Vider l'historique</button>
+        <button id="btnClearHistory" class="secondary small" style="float:right">🧹 Vider l'historique</button>
+      </div>
+
+      <div class="row mt-md">
+        <button id="btnReset" class="danger small">🔄 Reinitialiser toute la session</button>
       </div>
     </div>
 
+    <!-- Carte : QUESTION EN COURS -->
     <div id="live-card" class="card hidden">
-      <div>
+      <div class="live-header">
         <span class="cat-tag" id="catTag"></span>
-        <span style="float:right; color:#94a3b8; font-weight:700" id="progress"></span>
+        <span class="live-progress" id="progress"></span>
       </div>
+
       <div class="question-box" id="qText"></div>
       <div id="qFormula" class="formula-box hidden"></div>
       <div id="qVisual" class="visual-box hidden"></div>
+
       <div class="timer-bar" id="timerBar"><div class="timer-bar-inner" id="timerBarInner" style="width:100%"></div></div>
-      <div id="phaseLabel" class="phase-label">⏱️ Question en cours</div>
+      <div id="phaseLabel" class="phase-label">⏱️ Question en cours…</div>
+
       <div class="choices" id="choices"></div>
+
+      <!-- Histogramme distribution des reponses (apparait apres reveal) -->
+      <div id="answerDist" class="answer-dist hidden">
+        <h3>📊 Distribution des reponses</h3>
+        <div id="answerDistBars"></div>
+      </div>
+
+      <!-- Detail par joueur apres reveal -->
       <div id="explanationBox" class="explanation-box hidden"></div>
 
-      <h2 class="mt-md">📊 En direct : qui a deja repondu</h2>
-      <div id="answeredList" class="scores"></div>
+      <!-- LIVE : qui a deja repondu (pendant question) / detail (apres) -->
+      <h3 class="mt-md" id="liveTitle">📡 En direct</h3>
+      <div id="answeredList" class="player-feed"></div>
 
       <div class="row mt-md">
-        <button id="btnNext">⏭️ Reveler / Suivant</button>
-        <button id="btnStopGame" class="danger">⏹️ Arreter la partie</button>
+        <button id="btnNext" class="big-cta">⏭️ Reveler / Suivant</button>
+        <button id="btnStopGame" class="danger">⏹️ Arreter</button>
       </div>
     </div>
 
+    <!-- Carte : TABLEAU SCORES (toujours visible pendant partie) -->
     <div id="scores-card" class="card hidden">
-      <h2>🏆 Tableau des scores</h2>
+      <h2>🏆 Classement en direct</h2>
       <div id="teamScores" class="hidden"></div>
       <div id="scores" class="scores"></div>
     </div>
 
+    <!-- Carte : FIN DE PARTIE -->
     <div id="end-card" class="card hidden text-center">
-      <h1 style="font-size:2.2rem">🏁 Resultats finaux</h1>
+      <h1 style="font-size:2.2rem">🏁 Partie terminee</h1>
       <div class="podium" id="podium"></div>
       <div id="awards" class="banner mt-md"></div>
       <h2 class="mt-lg">Classement complet</h2>
       <div id="ranking" class="scores"></div>
-      <button id="btnAgain" class="mt-lg">↻ Nouvelle partie</button>
+      <button id="btnAgain" class="big-cta mt-lg">↻ Nouvelle partie</button>
     </div>
   </div>
 

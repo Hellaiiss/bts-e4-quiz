@@ -1,5 +1,5 @@
 // ============================================================
-// Logique cote animateur - Quiz BTS E4
+// PUPITRE ANIMATEUR - Quiz BTS E4
 // ============================================================
 const socket = io({
   transports: ['websocket', 'polling'],
@@ -14,8 +14,10 @@ let selectedCategory = '__ALL__';
 let isHost = false;
 let timerInterval = null;
 let waitingForStart = null;
+let lastQuestionChoices = null;
+let lastQuestionCategory = null;
 
-// Jeton persistant
+// === Jeton persistant ===
 function getHostToken() {
   let t = localStorage.getItem('hostToken');
   if (!t) {
@@ -27,16 +29,16 @@ function getHostToken() {
 const HOST_TOKEN = getHostToken();
 function claim() { socket.emit('host:claim', { token: HOST_TOKEN }); }
 
+// === Boutons principaux ===
 $('btnClaim').addEventListener('click', () => { SFX.click(); claim(); });
 
 $('btnStart').addEventListener('click', () => {
-  if (!isHost) { claim(); flashMsg('🔄 Reconnexion au role d\'animateur...', 'warn'); return; }
+  if (!isHost) { claim(); flashMsg('🔄 Reconnexion en tant qu\'animateur…', 'warn'); return; }
   const nb = parseInt($('nbQuestions').value, 10);
   const diff = $('difficulty').value || null;
   const mode = $('mode').value || 'classic';
-  const diffLabel = diff === 'F' ? 'Facile' : diff === 'M' ? 'Moyen' : diff === 'D' ? 'Difficile' : 'toutes';
   SFX.click();
-  flashMsg(`🚀 Lancement... ${diffLabel} · ${mode === 'survival' ? 'SURVIE' : 'classique'}`, 'info');
+  flashMsg('🚀 Lancement…', 'info');
   socket.emit('host:start', { category: selectedCategory, nbQuestions: nb, difficulty: diff, mode });
   if (waitingForStart) clearTimeout(waitingForStart);
   waitingForStart = setTimeout(() => {
@@ -45,42 +47,20 @@ $('btnStart').addEventListener('click', () => {
 });
 
 $('btnNext').addEventListener('click', () => { if (isHost) { SFX.click(); socket.emit('host:next'); } });
+
 $('btnStopGame').addEventListener('click', () => {
   if (!isHost) return;
   if (confirm('Arreter la partie en cours ? Le classement sera fige.')) socket.emit('host:stop');
 });
+
 $('btnReset').addEventListener('click', () => {
   if (!isHost) return;
-  if (confirm('Reinitialiser TOUTE la session ? Tous les joueurs seront deconnectes et un nouveau code session sera genere.')) {
+  if (confirm('Reinitialiser TOUTE la session ? Tous les joueurs seront deconnectes.')) {
     SFX.click();
     socket.emit('host:reset');
   }
 });
 
-const btnClearHist = document.getElementById('btnClearHistory');
-if (btnClearHist) {
-  btnClearHist.addEventListener('click', () => {
-    if (!isHost) return;
-    if (confirm('Vider l\'historique des questions deja vues ? (Toutes les questions redeviennent tirables.)')) {
-      SFX.click();
-      socket.emit('host:clearHistory');
-    }
-  });
-}
-
-async function refreshHistoryStats() {
-  try {
-    const r = await fetch('/api/history-stats');
-    const data = await r.json();
-    const el = document.getElementById('historyStats');
-    if (el) el.textContent = `${data.seen} question(s) deja vue(s) ne seront pas re-posees.`;
-  } catch (e) {}
-}
-setInterval(refreshHistoryStats, 4000);
-refreshHistoryStats();
-
-socket.on('history:cleared', () => { refreshHistoryStats(); flashMsg('🧹 Historique efface.', 'info'); });
-socket.on('host:info', msg => flashMsg(msg, 'info'));
 $('btnAgain').addEventListener('click', () => {
   SFX.click();
   $('end-card').classList.add('hidden');
@@ -88,13 +68,35 @@ $('btnAgain').addEventListener('click', () => {
   $('config-card').classList.remove('hidden');
 });
 
-socket.on('connect', claim);
+$('btnCopyUrl').addEventListener('click', () => {
+  const t = $('lanUrl').textContent;
+  navigator.clipboard.writeText(t).then(() => flashMsg('📋 URL copiee', 'info'));
+});
 
+const btnClearHist = $('btnClearHistory');
+if (btnClearHist) btnClearHist.addEventListener('click', () => {
+  if (!isHost) return;
+  if (confirm('Vider l\'historique des questions ? Toutes seront a nouveau tirables.')) {
+    SFX.click(); socket.emit('host:clearHistory');
+  }
+});
+
+// === Indicateur de connexion (sticky en haut) ===
+function setConn(s) {
+  const el = $('connStatus');
+  el.className = 'host-pill conn-status conn-' + s;
+  el.textContent = s === 'connected' ? '🟢 Connecte' : s === 'reconnecting' ? '🟠 Reconnexion' : '⏳ Connexion';
+}
+socket.on('connect', () => { setConn('connected'); claim(); });
+socket.on('disconnect', () => setConn('reconnecting'));
+socket.on('connect_error', () => setConn('reconnecting'));
+
+// === Claim host ===
 socket.on('host:granted', granted => {
   isHost = granted;
   $('claimMsg').classList.remove('hidden');
   if (granted) {
-    $('claimMsg').textContent = '✅ Vous etes l\'animateur.';
+    $('claimMsg').textContent = '✅ Tu es l\'animateur de cette session.';
     $('claim-card').classList.add('hidden');
     $('qr-card').classList.remove('hidden');
     $('config-card').classList.remove('hidden');
@@ -108,27 +110,37 @@ socket.on('host:error', msg => {
   if (waitingForStart) { clearTimeout(waitingForStart); waitingForStart = null; }
   flashMsg('❌ ' + msg, 'err');
 });
+socket.on('host:info', msg => flashMsg(msg, 'info'));
 
+// === Charge l'URL publique a afficher ===
 async function loadLanUrl() {
   try {
     const r = await fetch('/api/lan-urls');
     const data = await r.json();
-    const url = (data.urls && data.urls[0]) || `${window.location.protocol}//${window.location.host}/`;
+    const url = data.primary || (data.urls && data.urls[0]) || (window.location.origin + '/');
     $('lanUrl').textContent = url;
   } catch (e) {
     $('lanUrl').textContent = window.location.origin + '/';
   }
 }
 
+// === Lobby (joueurs + categories + code session) ===
 socket.on('lobby:update', data => {
-  // Code session
-  if (data.sessionCode) $('sessionCodeDisplay').textContent = data.sessionCode;
+  if (data.sessionCode) {
+    $('sessionCodeDisplay').textContent = data.sessionCode;
+    $('topCode').textContent = '🔢 ' + data.sessionCode;
+  }
+  $('topPlayers').textContent = '👥 ' + (data.players || []).length + ' joueur' + ((data.players||[]).length > 1 ? 's' : '');
+  if (data.mode) {
+    const labels = { classic:'🎮 Classique', survival:'💀 Survie', marathon:'🏃 Marathon', buzzer:'⚡ Buzzer', teams:'🟦🟥 Equipes' };
+    $('topMode').textContent = labels[data.mode] || data.mode;
+  }
 
-  // categories : on met le "Programme complet" en premier, les generateurs sont deja inclus
+  // categories
   const list = $('catList');
   const cats = ['__ALL__', ...data.categories];
   list.innerHTML = cats.map(c => {
-    const label = c === '__ALL__' ? '🎓 Programme complet (questions ecrites + generateurs)' : c;
+    const label = c === '__ALL__' ? '🎓 Programme complet (statiques + generateurs)' : c;
     return `<div class="cat-item ${c===selectedCategory?'selected':''}" data-cat="${escapeAttr(c)}">${escapeHtml(label)}</div>`;
   }).join('');
   list.querySelectorAll('.cat-item').forEach(el => {
@@ -140,31 +152,31 @@ socket.on('lobby:update', data => {
     });
   });
 
-  // joueurs en attente (utilise playersForHost si dispo : contient les socket IDs pour kick)
+  // joueurs en attente (kick possible)
   const playersList = data.playersForHost || data.players.map(p => ({ ...p, id: null }));
   $('playerCount').textContent = playersList.length;
   const box = $('players');
   if (playersList.length === 0) {
-    box.innerHTML = '<p class="sub">Aucun joueur connecte. Demande-leur de scanner le QR ou de taper le code session.</p>';
+    box.innerHTML = '<div class="empty-state">Aucun joueur connecte. Demande-leur de scanner le QR ou de taper le code session.</div>';
   } else {
-    box.innerHTML = playersList.map(p => {
-      const av = p.avatar ? `<div class="avatar" style="background:${p.avatar.color}">${p.avatar.emoji}</div>` : '';
-      const kickBtn = p.id ? `<button class="kick-btn" data-id="${escapeAttr(p.id)}" data-name="${escapeAttr(p.name)}" title="Retirer ce joueur" aria-label="Kick">❌</button>` : '';
-      return `<div class="score-card player-row">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts">Pret a jouer</div></div>${kickBtn}</div>`;
-    }).join('');
+    box.innerHTML = playersList.map(p => playerCardLobby(p)).join('');
     box.querySelectorAll('.kick-btn').forEach(btn => {
       btn.addEventListener('click', e => {
         e.stopPropagation();
-        const pid = btn.dataset.id;
-        const pname = btn.dataset.name;
-        if (confirm(`Retirer ${pname} de la partie ?`)) {
+        if (confirm(`Retirer ${btn.dataset.name} de la partie ?`)) {
           SFX.click();
-          socket.emit('host:kick', { playerId: pid });
+          socket.emit('host:kick', { playerId: btn.dataset.id });
         }
       });
     });
   }
 });
+
+function playerCardLobby(p) {
+  const av = p.avatar ? `<div class="avatar" style="background:${p.avatar.color}">${p.avatar.emoji}</div>` : '';
+  const kick = p.id ? `<button class="kick-btn" data-id="${escapeAttr(p.id)}" data-name="${escapeAttr(p.name)}" title="Retirer">❌</button>` : '';
+  return `<div class="score-card player-row">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts" style="font-size:0.8rem; color:#94a3b8">✅ Pret a jouer</div></div>${kick}</div>`;
+}
 
 socket.on('session:reset', () => {
   $('end-card').classList.add('hidden');
@@ -175,22 +187,43 @@ socket.on('session:reset', () => {
   flashMsg('🔄 Session reinitialisee, nouveau code genere.', 'info');
 });
 
-socket.on('game:start', ({ mode }) => {
+// === Stats historique ===
+async function refreshHistoryStats() {
+  try {
+    const r = await fetch('/api/history-stats');
+    const data = await r.json();
+    const el = $('historyStats');
+    if (el) el.textContent = `${data.seen} question(s) deja vue(s) ne seront pas re-posees.`;
+  } catch (e) {}
+}
+setInterval(refreshHistoryStats, 4000);
+refreshHistoryStats();
+socket.on('history:cleared', () => { refreshHistoryStats(); flashMsg('🧹 Historique vide.', 'info'); });
+
+// === Demarrage partie ===
+socket.on('game:start', ({ mode, modeLabel }) => {
   $('qr-card').classList.add('hidden');
   $('config-card').classList.add('hidden');
   $('end-card').classList.add('hidden');
   $('live-card').classList.remove('hidden');
   $('scores-card').classList.remove('hidden');
-  if (mode === 'survival') flashMsg('💀 Mode SURVIE active !', 'warn');
+  if (modeLabel) flashMsg('🎬 ' + modeLabel, 'info');
 });
 
+// === Question affichee ===
 socket.on('game:question', ({ index, total, category, question, formula, svg, difficulty, choices, duration }) => {
+  lastQuestionChoices = choices;
+  lastQuestionCategory = category;
+
   $('explanationBox').classList.add('hidden');
   $('explanationBox').innerHTML = '';
-  $('phaseLabel').textContent = '⏱️ Question en cours - les joueurs repondent...';
+  $('answerDist').classList.add('hidden');
+  $('answerDistBars').innerHTML = '';
+  $('phaseLabel').textContent = '⏱️ Question en cours – les joueurs reflechissent…';
   $('phaseLabel').classList.remove('phase-reveal');
   $('btnNext').textContent = '⏭️ Reveler maintenant';
   $('timerBar').classList.remove('urgent');
+  $('liveTitle').textContent = '📡 En direct : qui a deja repondu';
 
   const diffBadge = difficulty === 'F' ? '<span class="diff diff-F">🟢 Facile</span>'
                   : difficulty === 'M' ? '<span class="diff diff-M">🟡 Moyen</span>'
@@ -202,6 +235,7 @@ socket.on('game:question', ({ index, total, category, question, formula, svg, di
   const f = $('qFormula');
   if (formula) { f.textContent = '📐 ' + formula; f.classList.remove('hidden'); }
   else { f.classList.add('hidden'); f.textContent = ''; }
+
   const v = $('qVisual');
   if (svg) { v.innerHTML = svg; v.classList.remove('hidden'); }
   else { v.classList.add('hidden'); v.innerHTML = ''; }
@@ -233,23 +267,28 @@ socket.on('game:question', ({ index, total, category, question, formula, svg, di
   }, 80);
 });
 
+// === En direct : qui a repondu (avant reveal) ===
 socket.on('game:answered', ({ statuses }) => {
   const box = $('answeredList');
   if (!box) return;
   box.innerHTML = statuses.map(p => {
-    const av = `<div class="avatar" style="background:${p.avatar ? p.avatar.color : '#fbbf24'}">${p.avatar ? p.avatar.emoji : '👤'}</div>`;
-    const label = p.answered ? '✅ A repondu' : '⏳ En reflexion';
-    return `<div class="score-card ${p.answered ? 'answered' : ''}">${av}<div class="info"><div class="name">${escapeHtml(p.name)}</div><div class="pts" style="font-size:0.9rem; color:${p.answered ? '#34d399' : '#94a3b8'}">${label}</div></div></div>`;
+    const av = `<div class="avatar avatar-sm" style="background:${p.avatar ? p.avatar.color : '#fbbf24'}">${p.avatar ? p.avatar.emoji : '👤'}</div>`;
+    const tag = p.answered
+      ? `<span class="ans-tag tag-answered">✅ Repondu</span>`
+      : `<span class="ans-tag tag-thinking">⏳ En reflexion</span>`;
+    return `<div class="feed-row ${p.answered ? 'feed-answered' : ''}">${av}<span class="feed-name">${escapeHtml(p.name)}</span>${tag}</div>`;
   }).join('');
 });
 
-socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg, results, duration }) => {
+// === Reveal : reponse + histogramme + detail joueurs ===
+socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg, results, distribution, playerDetails, duration }) => {
   if (timerInterval) clearInterval(timerInterval);
   $('timerBarInner').style.width = '0%';
   $('timerBar').classList.remove('urgent');
-  $('phaseLabel').textContent = '💡 Explication (' + Math.round((duration||20000)/1000) + 's)';
+  $('phaseLabel').textContent = '💡 Explication';
   $('phaseLabel').classList.add('phase-reveal');
   $('btnNext').textContent = '⏭️ Question suivante';
+  $('liveTitle').textContent = '📋 Detail des reponses par joueur';
 
   const choicesBox = $('choices');
   [...choicesBox.children].forEach((b, i) => {
@@ -258,19 +297,57 @@ socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg
   });
   SFX.correct();
 
-  const goodPlayers = results.filter(r => r.correct);
+  // === HISTOGRAMME ===
+  if (distribution && Array.isArray(distribution)) {
+    const total = distribution.reduce((a, b) => a + b, 0) || 1;
+    const letters = ['A', 'B', 'C', 'D'];
+    $('answerDistBars').innerHTML = distribution.map((count, i) => {
+      const pct = Math.round((count / total) * 100);
+      const isCorrect = i === correctIndex;
+      return `
+        <div class="dist-row dist-${letters[i]}">
+          <span class="dist-letter">${letters[i]} ${isCorrect ? '✓' : ''}</span>
+          <div class="dist-bar-wrap"><div class="dist-bar dist-bar-${letters[i]} ${isCorrect ? 'is-correct' : ''}" style="width:${pct}%"></div></div>
+          <span class="dist-count">${count}</span>
+        </div>
+      `;
+    }).join('');
+    $('answerDist').classList.remove('hidden');
+  }
+
+  // === EXPLICATION ===
   const expBox = $('explanationBox');
   let html = `<div class="exp-title">✅ Bonne reponse : <span class="exp-answer">${escapeHtml(correctText)}</span></div>`;
   if (formula) html += `<div class="exp-formula">📐 ${escapeHtml(formula)}</div>`;
   if (explanation) html += `<div class="exp-text">${escapeHtml(explanation)}</div>`;
-  if (goodPlayers.length) {
-    html += `<div class="exp-players">🏆 Trouvee par : ${goodPlayers.map(p => escapeHtml(p.name) + (p.streak >= 3 ? ` 🔥×${p.streak}` : '')).join(', ')}</div>`;
-  } else {
-    html += `<div class="exp-players">😶 Personne n'a trouve.</div>`;
-  }
   expBox.innerHTML = html;
   expBox.classList.remove('hidden');
 
+  // === DETAIL PAR JOUEUR ===
+  if (playerDetails && lastQuestionChoices) {
+    const letters = ['A', 'B', 'C', 'D'];
+    $('answeredList').innerHTML = playerDetails.map(p => {
+      const av = `<div class="avatar avatar-sm" style="background:${p.avatar ? p.avatar.color : '#fbbf24'}">${p.avatar ? p.avatar.emoji : '👤'}</div>`;
+      const myLetter = (p.answer !== null && p.answer >= 0) ? letters[p.answer] : '–';
+      const cls = p.answer === null ? 'tag-noanswer' : (p.correct ? 'tag-correct' : 'tag-wrong');
+      const txt = p.answer === null ? 'Pas repondu' : (p.correct ? `+${p.gained} pts` : 'Mauvaise');
+      const letterBadge = p.answer !== null
+        ? `<span class="ans-letter letter-${myLetter}">${myLetter}</span>`
+        : `<span class="ans-letter letter-none">–</span>`;
+      const streak = p.streak >= 2 ? ` 🔥×${p.streak}` : '';
+      const lives = (p.lives !== undefined && p.lives !== null) ? ` ${'❤️'.repeat(Math.max(0, p.lives))}${p.lives <= 0 ? '💀' : ''}` : '';
+      const accu = p.totalAnswered ? `<span class="ans-accu">${p.totalCorrect}/${p.totalAnswered}</span>` : '';
+      return `<div class="feed-row reveal-row ${p.correct ? 'reveal-ok' : (p.answer === null ? 'reveal-none' : 'reveal-ko')}">
+        ${av}
+        <span class="feed-name">${escapeHtml(p.name)}${streak}${lives}</span>
+        ${letterBadge}
+        <span class="ans-tag ${cls}">${txt}</span>
+        ${accu}
+      </div>`;
+    }).join('');
+  }
+
+  // Barre du timer pour la phase d'explication
   if (duration) {
     const start = Date.now();
     timerInterval = setInterval(() => {
@@ -281,6 +358,7 @@ socket.on('game:reveal', ({ correctIndex, correctText, explanation, formula, svg
   }
 });
 
+// === Scores live ===
 socket.on('game:scores', ({ scores, eliminated, teamTotals }) => {
   const box = $('scores');
   const teamBox = $('teamScores');
@@ -304,12 +382,13 @@ socket.on('game:scores', ({ scores, eliminated, teamTotals }) => {
   if (eliminated && eliminated.length) {
     html += eliminated.map(s => {
       const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}; opacity:0.4">${s.avatar.emoji}</div>` : '';
-      return `<div class="score-card" style="opacity:0.5">${av}<div class="info"><div class="name">💀 ${escapeHtml(s.name)}</div><div class="pts">Elimine</div></div></div>`;
+      return `<div class="score-card eliminated">${av}<div class="info"><div class="name">💀 ${escapeHtml(s.name)}</div><div class="pts">Elimine</div></div></div>`;
     }).join('');
   }
   box.innerHTML = html;
 });
 
+// === Fin de partie ===
 socket.on('game:end', ({ ranking, awards }) => {
   $('live-card').classList.add('hidden');
   $('scores-card').classList.add('hidden');
@@ -328,17 +407,16 @@ socket.on('game:end', ({ ranking, awards }) => {
   });
 
   if (awards) {
-    let awardsHtml = '🏅 ';
-    if (awards.fastest) awardsHtml += `<strong>⚡ Plus rapide</strong> : ${escapeHtml(awards.fastest)}. `;
-    if (awards.bestStreak && awards.bestStreakValue >= 3) awardsHtml += `<strong>🔥 Meilleur combo</strong> : ${escapeHtml(awards.bestStreak)} (×${awards.bestStreakValue}).`;
-    $('awards').innerHTML = awardsHtml;
+    let html = '🏅 ';
+    if (awards.fastest) html += `<strong>⚡ Plus rapide</strong> : ${escapeHtml(awards.fastest)}. `;
+    if (awards.bestStreak && awards.bestStreakValue >= 3) html += `<strong>🔥 Meilleur combo</strong> : ${escapeHtml(awards.bestStreak)} (×${awards.bestStreakValue}).`;
+    $('awards').innerHTML = html;
   }
 
-  const rankBox = $('ranking');
-  rankBox.innerHTML = ranking.map((s, i) => {
+  $('ranking').innerHTML = ranking.map((s, i) => {
     const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
     const av = s.avatar ? `<div class="avatar" style="background:${s.avatar.color}">${s.avatar.emoji}</div>` : '';
-    const stat = s.stats ? `<div style="font-size:0.78rem; color:#94a3b8">${s.stats.correct}/${s.stats.answered} · ${s.stats.accuracy}%</div>` : '';
+    const stat = s.stats ? `<div class="card-stats">${s.stats.correct}/${s.stats.answered} · ${s.stats.accuracy}%</div>` : '';
     return `<div class="score-card ${cls}">${av}<div class="info"><div class="name">${i+1}. ${escapeHtml(s.name)}</div><div class="pts">${s.score} pts</div>${stat}</div></div>`;
   }).join('');
 
@@ -350,6 +428,7 @@ socket.on('game:end', ({ ranking, awards }) => {
   }
 });
 
+// === Utils ===
 function flashMsg(text, kind) {
   const el = document.createElement('div');
   el.className = 'toast';
@@ -357,8 +436,7 @@ function flashMsg(text, kind) {
   if (kind === 'warn') el.style.borderColor = '#fbbf24';
   el.textContent = text;
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 4500);
+  setTimeout(() => el.remove(), 4000);
 }
-
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function escapeAttr(s) { return escapeHtml(s); }

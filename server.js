@@ -50,10 +50,25 @@ function localIPs() {
   return out;
 }
 
+// Renvoie l'URL publique depuis laquelle on est accede
+// - via Render/Heroku/etc : utilise les headers X-Forwarded-* + host
+// - en local : renvoie aussi les IP LAN pour partage Wi-Fi
+function publicBaseUrl(req) {
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').split(',')[0].trim();
+  const host = (req.headers['x-forwarded-host'] || req.headers.host || `localhost:${PORT}`).split(',')[0].trim();
+  return `${proto}://${host}`;
+}
+
 app.get('/api/lan-urls', (req, res) => {
+  const publicUrl = publicBaseUrl(req) + '/';
+  // si l'URL publique est localhost/127.x → fallback LAN, sinon priorise public
+  const isLocal = /localhost|127\.|10\.168\./.test(publicUrl);
+  const lanUrls = localIPs().map(ip => `http://${ip}:${PORT}/`);
   res.json({
     port: PORT,
-    urls: localIPs().map(ip => `http://${ip}:${PORT}/`),
+    primary: publicUrl,
+    isLocal,
+    urls: isLocal ? [publicUrl, ...lanUrls] : [publicUrl],
   });
 });
 
@@ -64,11 +79,19 @@ app.get('/api/history-stats', (req, res) => {
 // QR code (PNG) qui pointe vers l'URL de connexion joueur
 app.get('/qr.png', async (req, res) => {
   try {
-    const ip = localIPs()[0] || 'localhost';
-    const url = `http://${ip}:${PORT}/`;
+    // Si l'host inclut localhost OU 127.x : on prefere une IP LAN pour le QR
+    // sinon on encode l'URL publique (ex: bts-e4-quiz.onrender.com)
+    let baseUrl = publicBaseUrl(req);
+    if (/localhost|127\./.test(baseUrl)) {
+      const ip = localIPs()[0];
+      if (ip) baseUrl = `http://${ip}:${PORT}`;
+    }
+    // suffixe code session pour pre-remplir le champ cote joueur
+    const code = state && state.sessionCode ? `?code=${state.sessionCode}` : '';
+    const url = baseUrl + '/' + code;
     const buf = await QRCode.toBuffer(url, {
       errorCorrectionLevel: 'M',
-      width: 360,
+      width: 420,
       margin: 1,
       color: { dark: '#0f172a', light: '#ffffff' },
     });
@@ -427,13 +450,39 @@ function revealAnswer() {
 
   state.history.push({ q: q.q, cat: q.cat, good: q.c[q.r] });
 
+  // Distribution des reponses (pour histogramme cote animateur)
+  const distribution = [0, 0, 0, 0];
+  Object.values(state.players).forEach(p => {
+    if (typeof p.lastAnswer === 'number' && p.lastAnswer >= 0 && p.lastAnswer <= 3) {
+      distribution[p.lastAnswer]++;
+    }
+  });
+
+  // Detail par joueur (avec lettre + correct + gain) - utile cote animateur
+  const playerDetails = Object.values(state.players).map(p => ({
+    name: p.name,
+    avatar: p.avatar,
+    team: p.team || null,
+    answer: (typeof p.lastAnswer === 'number') ? p.lastAnswer : null, // index 0..3 ou null
+    correct: p.lastAnswer === q.r,
+    gained: (results.find(r => r.name === p.name) || {}).gained || 0,
+    streak: p.streak || 0,
+    lives: p.lives,
+    eliminated: !!p.eliminated,
+    totalCorrect: p.totalCorrect || 0,
+    totalAnswered: p.totalAnswered || 0,
+  })).sort((a, b) => (b.gained || 0) - (a.gained || 0));
+
   io.emit('game:reveal', {
     correctIndex: q.r,
     correctText: q.c[q.r],
+    choices: q.c, // pour l'histogramme cote anim
     explanation: q.explanation || '',
     formula: q.formula || '',
     svg: q.svg || '',
     results,
+    distribution,
+    playerDetails,
     duration: state.explanationDuration,
   });
   broadcastScores();
