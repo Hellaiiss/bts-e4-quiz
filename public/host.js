@@ -92,11 +92,11 @@ socket.on('lobby:update', data => {
   // Code session
   if (data.sessionCode) $('sessionCodeDisplay').textContent = data.sessionCode;
 
-  // categories
+  // categories : on met le "Programme complet" en premier, les generateurs sont deja inclus
   const list = $('catList');
   const cats = ['__ALL__', ...data.categories];
   list.innerHTML = cats.map(c => {
-    const label = c === '__ALL__' ? '🎓 Programme complet (tout BTS E4)' : c;
+    const label = c === '__ALL__' ? '🎓 Programme complet (questions ecrites + generateurs)' : c;
     return `<div class="cat-item ${c===selectedCategory?'selected':''}" data-cat="${escapeAttr(c)}">${escapeHtml(label)}</div>`;
   }).join('');
   list.querySelectorAll('.cat-item').forEach(el => {

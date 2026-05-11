@@ -7,6 +7,8 @@ const QRCode = require('qrcode');
 const os = require('os');
 const path = require('path');
 const QUESTIONS = require('./questions');
+const GENERATORS = require('./generators');
+const GEN_CAT = '🎲 Generateurs (questions infinies)';
 
 const app = express();
 const server = http.createServer(app);
@@ -130,9 +132,10 @@ function playerPublic(p) {
 }
 
 function broadcastLobby() {
+  // On ajoute la categorie speciale "generateurs" au debut
   io.emit('lobby:update', {
     players: Object.values(state.players).map(playerPublic),
-    categories: Object.keys(QUESTIONS),
+    categories: [GEN_CAT, ...Object.keys(QUESTIONS)],
     inProgress: state.inProgress,
     category: state.category,
     sessionCode: state.sessionCode,
@@ -178,19 +181,60 @@ function shuffle(arr) {
   return a;
 }
 
+// Anti-triche : permute aleatoirement l'ordre des 4 propositions
+// (sinon les joueurs apprennent "la bonne est souvent B")
+function shuffleChoices(q) {
+  const indexed = q.c.map((text, i) => ({ text, idx: i }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  return { ...q, c: indexed.map(x => x.text), r: indexed.findIndex(x => x.idx === q.r) };
+}
+
+// Genere N questions parametrees (option : filtre difficulte)
+function generateParametricQuestions(n, difficulty) {
+  const out = [];
+  const names = Object.keys(GENERATORS);
+  let attempts = 0;
+  // memoire courte pour eviter trop de doublons d'enonces dans une meme partie
+  const seenEnonces = new Set();
+  while (out.length < n && attempts < n * 30) {
+    attempts++;
+    const gen = GENERATORS[names[Math.floor(Math.random() * names.length)]];
+    let q;
+    try { q = gen(); } catch (e) { continue; }
+    if (!q || !q.q || !q.c || q.c.length !== 4) continue;
+    if (difficulty && q.d && q.d !== difficulty) continue;
+    if (seenEnonces.has(q.q)) continue;
+    seenEnonces.add(q.q);
+    q.cat = GEN_CAT;
+    out.push(q);
+  }
+  return out;
+}
+
 function startGame(category, nbQuestions, difficulty, mode) {
   state.category = category;
   state.mode = mode === 'survival' ? 'survival' : 'classic';
-  let all = category === '__ALL__'
-    ? Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })))
-    : QUESTIONS[category].map(q => ({ ...q, cat: category }));
-  if (difficulty && ['F','M','D'].includes(difficulty)) {
+  let all;
+  if (category === GEN_CAT) {
+    // Categorie "generateurs" : on tire N questions parametrees
+    const N = (nbQuestions && nbQuestions < 9999) ? nbQuestions : 20;
+    all = generateParametricQuestions(N, difficulty);
+  } else if (category === '__ALL__') {
+    all = Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })));
+  } else {
+    all = QUESTIONS[category].map(q => ({ ...q, cat: category }));
+  }
+  if (difficulty && ['F','M','D'].includes(difficulty) && category !== GEN_CAT) {
     all = all.filter(q => q.d === difficulty);
   }
   if (all.length === 0) {
     all = Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })));
   }
-  state.questions = shuffle(all).slice(0, nbQuestions || all.length);
+  // Melange l'ordre des questions ET l'ordre des propositions de chaque question
+  state.questions = shuffle(all).slice(0, nbQuestions || all.length).map(shuffleChoices);
   state.currentIndex = -1;
   state.inProgress = true;
   state.history = [];
@@ -415,7 +459,7 @@ io.on('connection', socket => {
       socket.emit('host:error', 'Une partie est deja en cours.');
       return;
     }
-    if (!category || (category !== '__ALL__' && !QUESTIONS[category])) {
+    if (!category || (category !== '__ALL__' && category !== GEN_CAT && !QUESTIONS[category])) {
       console.log(`[START] refuse : categorie invalide (${category})`);
       socket.emit('host:error', 'Categorie invalide.');
       return;
