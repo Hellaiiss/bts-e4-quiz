@@ -1,0 +1,13 @@
+# Deploiement en 1 clic sur Render.com (gratuit, supporte WebSocket)
+# Mode d'emploi : voir DEPLOIEMENT.md (Option A)
+services:
+  - type: web
+    name: bts-e4-quiz
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+    autoDeploy: true

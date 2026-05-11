@@ -1,0 +1,22 @@
+# Dependances - reinstallees par npm install
+node_modules/
+
+# Build artefacts
+dist/
+
+# Fichiers temporaires
+*.log
+.DS_Store
+Thumbs.db
+
+# Editeurs
+.vscode/
+.idea/
+*.swp
+
+# Variables d'environnement locales
+.env
+.env.local
+
+# Sujets BTS (volumineux, restent en local)
+sujet E41 bts elec/
