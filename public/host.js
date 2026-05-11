@@ -56,6 +56,31 @@ $('btnReset').addEventListener('click', () => {
     socket.emit('host:reset');
   }
 });
+
+const btnClearHist = document.getElementById('btnClearHistory');
+if (btnClearHist) {
+  btnClearHist.addEventListener('click', () => {
+    if (!isHost) return;
+    if (confirm('Vider l\'historique des questions deja vues ? (Toutes les questions redeviennent tirables.)')) {
+      SFX.click();
+      socket.emit('host:clearHistory');
+    }
+  });
+}
+
+async function refreshHistoryStats() {
+  try {
+    const r = await fetch('/api/history-stats');
+    const data = await r.json();
+    const el = document.getElementById('historyStats');
+    if (el) el.textContent = `${data.seen} question(s) deja vue(s) ne seront pas re-posees.`;
+  } catch (e) {}
+}
+setInterval(refreshHistoryStats, 4000);
+refreshHistoryStats();
+
+socket.on('history:cleared', () => { refreshHistoryStats(); flashMsg('🧹 Historique efface.', 'info'); });
+socket.on('host:info', msg => flashMsg(msg, 'info'));
 $('btnAgain').addEventListener('click', () => {
   SFX.click();
   $('end-card').classList.add('hidden');

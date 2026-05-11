@@ -8,6 +8,7 @@ const os = require('os');
 const path = require('path');
 const QUESTIONS = require('./questions');
 const GENERATORS = require('./generators');
+const HISTORY = require('./history');
 const GEN_CAT = '🎲 Generateurs (questions infinies)';
 
 const app = express();
@@ -54,6 +55,10 @@ app.get('/api/lan-urls', (req, res) => {
     port: PORT,
     urls: localIPs().map(ip => `http://${ip}:${PORT}/`),
   });
+});
+
+app.get('/api/history-stats', (req, res) => {
+  res.json({ seen: HISTORY.size() });
 });
 
 // QR code (PNG) qui pointe vers l'URL de connexion joueur
@@ -219,13 +224,17 @@ function shuffleChoices(q) {
 }
 
 // Genere N questions parametrees (option : filtre difficulte)
+// Utilise l'historique global pour ne JAMAIS reposer une question deja vue.
+// Si le pool est epuise (rare), on relache la contrainte d'historique.
 function generateParametricQuestions(n, difficulty) {
   const out = [];
   const names = Object.keys(GENERATORS);
-  let attempts = 0;
-  // memoire courte pour eviter trop de doublons d'enonces dans une meme partie
   const seenEnonces = new Set();
-  while (out.length < n && attempts < n * 30) {
+  let attempts = 0;
+  const maxAttempts = n * 100;
+  let allowDuplicatesFromHistory = false;
+
+  while (out.length < n && attempts < maxAttempts) {
     attempts++;
     const gen = GENERATORS[names[Math.floor(Math.random() * names.length)]];
     let q;
@@ -233,11 +242,28 @@ function generateParametricQuestions(n, difficulty) {
     if (!q || !q.q || !q.c || q.c.length !== 4) continue;
     if (difficulty && q.d && q.d !== difficulty) continue;
     if (seenEnonces.has(q.q)) continue;
+    if (!allowDuplicatesFromHistory && HISTORY.has(q)) continue;
     seenEnonces.add(q.q);
     q.cat = GEN_CAT;
+    HISTORY.add(q);
     out.push(q);
+
+    // Au cas ou on n'arrive plus a trouver de neuf, on relache apres beaucoup d'essais
+    if (attempts > n * 50 && !allowDuplicatesFromHistory) {
+      allowDuplicatesFromHistory = true;
+      console.log('[HISTORY] pool epuise → on autorise quelques repetitions');
+    }
   }
   return out;
+}
+
+// Filtre les questions statiques selon l'historique (best-effort)
+function filterStaticByHistory(questions) {
+  if (HISTORY.size() === 0) return questions;
+  const unseen = questions.filter(q => !HISTORY.has(q));
+  // si moins de la moitie des questions restent non-vues, on relache
+  if (unseen.length < questions.length / 2) return questions;
+  return unseen;
 }
 
 function startGame(category, nbQuestions, difficulty, mode) {
@@ -270,8 +296,17 @@ function startGame(category, nbQuestions, difficulty, mode) {
   if (all.length === 0) {
     all = Object.entries(QUESTIONS).flatMap(([cat, qs]) => qs.map(q => ({ ...q, cat })));
   }
-  // Melange l'ordre des questions ET l'ordre des propositions de chaque question
-  state.questions = shuffle(all).slice(0, nbQuestions || all.length).map(shuffleChoices);
+  // Filtrage par historique pour les questions STATIQUES (les generateurs gerent deja)
+  if (category !== GEN_CAT) {
+    all = filterStaticByHistory(all);
+  }
+  // Melange + selection + permute propositions
+  const selected = shuffle(all).slice(0, nbQuestions || all.length).map(shuffleChoices);
+  // Marquer les questions statiques choisies comme vues
+  if (category !== GEN_CAT) {
+    selected.forEach(q => HISTORY.add(q));
+  }
+  state.questions = selected;
   state.currentIndex = -1;
   state.inProgress = true;
   state.history = [];
@@ -542,6 +577,13 @@ io.on('connection', socket => {
     console.log(`[KICK] joueur ${p.name} (${playerId}) exclu par l'animateur`);
     broadcastLobby();
     broadcastScores();
+  });
+
+  socket.on('host:clearHistory', () => {
+    if (socket.id !== state.hostId) return;
+    HISTORY.reset();
+    io.emit('history:cleared');
+    socket.emit('host:info', '🧹 Historique des questions efface. Toutes les questions sont a nouveau dispos.');
   });
 
   socket.on('host:reset', () => {

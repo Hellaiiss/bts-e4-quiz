@@ -18,5 +18,8 @@ Thumbs.db
 .env
 .env.local
 
+# Historique des questions (regenere a l'usage)
+.question-history.json
+
 # Sujets BTS (volumineux, restent en local)
 sujet E41 bts elec/
