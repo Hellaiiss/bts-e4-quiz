@@ -150,12 +150,14 @@ const state = {
 };
 
 // ===== Profils de duree par mode =====
+// Phase d'explication allongee : les explications sont desormais pedagogiques,
+// donc on laisse plus de temps pour les lire et comprendre.
 const MODE_PROFILES = {
-  classic:       { q: 25000, e: 20000, label: '🎮 Classique' },
-  survival:      { q: 25000, e: 15000, label: '💀 Survie' },
-  marathon:      { q: 12000, e: 8000,  label: '🏃 Marathon' },
-  buzzer:        { q: 20000, e: 15000, label: '⚡ Buzzer' },
-  teams:         { q: 25000, e: 20000, label: '🟦🟥 Equipes' },
+  classic:       { q: 25000, e: 25000, label: '🎮 Classique' },
+  survival:      { q: 25000, e: 20000, label: '💀 Survie' },
+  marathon:      { q: 12000, e: 10000, label: '🏃 Marathon' },
+  buzzer:        { q: 20000, e: 18000, label: '⚡ Buzzer' },
+  teams:         { q: 25000, e: 25000, label: '🟦🟥 Equipes' },
 };
 
 function playerPublic(p, includeId) {
