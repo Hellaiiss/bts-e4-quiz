@@ -1,0 +1,3691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soutenance U6.2 — Rétrofit MPH600 — S. Devallière</title>
+<style>
+/* =================================================================
+   MPH600 — U6.2 — Soutenance Sullivan DEVALLIÈRE
+   Système visuel : sombre, technique, accent vert SHEM / ENGIE
+   ================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:        #060A09;
+  --ink-2:      #0B1210;
+  --ink-3:      #101A16;
+  --raise:      #14201B;
+  --line:       rgba(173, 222, 199, 0.12);
+  --line-soft:  rgba(173, 222, 199, 0.07);
+
+  --paper:      #EAF3EE;
+  --paper-dim:  #B7C8BF;
+  --fog:        #76897F;
+  --fog-2:      #56655D;
+
+  --forest:     #1B5E20;
+  --shem:       #8BC34A;
+  --lime:       #9BE45B;
+  --emerald:    #2FD27A;
+  --glow:       rgba(124, 226, 132, 0.55);
+
+  --cyan:       #2BC4FF;
+  --cyan-deep:  #0B6E96;
+
+  --amber:      #F2B33B;
+  --rust:       #E76A45;
+  --rose:       #E64B6B;
+
+  --r:    16px;
+  --r-sm: 10px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+deck-stage:not(:defined){ visibility:hidden; }
+html,body{ background:#000; }
+
+/* ---------------- SLIDE FRAME ---------------- */
+section.slide{
+  font-family:"IBM Plex Sans", system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 700px at 82% -10%, rgba(43,196,255,0.06), transparent 60%),
+    radial-gradient(1300px 900px at 8% 115%, rgba(124,226,132,0.09), transparent 55%),
+    linear-gradient(165deg, #08110D 0%, var(--ink) 60%, #050807 100%);
+  color:var(--paper);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+section.slide::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(120% 100% at 50% 0%, #000 35%, transparent 78%);
+          mask-image:radial-gradient(120% 100% at 50% 0%, #000 35%, transparent 78%);
+  opacity:.6; pointer-events:none;
+}
+
+.pad{ position:absolute; inset:0; padding:84px 104px 74px; display:flex; flex-direction:column; z-index:1; }
+
+/* ---------------- chrome ---------------- */
+.chrome{ display:flex; justify-content:space-between; align-items:flex-start; gap:24px; }
+.eyebrow{
+  font-family:"IBM Plex Mono", monospace; font-size:21px; letter-spacing:.26em;
+  text-transform:uppercase; color:var(--shem); font-weight:500;
+  display:flex; align-items:center; gap:16px;
+}
+.eyebrow .act{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:42px; height:42px; border-radius:9px;
+  background:linear-gradient(150deg, var(--forest), #0c2a12);
+  border:1px solid rgba(124,226,132,.35);
+  color:var(--lime); font-weight:600; font-size:20px; letter-spacing:0;
+  box-shadow:0 0 22px -6px var(--glow);
+}
+.tags{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.tag{
+  font-family:"IBM Plex Mono", monospace; font-size:18px; font-weight:500;
+  padding:7px 15px; border-radius:999px; letter-spacing:.04em;
+  border:1px solid var(--line); color:var(--paper-dim); background:rgba(255,255,255,.02);
+}
+.tag.c{ border-color:rgba(124,226,132,.4); color:var(--lime); background:rgba(124,226,132,.07); }
+.tag.cy{ border-color:rgba(43,196,255,.4); color:var(--cyan); background:rgba(43,196,255,.07); }
+.tag.am{ border-color:rgba(242,179,59,.4); color:var(--amber); background:rgba(242,179,59,.08); }
+
+/* ---------------- titles ---------------- */
+.h1{ font-size:62px; line-height:1.03; font-weight:600; letter-spacing:-.018em; margin-top:30px; }
+.h1 .em{ color:var(--lime); }
+.h2{ font-size:40px; line-height:1.08; font-weight:600; letter-spacing:-.01em; }
+.lead{ font-size:27px; line-height:1.45; color:var(--paper-dim); font-weight:300; max-width:60ch; }
+.lead strong{ color:var(--paper); font-weight:600; }
+.mono{ font-family:"IBM Plex Mono", monospace; }
+.code{ font-family:"IBM Plex Mono", monospace; color:var(--lime); font-weight:500;
+  background:rgba(124,226,132,.08); padding:.06em .4em; border-radius:6px; font-size:.92em; }
+.cy{ color:var(--cyan); }
+.gr{ color:var(--lime); }
+.am{ color:var(--amber); }
+.dim{ color:var(--fog); }
+
+.body{ flex:1; min-height:0; margin-top:34px; }
+.foot{
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:"IBM Plex Mono", monospace; font-size:18px; color:var(--fog-2);
+  letter-spacing:.04em; padding-top:18px; border-top:1px solid var(--line-soft); margin-top:18px;
+}
+.foot .brandmark{ color:var(--shem); font-weight:500; }
+
+/* ---------------- cards ---------------- */
+.card{
+  background:linear-gradient(160deg, var(--ink-3), var(--ink-2));
+  border:1px solid var(--line); border-radius:var(--r);
+  padding:26px 28px; position:relative; overflow:hidden;
+}
+.card .kicker{
+  font-family:"IBM Plex Mono", monospace; font-size:18px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--fog); margin-bottom:12px; font-weight:500;
+}
+.card h3{ font-size:25px; font-weight:600; margin-bottom:9px; }
+.card p{ font-size:21px; line-height:1.45; color:var(--paper-dim); font-weight:300; }
+.card.edge-gr{ border-left:3px solid var(--lime); }
+.card.edge-cy{ border-left:3px solid var(--cyan); }
+.card.edge-am{ border-left:3px solid var(--amber); }
+.card.edge-rose{ border-left:3px solid var(--rose); }
+.card.solid{ background:linear-gradient(155deg, var(--forest), #0a2410); border-color:rgba(124,226,132,.3); }
+
+.grid{ display:grid; gap:22px; height:100%; }
+.g2{ grid-template-columns:1fr 1fr; }
+.g3{ grid-template-columns:repeat(3,1fr); }
+.g4{ grid-template-columns:repeat(4,1fr); }
+.col{ display:flex; flex-direction:column; gap:22px; min-height:0; }
+
+/* ---------------- KPI ---------------- */
+.kpi{ display:flex; align-items:baseline; gap:14px; }
+.kpi .v{ font-size:64px; font-weight:600; letter-spacing:-.03em; line-height:.9;
+  background:linear-gradient(180deg,#fff,var(--shem)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.kpi .v.cy{ background:linear-gradient(180deg,#fff,var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.kpi .v.am{ background:linear-gradient(180deg,#fff,var(--amber)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.kpi .l{ font-size:20px; color:var(--fog); line-height:1.25; max-width:18ch; }
+
+/* ---------------- badges ---------------- */
+.b{ display:inline-flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace;
+  font-size:17px; font-weight:500; padding:5px 12px; border-radius:7px; letter-spacing:.02em; }
+.b.ok{ background:rgba(47,210,122,.13); color:var(--emerald); }
+.b.bug{ background:rgba(231,106,69,.14); color:var(--rust); }
+.b.cy{ background:rgba(43,196,255,.13); color:var(--cyan); }
+.b.gr{ background:rgba(124,226,132,.13); color:var(--lime); }
+.dot{ width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 10px currentColor; }
+
+/* ---------------- tables ---------------- */
+table.t{ width:100%; border-collapse:collapse; font-size:20px; }
+table.t th{ text-align:left; font-family:"IBM Plex Mono",monospace; font-weight:500;
+  font-size:17px; letter-spacing:.08em; text-transform:uppercase; color:var(--fog);
+  padding:0 16px 14px; border-bottom:1px solid var(--line); }
+table.t td{ padding:13px 16px; border-bottom:1px solid var(--line-soft); color:var(--paper-dim); vertical-align:top; }
+table.t tr:last-child td{ border-bottom:none; }
+table.t td .mono{ color:var(--lime); font-size:18px; }
+table.t .lead-col{ color:var(--paper); font-weight:600; }
+
+/* ---------------- section divider ---------------- */
+section.divider .pad{ justify-content:center; }
+.dv-num{ font-family:"IBM Plex Mono",monospace; font-size:30px; letter-spacing:.4em;
+  color:var(--shem); margin-bottom:22px; }
+.dv-title{ font-size:108px; line-height:.96; font-weight:600; letter-spacing:-.025em; }
+.dv-title .em{ color:var(--lime); }
+.dv-sub{ font-size:26px; color:var(--paper-dim); font-weight:300; margin-top:26px; max-width:54ch; }
+
+/* ---------------- image slots ---------------- */
+.shot{ position:relative; border-radius:var(--r); overflow:hidden; border:1px solid var(--line);
+  background:var(--ink-2); }
+image-slot{ display:block; width:100%; height:100%; }
+
+/* ---------------- ENTRANCE ANIMATIONS (gated) ---------------- */
+@media (prefers-reduced-motion: no-preference){
+  .slide [data-anim]{ opacity:0; }
+  .slide[data-deck-active] [data-anim="up"]{ animation:aUp .7s cubic-bezier(.16,.84,.34,1) both; }
+  .slide[data-deck-active] [data-anim="fade"]{ animation:aFade .8s ease both; }
+  .slide[data-deck-active] [data-anim="left"]{ animation:aLeft .7s cubic-bezier(.16,.84,.34,1) both; }
+  .slide[data-deck-active] [data-anim="right"]{ animation:aRight .7s cubic-bezier(.16,.84,.34,1) both; }
+  .slide[data-deck-active] [data-anim="scale"]{ animation:aScale .7s cubic-bezier(.16,.84,.34,1) both; }
+  .slide[data-deck-active] [data-anim] [data-stagger]{ opacity:0; animation:aUp .6s cubic-bezier(.16,.84,.34,1) both; }
+}
+@keyframes aUp{ from{ opacity:0; transform:translateY(34px); } to{ opacity:1; transform:none; } }
+@keyframes aFade{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes aLeft{ from{ opacity:0; transform:translateX(-46px); } to{ opacity:1; transform:none; } }
+@keyframes aRight{ from{ opacity:0; transform:translateX(46px); } to{ opacity:1; transform:none; } }
+@keyframes aScale{ from{ opacity:0; transform:scale(.92); } to{ opacity:1; transform:none; } }
+
+[data-d="1"]{ animation-delay:.10s !important; }
+[data-d="2"]{ animation-delay:.20s !important; }
+[data-d="3"]{ animation-delay:.32s !important; }
+[data-d="4"]{ animation-delay:.44s !important; }
+[data-d="5"]{ animation-delay:.56s !important; }
+[data-d="6"]{ animation-delay:.68s !important; }
+[data-d="7"]{ animation-delay:.80s !important; }
+[data-d="8"]{ animation-delay:.92s !important; }
+
+/* signal draw */
+@media (prefers-reduced-motion: no-preference){
+  .slide[data-deck-active] .draw{ stroke-dasharray:var(--len,1200); stroke-dashoffset:var(--len,1200);
+    animation:draw 1.6s .3s cubic-bezier(.5,0,.2,1) forwards; }
+}
+@keyframes draw{ to{ stroke-dashoffset:0; } }
+
+/* pulse for live nodes */
+@keyframes pulse{ 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
+.live{ animation:pulse 2.2s ease-in-out infinite; }
+
+/* slow drift for ambient blobs */
+@keyframes drift{ 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(28px,-22px); } }
+
+/* ---------------- COVER ---------------- */
+.cover-fx{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.blob{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; }
+.blob.b1{ width:720px; height:720px; left:-180px; top:-220px;
+  background:radial-gradient(circle, rgba(124,226,132,.45), transparent 70%); animation:drift 14s ease-in-out infinite; }
+.blob.b2{ width:620px; height:620px; right:-160px; bottom:-200px;
+  background:radial-gradient(circle, rgba(43,196,255,.32), transparent 70%); animation:drift 18s ease-in-out infinite reverse; }
+.cover-trace{ position:absolute; inset:0; width:100%; height:100%; opacity:.9; }
+.cover-kick{ font-size:22px; letter-spacing:.34em; color:var(--shem); margin-bottom:24px; }
+.cover-title{ font-size:88px; line-height:1.0; font-weight:600; letter-spacing:-.025em; }
+.cover-title .em{ background:linear-gradient(100deg,var(--lime),var(--emerald) 60%,var(--cyan)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.cover-sign{ display:flex; justify-content:space-between; align-items:flex-end; gap:30px;
+  border-top:1px solid var(--line); padding-top:24px; }
+.cover-sign .name{ font-size:25px; font-weight:600; }
+.cover-sign .role{ font-size:17px; color:var(--fog); margin-top:5px; letter-spacing:.03em; }
+.cover-sign .right{ text-align:right; }
+
+/* ---------------- SPLIT / PERSON / FRONTIÈRE ---------------- */
+.split2{ display:grid; grid-template-columns:1fr auto 1fr; gap:30px; align-items:stretch; height:100%; }
+.person-card{ background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line);
+  border-radius:var(--r); padding:30px 32px; position:relative; }
+.person-card{ border-top:3px solid var(--lime); }
+.person-card.dim-card{ border-top:3px solid var(--cyan); opacity:.92; }
+.pc-top{ display:flex; align-items:center; gap:18px; margin-bottom:22px; }
+.pc-init{ width:62px; height:62px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:24px;
+  background:linear-gradient(150deg,var(--forest),#0a2410); color:var(--lime); border:1px solid rgba(124,226,132,.4); }
+.pc-init.alt{ background:linear-gradient(150deg,var(--cyan-deep),#062534); color:var(--cyan); border-color:rgba(43,196,255,.4); }
+.pc-name{ font-size:27px; font-weight:600; }
+.pc-tag{ font-size:16px; letter-spacing:.14em; margin-top:4px; }
+.pc-list{ list-style:none; display:flex; flex-direction:column; gap:14px; }
+.pc-list li{ font-size:21px; line-height:1.35; color:var(--paper-dim); padding-left:26px; position:relative; }
+.pc-list li::before{ content:""; position:absolute; left:0; top:11px; width:11px; height:11px; border-radius:3px;
+  background:var(--lime); box-shadow:0 0 10px var(--glow); }
+.dim-card .pc-list li::before{ background:var(--cyan); box-shadow:0 0 10px rgba(43,196,255,.5); }
+.dim-card .pc-list li{ color:var(--fog); }
+.frontier{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+.frontier-line{ width:2px; flex:1; background:linear-gradient(var(--lime),transparent,var(--cyan)); }
+.frontier-dot{ width:11px; height:11px; border-radius:50%; background:var(--paper); box-shadow:0 0 14px var(--paper); }
+.frontier-word{ writing-mode:vertical-rl; font-size:17px; letter-spacing:.3em; color:var(--paper-dim); }
+
+/* ---------------- strip / kpibar ---------------- */
+.strip{ display:flex; align-items:center; gap:22px; margin-top:22px; padding:18px 26px;
+  background:linear-gradient(155deg,var(--forest),#0a2410); border:1px solid rgba(124,226,132,.3); border-radius:var(--r); }
+.strip p{ font-size:21px; color:var(--paper-dim); font-weight:300; }
+.strip .b{ white-space:nowrap; }
+.kpibar{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:24px;
+  padding-top:26px; border-top:1px solid var(--line); }
+
+/* ---------------- ACT DIVIDER fx ---------------- */
+.act-fx{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.act-fx .blob.b1{ width:900px; height:900px; left:50%; top:46%; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(124,226,132,.30), transparent 68%); opacity:.6; }
+
+/* ---------------- PROCESS STEPS ---------------- */
+.steps{ display:flex; flex-direction:column; gap:0; }
+.step{ display:grid; grid-template-columns:auto 1fr; gap:24px; position:relative; padding-bottom:24px; }
+.step:last-child{ padding-bottom:0; }
+.step::before{ content:""; position:absolute; left:25px; top:56px; bottom:-2px; width:2px;
+  background:linear-gradient(var(--lime),var(--line)); }
+.step:last-child::before{ display:none; }
+.step-num{ width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:22px; color:#06210f;
+  background:linear-gradient(150deg,var(--lime),var(--emerald)); box-shadow:0 0 20px -4px var(--glow); z-index:1; }
+.step-body h4{ font-size:24px; font-weight:600; margin-bottom:6px; padding-top:9px; }
+.step-body p{ font-size:20px; line-height:1.4; color:var(--paper-dim); font-weight:300; }
+
+/* ---------------- RACK M340 ---------------- */
+.rack-wrap{ display:flex; flex-direction:column; gap:14px; }
+.rack{ display:flex; border:2px solid var(--line); border-radius:14px;
+  background:linear-gradient(180deg,#0a130f,#070d0b); padding:14px; gap:10px; }
+.slot{ flex:1; min-width:0; border-radius:9px; padding:15px 12px 13px; position:relative;
+  background:linear-gradient(175deg,var(--ink-3),#0a120e); border:1px solid var(--line);
+  display:flex; flex-direction:column; min-height:300px; }
+.slot.filled{ border-color:rgba(124,226,132,.38); box-shadow:inset 0 0 30px -14px var(--glow); }
+.slot.psu.filled{ border-color:rgba(242,179,59,.45); }
+.slot.cpu.filled{ border-color:rgba(155,228,91,.6); box-shadow:inset 0 0 30px -10px var(--glow); }
+.slot.sig.filled{ border-color:rgba(43,196,255,.45); }
+.slot-no{ font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--fog-2); letter-spacing:.1em; }
+.slot-ref{ font-family:"IBM Plex Mono",monospace; font-size:16px; font-weight:600; color:var(--lime); margin-top:8px; line-height:1.2; word-break:break-all; }
+.slot.psu .slot-ref{ color:var(--amber); }
+.slot.sig .slot-ref{ color:var(--cyan); }
+.slot-name{ font-size:17px; color:var(--paper); margin-top:7px; line-height:1.25; font-weight:500; }
+.slot-role{ font-size:15px; color:var(--fog); margin-top:auto; padding-top:12px; line-height:1.3; }
+.slot.empty{ align-items:center; justify-content:center; border-style:dashed; opacity:.5; }
+.slot.empty span{ font-family:"IBM Plex Mono",monospace; font-size:15px; color:var(--fog-2); letter-spacing:.12em; }
+.slot-led{ position:absolute; top:14px; right:12px; width:9px; height:9px; border-radius:50%;
+  background:var(--emerald); box-shadow:0 0 12px var(--emerald); }
+.slot.psu .slot-led{ background:var(--amber); box-shadow:0 0 12px var(--amber); }
+.slot.sig .slot-led{ background:var(--cyan); box-shadow:0 0 12px var(--cyan); }
+.rack-legend{ display:flex; gap:22px; flex-wrap:wrap; }
+
+/* ---------------- chain / signal flow diagram ---------------- */
+.chain{ display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:16px; }
+.chain-node{ background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line);
+  border-radius:14px; padding:22px 20px; text-align:center; position:relative; }
+.chain-node .cn-ico{ font-family:"IBM Plex Mono",monospace; font-size:15px; letter-spacing:.14em; color:var(--fog); }
+.chain-node h4{ font-size:23px; font-weight:600; margin:8px 0 6px; }
+.chain-node p{ font-size:18px; color:var(--paper-dim); font-weight:300; line-height:1.35; }
+.chain-node.hot{ border-color:rgba(124,226,132,.45); box-shadow:0 0 40px -18px var(--glow); }
+.chain-arrow{ font-size:30px; color:var(--lime); }
+.chain-arrow .mono{ display:block; font-size:13px; color:var(--fog); letter-spacing:.1em; margin-top:2px; }
+
+/* ---------------- before/after & solder ---------------- */
+.ba{ display:grid; grid-template-columns:1fr auto 1fr; gap:26px; align-items:stretch; }
+.ba-card{ border-radius:var(--r); padding:26px 28px; border:1px solid var(--line);
+  background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); display:flex; flex-direction:column; }
+.ba-card.before{ border-color:rgba(231,106,69,.35); }
+.ba-card.after{ border-color:rgba(124,226,132,.4); }
+.ba-card .tagline{ font-family:"IBM Plex Mono",monospace; font-size:16px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px; }
+.ba-card.before .tagline{ color:var(--rust); }
+.ba-card.after .tagline{ color:var(--lime); }
+.ba-card h4{ font-size:25px; font-weight:600; margin-bottom:10px; }
+.ba-card p{ font-size:20px; color:var(--paper-dim); font-weight:300; line-height:1.42; }
+.ba-arrow{ display:flex; align-items:center; font-size:40px; color:var(--lime); }
+
+/* ---------------- PROCESS STEPS (numbered flow) ---------------- */
+.steps{ display:flex; flex-direction:column; gap:16px; }
+.step{ display:flex; gap:22px; align-items:flex-start; padding:20px 24px;
+  background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line);
+  border-radius:var(--r); border-left:3px solid var(--lime); }
+.step .n{ font-family:"IBM Plex Mono",monospace; font-size:30px; font-weight:600; color:var(--lime);
+  line-height:1; min-width:54px; }
+.step .sc h3{ font-size:24px; font-weight:600; margin-bottom:5px; }
+.step .sc p{ font-size:20px; line-height:1.4; color:var(--paper-dim); font-weight:300; }
+.step .sc p .code{ font-size:.88em; }
+
+/* ---------------- RACK DIAGRAM ---------------- */
+.rack{ display:flex; gap:0; height:100%; align-items:stretch;
+  background:linear-gradient(180deg,#0e1714,#0a110e); border:1px solid var(--line);
+  border-radius:14px; padding:18px; box-shadow:inset 0 0 60px rgba(0,0,0,.5); }
+.slot{ flex:1; display:flex; flex-direction:column; border-radius:9px; margin:0 5px;
+  border:1px solid var(--line); background:linear-gradient(180deg,#162019,#0d1410);
+  padding:16px 12px; position:relative; overflow:hidden; transition:transform .3s; }
+.slot.empty{ background:repeating-linear-gradient(135deg,#0c120f,#0c120f 9px,#0a0f0c 9px,#0a0f0c 18px);
+  border-style:dashed; opacity:.7; }
+.slot .si{ font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--fog-2); letter-spacing:.1em; }
+.slot .sref{ font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:600; color:var(--paper);
+  margin-top:10px; line-height:1.2; word-break:break-all; }
+.slot .srole{ font-size:16px; color:var(--paper-dim); margin-top:auto; line-height:1.3; }
+.slot .led{ position:absolute; top:14px; right:12px; width:9px; height:9px; border-radius:50%;
+  background:var(--lime); box-shadow:0 0 12px var(--glow); }
+.slot.cpu{ border-color:rgba(124,226,132,.5); background:linear-gradient(180deg,#16291b,#0d1a11); }
+.slot.cpu .sref{ color:var(--lime); }
+.slot.alim{ border-color:rgba(242,179,59,.4); }
+.slot.alim .led{ background:var(--amber); box-shadow:0 0 12px rgba(242,179,59,.6); }
+.slot.sig{ border-color:rgba(43,196,255,.45); background:linear-gradient(180deg,#0e2230,#0a1620); }
+.slot.sig .sref{ color:var(--cyan); }
+.slot.sig .led{ background:var(--cyan); box-shadow:0 0 12px rgba(43,196,255,.6); }
+.slot.empty .led{ display:none; }
+
+/* legend chips under rack */
+.legend{ display:flex; gap:26px; flex-wrap:wrap; margin-top:18px; }
+.legend .li{ display:flex; align-items:center; gap:9px; font-size:18px; color:var(--paper-dim); }
+.legend .sw{ width:14px; height:14px; border-radius:4px; }
+
+/* ---------------- SIGNAL CHAIN (mesurer/décider/agir) ---------------- */
+.chain{ display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:stretch; gap:14px; }
+.cnode{ background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line);
+  border-radius:var(--r); padding:24px 22px; text-align:center; display:flex; flex-direction:column; gap:8px; }
+.cnode .ci{ font-family:"IBM Plex Mono",monospace; font-size:15px; letter-spacing:.16em; color:var(--fog); text-transform:uppercase; }
+.cnode h4{ font-size:25px; font-weight:600; }
+.cnode p{ font-size:18px; color:var(--paper-dim); font-weight:300; line-height:1.35; }
+.cnode.hot{ border-color:rgba(124,226,132,.5); box-shadow:0 0 44px -16px var(--glow); background:linear-gradient(160deg,#16291b,#0d1a11); }
+.carrow{ display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--lime); font-size:34px; line-height:1; }
+.carrow .mono{ font-size:13px; color:var(--fog); letter-spacing:.08em; margin-top:4px; }
+
+/* ---------------- BEFORE / AFTER (ampli) ---------------- */
+.ba{ display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:stretch; }
+.ba-card{ border-radius:var(--r); padding:26px 28px; border:1px solid var(--line);
+  background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); display:flex; flex-direction:column; }
+.ba-card.before{ border-color:rgba(231,106,69,.35); }
+.ba-card.after{ border-color:rgba(124,226,132,.45); }
+.ba-tag{ font-family:"IBM Plex Mono",monospace; font-size:16px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:9px; }
+.ba-card.before .ba-tag{ color:var(--rust); }
+.ba-card.after .ba-tag{ color:var(--lime); }
+.ba-card h4{ font-size:24px; font-weight:600; margin-bottom:10px; }
+.ba-card p{ font-size:20px; color:var(--paper-dim); font-weight:300; line-height:1.42; }
+.ba-mid{ display:flex; align-items:center; justify-content:center; }
+.ba-mid .iron{ width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:30px; background:linear-gradient(150deg,var(--lime),var(--emerald)); color:#06210f; box-shadow:0 0 30px -6px var(--glow); }
+
+/* ---------------- BUG TIMELINE ---------------- */
+.tl{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; height:100%; }
+.tl-col{ display:flex; flex-direction:column; gap:14px; }
+.tl-head{ display:flex; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+.tl-ver{ font-family:"IBM Plex Mono",monospace; font-size:26px; font-weight:600; color:var(--lime); }
+.tl-col.ship .tl-ver{ color:var(--amber); }
+.tl-cap{ font-size:16px; color:var(--fog); }
+.bug{ background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line);
+  border-left:3px solid var(--rust); border-radius:10px; padding:14px 16px; }
+.bug .bid{ font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600; color:var(--rust); letter-spacing:.06em; }
+.bug .bsym{ font-size:17px; color:var(--paper); margin:6px 0 5px; line-height:1.25; font-weight:500; }
+.bug .bfix{ font-size:15px; color:var(--fog); line-height:1.3; }
+.tl-col.ship .bug{ border-left-color:var(--amber); }
+.tl-empty{ flex:1; display:flex; align-items:center; justify-content:center; border:1px dashed var(--line-soft);
+  border-radius:10px; color:var(--fog-2); font-size:15px; font-family:"IBM Plex Mono",monospace; }
+
+/* ---------------- COMPÉTENCES / FINAL ---------------- */
+.comp{ display:flex; gap:14px; align-items:center; padding:16px 20px; border-radius:12px;
+  background:linear-gradient(160deg,var(--ink-3),var(--ink-2)); border:1px solid var(--line); border-left:3px solid var(--lime); }
+.comp .cc{ font-family:"IBM Plex Mono",monospace; font-size:22px; font-weight:600; color:var(--lime); min-width:50px; }
+.comp p{ font-size:19px; color:var(--paper-dim); font-weight:300; line-height:1.3; }
+
+/* ---------------- mini IHM screen tiles ---------------- */
+.screens{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.scr{ background:linear-gradient(170deg,var(--ink-3),#0a120e); border:1px solid var(--line); border-radius:12px;
+  padding:18px 20px; }
+.scr .sid{ font-family:"IBM Plex Mono",monospace; font-size:15px; color:var(--cyan); letter-spacing:.06em; }
+.scr h4{ font-size:21px; font-weight:600; margin:7px 0 5px; }
+.scr p{ font-size:16px; color:var(--fog); line-height:1.3; }
+.scr.alert{ border-color:rgba(230,75,107,.4); }
+.scr.alert .sid{ color:var(--rose); }
+
+</style>
+</head>
+<body>
+<deck-stage>
+
+<!-- 01 · COUVERTURE -->
+<section class="slide" data-screen-label="01">
+  <div class="cover-fx" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <svg class="cover-trace" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+      <path class="draw" style="--len:2600" d="M-40 760 H560 L660 660 H1040 L1140 760 H1500 L1600 540 H2000" fill="none" stroke="rgba(124,226,132,.5)" stroke-width="2"/>
+      <path class="draw" style="--len:2600" d="M-40 880 H420 L520 820 H980 L1080 880 H1480 L1560 700 H2000" fill="none" stroke="rgba(43,196,255,.32)" stroke-width="2"/>
+      <circle class="live" cx="660" cy="660" r="5" fill="var(--lime)"/>
+      <circle class="live" cx="1140" cy="760" r="5" fill="var(--lime)"/>
+      <circle class="live" cx="1600" cy="540" r="5" fill="var(--lime)"/>
+    </svg>
+  </div>
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">U6.2</span> BTS Électrotechnique · Session juin 2026</div>
+      <div class="tags"><span class="tag c">Soutenance</span><span class="tag cy">≈ 20 min</span></div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+      <div class="cover-kick mono" data-anim="up" data-d="1">RÉTROFIT · AUTOMATISME · MISE EN SERVICE</div>
+      <h1 class="cover-title" data-anim="up" data-d="2">Rétrofit de l'armoire<br>électrique du bras<br><span class="em">manipulateur MPH600</span></h1>
+      <p class="lead" data-anim="up" data-d="4" style="margin-top:30px;">Conception logicielle, configuration de l'automate <strong>Schneider M340</strong> et mise en service de l'asservissement hydraulique — la part <strong>automatisme</strong> d'un chantier mené en binôme.</p>
+    </div>
+    <div class="cover-sign" data-anim="fade" data-d="6">
+      <div class="who">
+        <div class="name">Sullivan DEVALLIÈRE</div>
+        <div class="role mono">Partie automatisme · programmation · asservissement</div>
+      </div>
+      <div class="who right">
+        <div class="name dim">En binôme avec Tom FROIDEFOND</div>
+        <div class="role mono">Partie câblage général de l'armoire</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · BINÔME -->
+<section class="slide" data-screen-label="02">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">00</span> Organisation du chantier</div>
+      <div class="tags"><span class="tag">60 h · contrat individuel</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:26px;">Un chantier, <span class="gr">deux métiers</span> — une frontière nette</h2>
+    <div class="body">
+      <div class="split2">
+        <div class="person-card" data-anim="left" data-d="2">
+          <div class="pc-top"><span class="pc-init">SD</span><div><div class="pc-name">Sullivan DEVALLIÈRE</div><div class="pc-tag mono gr">MOI · AUTOMATISME</div></div></div>
+          <ul class="pc-list">
+            <li>Création du projet Control&nbsp;Expert &amp; configuration du rack M340</li>
+            <li>Programmation des sections automate (SFC + ST)</li>
+            <li>Asservissement PI &amp; mise en service de la boucle</li>
+            <li>Soudure / recâblage de l'embase de l'amplificateur</li>
+          </ul>
+        </div>
+        <div class="frontier" data-anim="scale" data-d="3" aria-hidden="true">
+          <span class="frontier-line"></span><span class="frontier-dot"></span><span class="frontier-word mono">FRONTIÈRE</span><span class="frontier-dot"></span><span class="frontier-line"></span>
+        </div>
+        <div class="person-card dim-card" data-anim="right" data-d="3">
+          <div class="pc-top"><span class="pc-init alt">TF</span><div><div class="pc-name">Tom FROIDEFOND</div><div class="pc-tag mono cy">BINÔME · CÂBLAGE</div></div></div>
+          <ul class="pc-list">
+            <li>Câblage général de l'armoire</li>
+            <li>Distribution de puissance &amp; alimentations</li>
+            <li>Borniers, cheminements, repérage</li>
+            <li>Hors interfaces de signal sensibles</li>
+          </ul>
+        </div>
+      </div>
+      <div class="strip" data-anim="up" data-d="5">
+        <span class="b gr"><span class="dot"></span>2 mondes · 1 armoire</span>
+        <p>Tom donne le <strong>courant</strong>, je donne <strong>l'intelligence</strong>. Cette présentation suit exclusivement <span class="gr">ma partie automatisme</span> — du premier fichier projet jusqu'à la réception client.</p>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">MPH600</span> · U6.2 · S. Devallière</span><span class="mono">02</span></div>
+  </div>
+</section>
+
+<!-- 03 · CONTEXTE -->
+<section class="slide" data-screen-label="03">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">00</span> Le système</div>
+      <div class="tags"><span class="tag cy">Bras hydraulique 3 axes</span><span class="tag">Pédagogique</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:26px;">Le <span class="gr">MPH600</span> — un bras hydraulique à remettre à neuf</h2>
+    <div class="body">
+      <div class="grid g3" style="grid-template-columns:1.15fr 1fr 1fr; align-items:stretch;">
+        <div class="card edge-gr" data-anim="up" data-d="2">
+          <div class="kicker">Le système</div>
+          <h3>Trois axes, une pince</h3>
+          <p><span class="cy">AX1 (G/D)</span> asservi en position par distributeur proportionnel. <span class="cy">AX2 / AX3</span> en tout-ou-rien, plus une pince. Le tout piloté à l'huile sous pression.</p>
+        </div>
+        <div class="card edge-am" data-anim="up" data-d="3">
+          <div class="kicker">La mission</div>
+          <h3>Rétrofit complet</h3>
+          <p>Remplacer une commande obsolète par un automate moderne <span class="gr">Schneider M340</span> + IHM Harmony, sans toucher à la mécanique du bras.</p>
+        </div>
+        <div class="card" data-anim="up" data-d="4">
+          <div class="kicker">Ma cible</div>
+          <h3>Du fichier vide à la réception</h3>
+          <p>Tout le logiciel : configuration matérielle, programme, IHM, réglage de l'asservissement et validation par <span class="gr">8 essais</span>.</p>
+        </div>
+      </div>
+      <div class="kpibar" data-anim="up" data-d="5">
+        <div class="kpi"><span class="v">3</span><span class="l">axes pilotés + 1 pince</span></div>
+        <div class="kpi"><span class="v cy">6</span><span class="l">modules dans le rack M340</span></div>
+        <div class="kpi"><span class="v am">26 h</span><span class="l">de programmation sur 60 h</span></div>
+        <div class="kpi"><span class="v">138</span><span class="l">variables déclarées</span></div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">MPH600</span> · U6.2 · S. Devallière</span><span class="mono">03</span></div>
+  </div>
+</section>
+
+<!-- 04 · ACTE I DIVIDER -->
+<section class="slide divider" data-screen-label="04">
+  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
+  <div class="pad">
+    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; I &nbsp;·&nbsp; FONDATIONS</div>
+    <h2 class="dv-title" data-anim="up" data-d="2">Créer<br>le <span class="em">projet</span>.</h2>
+    <p class="dv-sub" data-anim="up" data-d="3">Avant la moindre ligne de programme : bâtir la maquette logicielle de l'automate. Donner à chaque module sa place et son nom dans le rack M340.</p>
+    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
+      <span class="tag c">EcoStruxure Control Expert</span><span class="tag">Modicon M340</span><span class="tag">Rack 6 emplacements</span>
+    </div>
+  </div>
+</section>
+
+<!-- 05 · CRÉATION DU PROJET CONTROL EXPERT -->
+<section class="slide" data-screen-label="05">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">I</span> Création du projet</div>
+      <div class="tags"><span class="tag c">Schneider Electric</span><span class="tag">EcoStruxure Control Expert</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:24px;">Ma première action : <span class="gr">faire naître le projet</span></h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1fr 1fr; gap:40px; align-items:center;">
+        <div class="col" data-anim="left" data-d="2">
+          <p class="lead" style="font-size:24px;">Un projet automate ne démarre pas par du code, mais par une <strong>déclaration de matériel</strong>. J'ai construit dans Control Expert la copie exacte de l'automate physique — avant de pouvoir lui parler.</p>
+          <div class="strip" style="margin-top:6px;">
+            <span class="b gr"><span class="dot"></span>Règle d'or</span>
+            <p>Si la configuration matérielle est fausse, <strong>aucune</strong> ligne de programme ne fonctionnera ensuite. C'est la fondation.</p>
+          </div>
+        </div>
+        <div class="steps" data-anim="right" data-d="3">
+          <div class="step"><span class="n">1</span><div class="sc"><h3>Créer le fichier projet</h3><p>Nouveau projet dans EcoStruxure Control&nbsp;Expert, l'atelier logiciel de Schneider.</p></div></div>
+          <div class="step"><span class="n">2</span><div class="sc"><h3>Assigner l'automate</h3><p>Choix de la plateforme <span class="code">Modicon M340</span> et de son processeur.</p></div></div>
+          <div class="step"><span class="n">3</span><div class="sc"><h3>Définir le rack</h3><p>Un rack de <strong>6 emplacements</strong>, conforme aux plans préliminaires.</p></div></div>
+          <div class="step"><span class="n">4</span><div class="sc"><h3>Peupler &amp; nommer</h3><p>Chaque module à sa place, chaque place à son nom — pour le repérage.</p></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">MPH600</span> · Création du projet · C15</span><span class="mono">05</span></div>
+  </div>
+</section>
+
+<!-- 06 · CONFIGURATION DU RACK M340 -->
+<section class="slide" data-screen-label="06">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">I</span> Configuration matérielle</div>
+      <div class="tags"><span class="tag c">Modicon M340</span><span class="tag">Rack BMX · 6 slots</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Le rack <span class="gr">M340</span> — une place et un nom pour chacun</h2>
+    <div class="body" style="display:flex;flex-direction:column;">
+      <div class="rack" data-anim="scale" data-d="2" style="flex:1;">
+        <div class="slot alim" data-stagger data-d="1"><span class="led"></span><span class="si">SLOT 0</span><span class="sref">BMX CPS 2000</span><span class="srole">Alimentation du rack</span></div>
+        <div class="slot cpu" data-stagger data-d="2"><span class="led"></span><span class="si">SLOT 1</span><span class="sref">BMX P34 2020</span><span class="srole">Processeur · CPU + Ethernet</span></div>
+        <div class="slot" data-stagger data-d="3"><span class="led"></span><span class="si">SLOT 2</span><span class="sref">BMX DDI 1602</span><span class="srole">16 entrées TOR</span></div>
+        <div class="slot" data-stagger data-d="4"><span class="led"></span><span class="si">SLOT 3</span><span class="sref">BMX DRA 1605</span><span class="srole">16 sorties relais</span></div>
+        <div class="slot sig" data-stagger data-d="5"><span class="led"></span><span class="si">SLOT 4</span><span class="sref">BMX EHC 0800</span><span class="srole">8 voies comptage codeurs</span></div>
+        <div class="slot sig" data-stagger data-d="6"><span class="led"></span><span class="si">SLOT 5</span><span class="sref">BMX AMM 0600</span><span class="srole">Analogique · 4 E / 2 S</span></div>
+      </div>
+      <div class="legend" data-anim="up" data-d="4">
+        <div class="li"><span class="sw" style="background:var(--amber)"></span>Énergie</div>
+        <div class="li"><span class="sw" style="background:var(--lime)"></span>Cerveau (CPU)</div>
+        <div class="li"><span class="sw" style="background:var(--paper-dim)"></span>Tout-ou-rien</div>
+        <div class="li"><span class="sw" style="background:var(--cyan)"></span>Interfaces de signal · la frontière avec le câblage</div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">MPH600</span> · Implantation rack · suivant les plans préliminaires</span><span class="mono">06</span></div>
+  </div>
+</section>
+
+<!-- 07 · CHAÎNE DE SIGNAL -->
+<section class="slide" data-screen-label="07">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">I</span> La chaîne de signal</div>
+      <div class="tags"><span class="tag cy">Mesurer → Décider → Agir</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:24px;">Comment l'automate <span class="gr">voit et agit</span> sur le bras</h2>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:36px;">
+      <div class="chain" data-anim="up" data-d="2">
+        <div class="cnode"><span class="ci">Mesurer</span><h4>Codeurs</h4><p>3 codeurs incrémentaux → module <span class="cy">BMX EHC 0800</span>. Position réelle de chaque axe, à chaque cycle.</p></div>
+        <div class="carrow">→<span class="mono">position</span></div>
+        <div class="cnode hot"><span class="ci">Décider</span><h4>CPU M340</h4><p><span class="gr">BMX P34 2020</span> compare consigne et mesure, calcule la correction.</p></div>
+        <div class="carrow">→<span class="mono">commande</span></div>
+        <div class="cnode"><span class="ci">Agir</span><h4>Distributeur</h4><p>Sortie analogique <span class="cy">BMX AMM 0600</span> → amplificateur → distributeur proportionnel.</p></div>
+      </div>
+      <div class="strip" data-anim="up" data-d="5" style="margin-top:0;">
+        <span class="b cy"><span class="dot"></span>Boucle fermée</span>
+        <p>La mesure revient en permanence vers la CPU : c'est cette boucle qui permet d'<strong>asservir la position</strong> de l'axe G/D — pas seulement de l'ouvrir ou de le fermer. Tout le talent du programme est là.</p>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Chaîne</span> · capteurs ↔ CPU ↔ actionneurs</span><span class="mono">07</span></div>
+  </div>
+</section>
+
+<!-- 08 · AMPLIFICATEUR ATOS — SOUDURE -->
+<section class="slide" data-screen-label="08">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">I</span> Geste métier · amplificateur proportionnel</div>
+      <div class="tags"><span class="tag am">Atos E-BM-AC-05F</span><span class="tag">Soudure embase</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Un obstacle matériel : l'<span class="gr">embase obsolète</span> de l'amplificateur</h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1.32fr 1fr; align-items:stretch; gap:34px;">
+        <div class="col">
+          <div class="ba" data-anim="up" data-d="2">
+            <div class="ba-card before">
+              <div class="ba-tag"><span class="dot"></span>Avant · bloqué</div>
+              <h4>Embase d'origine inutilisable</h4>
+              <p>L'amplificateur proportionnel arrivait avec une <strong>ancienne embase totalement obsolète</strong>, impossible à réutiliser en l'état. Aucun raccordement propre vers l'automate n'était possible.</p>
+            </div>
+            <div class="ba-mid"><span class="iron">⌁</span></div>
+            <div class="ba-card after">
+              <div class="ba-tag"><span class="dot"></span>Après · recâblé</div>
+              <h4>Nouveau câblage soudé main</h4>
+              <p>J'ai réalisé les <strong>soudures sur l'embase</strong> pour refaire un câblage propre, reliant l'amplificateur à la sortie analogique de l'automate et au distributeur proportionnel.</p>
+            </div>
+          </div>
+          <div class="strip" data-anim="up" data-d="4" style="margin-top:0;">
+            <span class="b gr"><span class="dot"></span>Geste métier</span>
+            <p>De la <strong>configuration logicielle</strong> au <strong>fer à souder</strong> : un automaticien doit aussi savoir rétablir le lien physique quand le matériel ne suit pas.</p>
+          </div>
+        </div>
+        <div class="shot" data-anim="right" data-d="3">
+          <image-slot id="mph_soudure" shape="rect" placeholder="Glissez ici votre photo des soudures sur l'embase de l'amplificateur Atos"></image-slot>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Atos E-BM-AC-05F</span> · sortie %QW0.5.4 → 0-10 V → distributeur</span><span class="mono">08</span></div>
+  </div>
+</section>
+
+<!-- 09 · ACTE II DIVIDER -->
+<section class="slide divider" data-screen-label="09">
+  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
+  <div class="pad">
+    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; II &nbsp;·&nbsp; INTELLIGENCE</div>
+    <h2 class="dv-title" data-anim="up" data-d="2">Programmer<br>le <span class="em">comportement</span>.</h2>
+    <p class="dv-sub" data-anim="up" data-d="3">26 heures de programmation. Quatre sections, un principe d'architecture unique, un asservissement PI réglé sur banc — et une IHM pour piloter le tout.</p>
+    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
+      <span class="tag c">4 sections MAST</span><span class="tag">SFC + ST</span><span class="tag cy">138 variables</span>
+    </div>
+  </div>
+</section>
+
+<!-- 10 · ARCHITECTURE 4 SECTIONS + M_CMD -->
+<section class="slide" data-screen-label="10">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">II</span> Architecture du programme</div>
+      <div class="tags"><span class="tag c">Tâche MAST</span><span class="tag">Ordre d'exécution fixé</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Quatre sections, et une <span class="gr">règle d'or</span> : le principe M_CMD</h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1.05fr 1fr; gap:34px; align-items:stretch;">
+        <div class="steps" data-anim="left" data-d="2">
+          <div class="step"><span class="n">1</span><div class="sc"><h3>REGULATION <span class="dim mono" style="font-size:16px;">· ST</span></h3><p>Acquisition codeurs, exécution du correcteur PI, recopie vers l'IHM.</p></div></div>
+          <div class="step"><span class="n">2</span><div class="sc"><h3>GRAFCET_MAITRE <span class="dim mono" style="font-size:16px;">· SFC</span></h3><p>Cinq modes : REPOS, INIT, MANU, APP, AUTO.</p></div></div>
+          <div class="step"><span class="n">3</span><div class="sc"><h3>GRAFCET_INIT <span class="dim mono" style="font-size:16px;">· SFC</span></h3><p>Prise d'origine (homing) après mise sous tension.</p></div></div>
+          <div class="step"><span class="n">4</span><div class="sc"><h3>SECURITE <span class="dim mono" style="font-size:16px;">· ST · 190 lignes</span></h3><p>Traduit les intentions M_CMD en sorties physiques.</p></div></div>
+        </div>
+        <div class="card edge-gr" data-anim="right" data-d="3" style="display:flex;flex-direction:column;justify-content:center;">
+          <div class="kicker">Le principe M_CMD</div>
+          <p style="font-size:23px;line-height:1.5;">Aucun GRAFCET n'écrit <strong>directement</strong> sur une sortie. Chacun exprime une <em>intention</em> — <span class="code">M_CMD_AX2_MONT</span> — et la section <strong>SECURITE</strong>, seule, décide en fin de cycle si l'intention devient une action physique.</p>
+          <div class="strip" style="margin-top:22px;padding:16px 20px;">
+            <span class="b gr"><span class="dot"></span>1 seule loi</span>
+            <p style="font-size:18px;">Interblocages, fins de course, anti-chattering : tout au même endroit. Ajouter une sécurité = modifier <strong>un seul bloc</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">MAST</span> · découplage intention / action · C15</span><span class="mono">10</span></div>
+  </div>
+</section>
+
+<!-- 11 · GRAFCET MAÎTRE -->
+<section class="slide" data-screen-label="11">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">II</span> Le GRAFCET maître</div>
+      <div class="tags"><span class="tag c">5 modes</span><span class="tag">Étoile autour de REPOS</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Une <span class="gr">étoile</span> de modes autour du repos</h2>
+    <div class="body" style="display:flex;align-items:center;">
+      <div class="grid g2" style="grid-template-columns:1.25fr 1fr; gap:40px; align-items:center; width:100%;">
+        <div data-anim="scale" data-d="2" style="display:flex;justify-content:center;">
+          <svg viewBox="0 0 520 440" style="width:100%;max-width:520px;">
+            <defs>
+              <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--lime)"/></marker>
+            </defs>
+            <!-- branches -->
+            <g stroke="var(--lime)" stroke-width="2" fill="none" opacity=".55" marker-end="url(#ar)">
+              <line class="draw" style="--len:200" x1="260" y1="200" x2="110" y2="90"/>
+              <line class="draw" style="--len:200" x1="260" y1="200" x2="410" y2="90"/>
+              <line class="draw" style="--len:200" x1="260" y1="200" x2="110" y2="350"/>
+              <line class="draw" style="--len:200" x1="260" y1="200" x2="410" y2="350"/>
+            </g>
+            <!-- center REPOS -->
+            <g>
+              <rect x="190" y="165" width="140" height="70" rx="12" fill="url(#gc)" stroke="var(--lime)" stroke-width="2"/>
+              <circle class="live" cx="260" cy="200" r="58" fill="none" stroke="var(--lime)" stroke-width="1" opacity=".3"/>
+            </g>
+            <defs><linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16291b"/><stop offset="1" stop-color="#0d1a11"/></linearGradient></defs>
+            <text x="260" y="195" text-anchor="middle" fill="#EAF3EE" font-family="IBM Plex Mono" font-size="22" font-weight="600">REPOS</text>
+            <text x="260" y="217" text-anchor="middle" fill="#9BE45B" font-family="IBM Plex Mono" font-size="13">étape pivot</text>
+            <!-- mode nodes -->
+            <g font-family="IBM Plex Mono" font-size="17" font-weight="600">
+              <g><rect x="40" y="58" width="140" height="56" rx="11" fill="#101A16" stroke="#2BC4FF" stroke-width="1.6"/><text x="110" y="83" text-anchor="middle" fill="#2BC4FF">INIT</text><text x="110" y="101" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">homing</text></g>
+              <g><rect x="340" y="58" width="140" height="56" rx="11" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/><text x="410" y="83" text-anchor="middle" fill="#EAF3EE">MANU</text><text x="410" y="101" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">joysticks</text></g>
+              <g><rect x="40" y="318" width="140" height="56" rx="11" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/><text x="110" y="343" text-anchor="middle" fill="#EAF3EE">APP</text><text x="110" y="361" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">apprentissage</text></g>
+              <g><rect x="340" y="318" width="140" height="56" rx="11" fill="#101A16" stroke="#9BE45B" stroke-width="1.6"/><text x="410" y="343" text-anchor="middle" fill="#9BE45B">AUTO</text><text x="410" y="361" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">cycle P1→P3</text></g>
+            </g>
+          </svg>
+        </div>
+        <div class="col" data-anim="right" data-d="4">
+          <p class="lead" style="font-size:23px;">Depuis <strong>REPOS</strong>, quatre branches conditionnelles selon le mode demandé sur l'IHM. Chaque branche <strong>revient à REPOS</strong> quand le mode se termine ou qu'une <span class="code">CONDITION_SORTIE</span> calculée dans SECURITE l'interrompt.</p>
+          <div class="card edge-cy" style="padding:20px 24px;">
+            <div class="kicker">Tournant d'architecture</div>
+            <p style="font-size:20px;">À l'origine, j'avais <strong>quatre GRAFCETs séparés</strong>. Les fusionner en un seul maître a tout simplifié — et corrigé deux bugs d'un coup (voir Acte III).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">GRAFCET_MAITRE</span> · 5 modes opérationnels</span><span class="mono">11</span></div>
+  </div>
+</section>
+
+<!-- 12 · ASSERVISSEMENT — BOUCLE PI -->
+<section class="slide" data-screen-label="12">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">II</span> Asservissement de position · axe G/D</div>
+      <div class="tags"><span class="tag c">Bloc PI1 · CONT_CTL</span><span class="tag">Cycle ~10 ms</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">La <span class="gr">boucle fermée</span> qui amène l'axe pile à la consigne</h2>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:30px;">
+      <div data-anim="up" data-d="2" style="display:flex;justify-content:center;">
+        <svg viewBox="0 0 1180 250" style="width:100%;max-width:1180px;">
+          <defs><marker id="lar" markerWidth="11" markerHeight="11" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9BE45B"/></marker></defs>
+          <g font-family="IBM Plex Sans" fill="#EAF3EE">
+            <!-- consigne -->
+            <rect x="10" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#2BC4FF" stroke-width="1.5"/>
+            <text x="85" y="100" text-anchor="middle" font-size="19" font-weight="600">Consigne</text>
+            <text x="85" y="122" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">IHM · MF_SP_GD</text>
+            <!-- comparator -->
+            <circle cx="225" cy="103" r="24" fill="#0B1210" stroke="#EAF3EE" stroke-width="1.5"/>
+            <text x="225" y="111" text-anchor="middle" font-size="26" fill="#EAF3EE">−</text>
+            <line class="draw" style="--len:50" x1="160" y1="103" x2="198" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
+            <!-- erreur -->
+            <line class="draw" style="--len:80" x1="249" y1="103" x2="318" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
+            <text x="285" y="92" text-anchor="middle" font-size="13" fill="#76897F" font-style="italic">erreur ε</text>
+            <!-- PI -->
+            <rect x="320" y="70" width="180" height="66" rx="10" fill="url(#pig)" stroke="#9BE45B" stroke-width="2"/>
+            <text x="410" y="98" text-anchor="middle" font-size="20" font-weight="600" fill="#EAF3EE">Correcteur PI</text>
+            <text x="410" y="120" text-anchor="middle" font-size="14" fill="#9BE45B" font-family="IBM Plex Mono">Kp=4,0 · Ti=2,0s</text>
+            <defs><linearGradient id="pig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16291b"/><stop offset="1" stop-color="#0d1a11"/></linearGradient></defs>
+            <!-- AO -->
+            <line class="draw" style="--len:80" x1="500" y1="103" x2="568" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
+            <text x="535" y="92" text-anchor="middle" font-size="13" fill="#76897F">0-100%</text>
+            <rect x="570" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#2BC4FF" stroke-width="1.5"/>
+            <text x="645" y="98" text-anchor="middle" font-size="18" font-weight="600">Sortie AO</text>
+            <text x="645" y="120" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">AMM0600 · %QW0.5.4</text>
+            <!-- ampli -->
+            <line class="draw" style="--len:60" x1="720" y1="103" x2="788" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
+            <text x="755" y="92" text-anchor="middle" font-size="13" fill="#76897F">0-10V</text>
+            <rect x="790" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#F2B33B" stroke-width="1.5"/>
+            <text x="865" y="98" text-anchor="middle" font-size="18" font-weight="600">Ampli Atos</text>
+            <text x="865" y="120" text-anchor="middle" font-size="13" fill="#76897F">distributeur + vérin</text>
+            <!-- vérin out -->
+            <line class="draw" style="--len:60" x1="940" y1="103" x2="1010" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
+            <rect x="1010" y="70" width="160" height="66" rx="10" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/>
+            <text x="1090" y="98" text-anchor="middle" font-size="18" font-weight="600">Axe G/D</text>
+            <text x="1090" y="120" text-anchor="middle" font-size="13" fill="#76897F">position réelle</text>
+            <!-- feedback codeur -->
+            <path class="draw" style="--len:1100" d="M1090,136 V210 H225 V130" fill="none" stroke="#2BC4FF" stroke-width="2" marker-end="url(#lar)" opacity=".8"/>
+            <rect x="540" y="186" width="220" height="48" rx="9" fill="#0e2230" stroke="#2BC4FF" stroke-width="1.4"/>
+            <text x="650" y="208" text-anchor="middle" font-size="16" font-weight="600" fill="#2BC4FF">Codeur incrémental</text>
+            <text x="650" y="226" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">HSC voie 0 → MF_PV_GD</text>
+          </g>
+        </svg>
+      </div>
+      <div class="strip" data-anim="up" data-d="6" style="margin-top:0;">
+        <span class="b gr"><span class="dot"></span>%MF flottants</span>
+        <p>Les gains <span class="code">Kp</span> et <span class="code">Ti</span> sont des réels — stockés en flottants 32 bits, exposés en secondes côté IHM pour rester lisibles par l'opérateur, et convertis en type <span class="code">TIME</span> pour le bloc PI1.</p>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Boucle G/D</span> · consigne − mesure → PI → AO</span><span class="mono">12</span></div>
+  </div>
+</section>
+
+<!-- 13 · IDENTIFICATION BROÏDA + RÉGLAGE -->
+<section class="slide" data-screen-label="13">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">II</span> Réglage de l'asservissement · méthode Broïda</div>
+      <div class="tags"><span class="tag c">Identification boucle ouverte</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Régler le PI sur le <span class="gr">comportement réel</span> du banc</h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1.25fr 1fr; gap:38px; align-items:center;">
+        <div data-anim="left" data-d="2">
+          <svg viewBox="0 0 560 320" style="width:100%;">
+            <g font-family="IBM Plex Mono" font-size="14">
+              <!-- axes -->
+              <line x1="60" y1="40" x2="60" y2="270" stroke="#56655D" stroke-width="1.5"/>
+              <line x1="60" y1="270" x2="540" y2="270" stroke="#56655D" stroke-width="1.5"/>
+              <text x="30" y="50" fill="#76897F" font-size="12">pos.</text>
+              <text x="510" y="292" fill="#76897F" font-size="12">temps</text>
+              <!-- consigne step -->
+              <path d="M60,200 H160 V90 H540" fill="none" stroke="#2BC4FF" stroke-width="2" stroke-dasharray="6 4" opacity=".7"/>
+              <text x="430" y="80" fill="#2BC4FF" font-size="13">consigne</text>
+              <!-- response curve (Broïda S-curve) -->
+              <path class="draw" style="--len:700" d="M60,200 H160 C210,200 230,190 270,150 C310,112 360,96 420,92 C470,90 510,90 540,90" fill="none" stroke="#9BE45B" stroke-width="3"/>
+              <text x="300" y="135" fill="#9BE45B" font-size="13">réponse mesurée</text>
+              <!-- tau / theta markers -->
+              <line x1="160" y1="270" x2="160" y2="200" stroke="#F2B33B" stroke-width="1" stroke-dasharray="3 3"/>
+              <line x1="270" y1="270" x2="270" y2="150" stroke="#F2B33B" stroke-width="1" stroke-dasharray="3 3"/>
+              <text x="200" y="288" fill="#F2B33B" font-size="12">θ</text>
+              <text x="350" y="288" fill="#F2B33B" font-size="12">τ</text>
+            </g>
+          </svg>
+          <p class="dim" style="font-size:18px;text-align:center;margin-top:8px;">Réponse indicielle à l'oscilloscope Control Expert — seuils Broïda à 28 % et 40 % : t₁ = 2,53 s, t₂ = 2,77 s</p>
+        </div>
+        <div class="col" data-anim="right" data-d="3">
+          <p class="lead" style="font-size:21px;">Échelon <strong>0 → 100 %</strong> en boucle ouverte, réponse relevée à l'oscilloscope. Broïda en déduit d'abord un réglage <strong>PIDFF</strong> théorique — puis l'essai en boucle fermée m'oblige à <span class="gr">supprimer la dérivée</span>.</p>
+          <div class="card" style="padding:18px 22px;">
+            <table class="t" style="font-size:19px;">
+              <thead><tr><th>Param.</th><th>Broïda PIDFF</th><th>Retenu PI</th></tr></thead>
+              <tbody>
+                <tr><td class="lead-col mono">Kp</td><td class="dim">4,61</td><td><span class="gr">4,0</span></td></tr>
+                <tr><td class="lead-col mono">Ti</td><td class="dim">2,16 s</td><td><span class="gr">2,0 s</span></td></tr>
+                <tr><td class="lead-col mono">Td</td><td class="dim">0,51 s</td><td><span class="am">absent</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="strip" style="margin-top:0;padding:16px 22px;">
+            <span class="b am"><span class="dot"></span>Pourquoi sans Td</span>
+            <p style="font-size:18px;">Le terme dérivé amplifiait le bruit codeur (±1 incrément) → oscillation HF (bug B07). Td supprimé, <span class="code">Kp</span> / <span class="code">Ti</span> réajustés sur banc. <strong>Kp = 4,0 · Ti = 2,0 s</strong> devient le réglage usine, laissé sur une fiche réflexe A5 près du pupitre.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Broïda</span> · PIDFF 4,61 / 2,16 / 0,51 → PI retenu 4,0 / 2,0</span><span class="mono">13</span></div>
+  </div>
+</section>
+
+<!-- 14 · IHM HMIS5T -->
+<section class="slide" data-screen-label="14">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">II</span> Interface opérateur · IHM Harmony</div>
+      <div class="tags"><span class="tag c">HMIS5T</span><span class="tag cy">Modbus TCP · 502</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Six écrans pour <span class="gr">piloter sans lire le code</span></h2>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:24px;">
+      <div class="screens" data-anim="up" data-d="2">
+        <div class="scr"><div class="sid">P_ACCUEIL</div><h4>Accueil</h4><p>Lampes d'état, sélection du mode, accès écrans</p></div>
+        <div class="scr"><div class="sid">P_MANU</div><h4>Manuel</h4><p>3 axes, consigne G/D éditable, pince</p></div>
+        <div class="scr"><div class="sid">P_APP</div><h4>Apprentissage</h4><p>Mémoriser la position courante, tout effacer</p></div>
+        <div class="scr"><div class="sid">P_AUTO</div><h4>Auto</h4><p>Index, consigne / position / erreur, lancer</p></div>
+        <div class="scr"><div class="sid">P_REGL</div><h4>Réglages</h4><p>Kp, Ti, tolérances, freinage prédictif</p></div>
+        <div class="scr alert"><div class="sid">P_DEF</div><h4>Défauts</h4><p>8 lampes diagnostic (AU, pression, timeouts…)</p></div>
+      </div>
+      <div class="strip" data-anim="up" data-d="4" style="margin-top:0;">
+        <span class="b am"><span class="dot"></span>Deux adaptations assumées</span>
+        <p>L'écran prévu (GTU 10″) n'étant plus dispo, refonte complète sur une <strong>HMIS5T 320×240</strong>. Licence VXML absente → contournement par <strong>import CSV</strong> des 89 variables. Toutes les fonctions prévues sont bien là.</p>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Vijeo Designer</span> · 6 écrans · 89 variables Modbus</span><span class="mono">14</span></div>
+  </div>
+</section>
+
+<!-- 15 · ACTE III DIVIDER -->
+<section class="slide divider" data-screen-label="15">
+  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
+  <div class="pad">
+    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; III &nbsp;·&nbsp; MISE AU POINT</div>
+    <h2 class="dv-title" data-anim="up" data-d="2">Débusquer,<br>puis <span class="em">corriger</span>.</h2>
+    <p class="dv-sub" data-anim="up" data-d="3">Sept bugs, quatre versions. Pas un aveu d'erreurs — la trace assumée d'une démarche : chaque défaut identifié à l'usage, isolé, expliqué, puis corrigé par une modification calibrée.</p>
+    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
+      <span class="tag am">V1 → V4.2</span><span class="tag c">7 bugs résolus</span><span class="tag">Historique = livrable DOE</span>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · TIMELINE DES 7 BUGS -->
+<section class="slide" data-screen-label="16">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">III</span> Frise des bugs B01 → B07</div>
+      <div class="tags"><span class="tag c">4 versions</span><span class="tag am">V4.2 livrée</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Quatre versions, sept bugs <span class="gr">tracés et corrigés</span></h2>
+    <div class="body">
+      <div class="tl" data-anim="up" data-d="2">
+        <div class="tl-col">
+          <div class="tl-head"><span class="tl-ver">V1</span><span class="tl-cap">première écriture</span></div>
+          <div class="tl-empty">base — 4 GRAFCETs séparés</div>
+        </div>
+        <div class="tl-col">
+          <div class="tl-head"><span class="tl-ver">V2</span><span class="tl-cap">refonte architecturale</span></div>
+          <div class="bug"><div class="bid">B01</div><div class="bsym">AUTO retombe au repos avant la cible</div><div class="bfix">→ écriture déplacée en action one-shot</div></div>
+          <div class="bug"><div class="bid">B02</div><div class="bsym">codeur AX2 décompte à l'envers</div><div class="bfix">→ signe négatif corrigé en REGULATION</div></div>
+        </div>
+        <div class="tl-col">
+          <div class="tl-head"><span class="tl-ver">V3</span><span class="tl-cap">stabilisation</span></div>
+          <div class="bug"><div class="bid">B03</div><div class="bsym">battement des distributeurs AX2/AX3</div><div class="bfix">→ anti-chattering 30/20 cycles</div></div>
+          <div class="bug"><div class="bid">B04</div><div class="bsym">import XSF refusé</div><div class="bfix">→ balises XML retirées</div></div>
+          <div class="bug"><div class="bid">B05</div><div class="bsym">position atteinte jamais validée</div><div class="bfix">→ comparaison codeur ± tolérance</div></div>
+        </div>
+        <div class="tl-col ship">
+          <div class="tl-head"><span class="tl-ver">V4.2</span><span class="tl-cap">version livrée</span></div>
+          <div class="bug"><div class="bid">B06</div><div class="bsym">INIT non relançable après défaut</div><div class="bfix">→ remise à zéro de INIT_OK</div></div>
+          <div class="bug"><div class="bid">B07</div><div class="bsym">oscillation HF — bruit codeur amplifié</div><div class="bfix">→ bascule PIDFF → PI1</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Historique B01-B07</span> · conservé au DOE pour la maintenance</span><span class="mono">16</span></div>
+  </div>
+</section>
+
+<!-- 17 · LE TOURNANT MÉTHODE -->
+<section class="slide" data-screen-label="17">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">III</span> Le tournant V1 → V2</div>
+      <div class="tags"><span class="tag c">Décision d'architecture</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Le moment décisif : <span class="gr">tout refondre</span> plutôt que rustiner</h2>
+    <div class="body" style="display:flex;align-items:center;">
+      <div class="grid g2" style="gap:38px; align-items:stretch; width:100%;">
+        <div class="ba-card before" data-anim="left" data-d="2" style="justify-content:center;">
+          <div class="ba-tag"><span class="dot"></span>V1 · ce qui coinçait</div>
+          <h4>Quatre GRAFCETs séparés</h4>
+          <p>Chacun écrivait directement sur les sorties physiques. Plusieurs endroits pilotaient la même sortie → conflits, fins de course oubliées, sécurité fragile. C'est là que naissaient B01 et B02.</p>
+        </div>
+        <div class="ba-card after" data-anim="right" data-d="3" style="justify-content:center;">
+          <div class="ba-tag"><span class="dot"></span>V2 · la refonte</div>
+          <h4>Un GRAFCET maître + M_CMD</h4>
+          <p>Fusion en un grafcet unique, centralisation des sorties via les flags <span class="code">M_CMD_*</span> et la section SECURITE. Deux bugs corrigés d'un coup — et une base saine pour toute la suite.</p>
+        </div>
+      </div>
+    </div>
+    <div class="strip" data-anim="up" data-d="4">
+      <span class="b gr"><span class="dot"></span>La leçon</span>
+      <p>Savoir reconnaître qu'un problème est <strong>architectural</strong>, pas ponctuel : reconstruire proprement a coûté du temps sur le moment, mais a payé sur les versions V3 et V4.2.</p>
+    </div>
+    <div class="foot"><span><span class="brandmark">V1 → V2</span> · refonte fondatrice</span><span class="mono">17</span></div>
+  </div>
+</section>
+
+<!-- 18 · ACTE IV DIVIDER -->
+<section class="slide divider" data-screen-label="18">
+  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
+  <div class="pad">
+    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; IV &nbsp;·&nbsp; PREUVE</div>
+    <h2 class="dv-title" data-anim="up" data-d="2">Mettre<br>en <span class="em">service</span>.</h2>
+    <p class="dv-sub" data-anim="up" data-d="3">Huit essais contradictoires, des performances chiffrées, une fiche de réception signée devant le client. Le moment où le code devient une machine qui marche.</p>
+    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
+      <span class="tag c">Essais E1 → E8</span><span class="tag">3 modes démontrés</span><span class="tag am">Réception signée</span>
+    </div>
+  </div>
+</section>
+
+<!-- 19 · ESSAIS E1-E8 + PERFS -->
+<section class="slide" data-screen-label="19">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">IV</span> Validation · protocole E1 → E8</div>
+      <div class="tags"><span class="tag c">8 / 8 OK</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Huit essais, <span class="gr">huit succès</span> — preuve chiffrée</h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1.1fr 1fr; gap:34px; align-items:stretch;">
+        <div data-anim="left" data-d="2" class="card" style="padding:22px 26px;">
+          <table class="t">
+            <thead><tr><th>N°</th><th>Essai</th><th style="text-align:right;">Rés.</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">E1</td><td class="lead-col">Arrêt d'urgence en mouvement</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E2</td><td class="lead-col">Fin de course AX2</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E3</td><td class="lead-col">Fin de course AX3</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E4</td><td class="lead-col">Comptage codeur G/D butée à butée</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E5</td><td class="lead-col">Boucle PI à 50 % de course</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E6</td><td class="lead-col">Cycle apprentissage P1→P2→P3</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E7</td><td class="lead-col">Coupure groupe hydraulique</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+              <tr><td class="mono">E8</td><td class="lead-col">Repli sortie analogique (STOP CPU)</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col" data-anim="right" data-d="3">
+          <div class="card edge-gr" style="padding:22px 26px;">
+            <div class="kicker">Essai E5 · performances de l'asservissement</div>
+            <table class="t" style="font-size:18px;">
+              <thead><tr><th>Échelon</th><th>Dépass.</th><th>t<sub>r</sub></th><th>ε stat.</th></tr></thead>
+              <tbody>
+                <tr><td class="lead-col">25 %</td><td><span class="gr">2,1 %</span></td><td><span class="gr">2,4 s</span></td><td><span class="gr">0,8 mm</span></td></tr>
+                <tr><td class="lead-col">50 %</td><td><span class="gr">3,4 %</span></td><td><span class="gr">2,7 s</span></td><td><span class="gr">1,1 mm</span></td></tr>
+                <tr><td class="lead-col">100 %</td><td><span class="gr">4,6 %</span></td><td><span class="gr">2,9 s</span></td><td><span class="gr">1,5 mm</span></td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:16px;color:var(--fog);margin-top:10px;">Cibles : dépassement &lt; 5 % · t<sub>r</sub> &lt; 3 s · ε &lt; 2 mm — tenues sur les trois échelons.</p>
+          </div>
+          <div class="kpibar" style="grid-template-columns:1fr 1fr;padding-top:20px;margin-top:0;">
+            <div class="kpi"><span class="v">8/8</span><span class="l">essais validés</span></div>
+            <div class="kpi"><span class="v cy">&lt;5 mm</span><span class="l">précision de positionnement</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Essais</span> · sécurité · mesure · régulation · fonctionnel</span><span class="mono">19</span></div>
+  </div>
+</section>
+
+<!-- 20 · RÉCEPTION + BILAN COMPÉTENCES -->
+<section class="slide" data-screen-label="20">
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">IV</span> Réception client &amp; bilan de compétences</div>
+      <div class="tags"><span class="tag c">Fiche signée</span></div>
+    </div>
+    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Réceptionné, démontré, <span class="gr">formé</span></h2>
+    <div class="body">
+      <div class="grid g2" style="grid-template-columns:1.05fr 1fr; gap:34px; align-items:stretch;">
+        <div class="col" data-anim="left" data-d="2">
+          <div class="card edge-gr" style="padding:24px 28px;">
+            <div class="kicker">Séance de réception</div>
+            <p style="font-size:21px;">Devant <strong>MM. Thomas et Smuda</strong> jouant le client : conduite des 8 essais, puis démonstration des <strong>trois modes</strong> — manuel, apprentissage, automatique — sur un cycle complet en charge. Fiche remplie case par case et <strong>signée</strong>.</p>
+          </div>
+          <div class="card edge-cy" style="padding:24px 28px;">
+            <div class="kicker">Formation utilisateurs</div>
+            <p style="font-size:21px;">Une heure de prise en main de l'écran de réglage, appuyée sur une <strong>fiche réflexe A5</strong> : mise en service au recto, ajustement du PI par symptôme au verso.</p>
+          </div>
+        </div>
+        <div class="col" data-anim="right" data-d="3">
+          <div class="comp"><span class="cc">C14</span><p>Organiser le chantier &amp; câbler les entrées codeurs / la sortie analogique</p></div>
+          <div class="comp"><span class="cc">C15</span><p>Programmer l'automate &amp; l'IHM, paramétrer l'asservissement</p></div>
+          <div class="comp"><span class="cc">C16</span><p>Mettre en service et valider les 8 essais E1→E8</p></div>
+          <div class="comp"><span class="cc">C4</span><p>Réceptionner, former, conduire la communication de chantier</p></div>
+          <div class="strip" style="margin-top:4px;">
+            <span class="b gr"><span class="dot"></span>60 h</span>
+            <p style="font-size:19px;">de la première ligne du projet Control Expert à la signature de la réception.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span><span class="brandmark">Réception</span> · 3 modes en charge · fiche signée</span><span class="mono">20</span></div>
+  </div>
+</section>
+
+<!-- 21 · CONCLUSION -->
+<section class="slide" data-screen-label="21">
+  <div class="cover-fx" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <svg class="cover-trace" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+      <path class="draw" style="--len:2600" d="M-40 720 H520 L620 640 H1020 L1120 720 H1520 L1620 520 H2000" fill="none" stroke="rgba(124,226,132,.45)" stroke-width="2"/>
+      <circle class="live" cx="620" cy="640" r="5" fill="var(--lime)"/>
+      <circle class="live" cx="1120" cy="720" r="5" fill="var(--lime)"/>
+    </svg>
+  </div>
+  <div class="pad">
+    <div class="chrome">
+      <div class="eyebrow"><span class="act">★</span> Conclusion</div>
+      <div class="tags"><span class="tag c">Merci</span></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <h1 class="cover-title" data-anim="up" data-d="1" style="font-size:78px;">Du <span class="em">fichier vide</span><br>à la machine qui obéit.</h1>
+      <p class="lead" data-anim="up" data-d="3" style="margin-top:28px;font-size:27px;">Configurer l'automate, architecturer le programme, asservir l'axe, débusquer sept bugs et prouver le tout en huit essais — la part automatisme d'un rétrofit mené, et réceptionné, en binôme.</p>
+      <div class="kpibar" data-anim="up" data-d="5" style="border-top:none;margin-top:34px;">
+        <div class="kpi"><span class="v">8/8</span><span class="l">essais validés à la réception</span></div>
+        <div class="kpi"><span class="v cy">V4.2</span><span class="l">version livrée, stable</span></div>
+        <div class="kpi"><span class="v am">&lt;5 mm</span><span class="l">précision de position</span></div>
+        <div class="kpi"><span class="v">C14·15·16·4</span><span class="l">compétences couvertes</span></div>
+      </div>
+    </div>
+    <div class="cover-sign" data-anim="fade" data-d="6">
+      <div class="who"><div class="name">Sullivan DEVALLIÈRE</div><div class="role mono">Merci de votre attention — place aux questions</div></div>
+      <div class="who right"><div class="name dim">MPH600 · U6.2</div><div class="role mono">BTS Électrotechnique · juin 2026</div></div>
+    </div>
+  </div>
+</section>
+
+</deck-stage>
+<script>
+// @ds-adherence-ignore -- omelette starter scaffold (raw elements/hex/px by design)
+/* BEGIN USAGE */
+/**
+ * <image-slot> — user-fillable image placeholder.
+ *
+ * Drop this into a deck, mockup, or page wherever you want the user to
+ * supply an image. You control the slot's shape and size; the user fills it
+ * by dragging an image file onto it (or clicking to browse). The dropped
+ * image persists across reloads via a .image-slots.state.json sidecar —
+ * same read-via-fetch / write-via-window.omelette pattern as
+ * design_canvas.jsx, so the filled slot shows on share links, downloaded
+ * zips, and PPTX export. Outside the omelette runtime the slot is read-only.
+ *
+ * The host bridge only allows sidecar writes at the project root, so the
+ * HTML that uses this component is assumed to live at the project root too
+ * (same constraint as design_canvas.jsx).
+ *
+ * Attributes:
+ *   id           Persistence key. REQUIRED for the drop to survive reload —
+ *                every slot on the page needs a distinct id.
+ *   shape        'rect' | 'rounded' | 'circle' | 'pill'   (default 'rounded')
+ *                'circle' applies 50% border-radius; on a non-square slot
+ *                that's an ellipse — set equal width and height for a true
+ *                circle.
+ *   radius       Corner radius in px for 'rounded'.       (default 12)
+ *   mask         Any CSS clip-path value. Overrides `shape` — use this for
+ *                hexagons, blobs, arbitrary polygons.
+ *   fit          object-fit: cover | contain | fill.       (default 'cover')
+ *                With cover (the default) double-clicking the filled slot
+ *                enters a reframe mode: the whole image spills past the mask
+ *                (translucent outside, opaque inside), drag to reposition,
+ *                corner-drag to scale. The crop persists alongside the image
+ *                in the sidecar. contain/fill stay static.
+ *   position     object-position for fit=contain|fill.     (default '50% 50%')
+ *   placeholder  Empty-state caption.                      (default 'Drop an image')
+ *   src          Optional initial/fallback image URL. A user drop overrides
+ *                it; clearing the drop reveals src again.
+ *
+ * Size and layout come from ordinary CSS on the element — width/height
+ * inline or from a parent grid — so it composes with any layout.
+ *
+ * Usage:
+ *   <image-slot id="hero"   style="width:800px;height:450px" shape="rounded" radius="20"
+ *               placeholder="Drop a hero image"></image-slot>
+ *   <image-slot id="avatar" style="width:120px;height:120px" shape="circle"></image-slot>
+ *   <image-slot id="kite"   style="width:300px;height:300px"
+ *               mask="polygon(50% 0, 100% 50%, 50% 100%, 0 50%)"></image-slot>
+ */
+/* END USAGE */
+
+(() => {
+  const STATE_FILE = '.image-slots.state.json';
+  // 2× a ~600px slot in a 1920-wide deck — retina-sharp without making the
+  // sidecar enormous. A 1200px WebP at q=0.85 is ~150-300KB.
+  const MAX_DIM = 1200;
+  // Raster formats only. SVG is excluded (can carry script; createImageBitmap
+  // on SVG blobs is inconsistent). GIF is excluded because the canvas
+  // re-encode keeps only the first frame, so an animated GIF would silently
+  // go still — better to reject than surprise.
+  const ACCEPT = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+
+  // ── Shared sidecar store ────────────────────────────────────────────────
+  // One fetch + immediate write-on-change for every <image-slot> on the
+  // page. Reads via fetch() so viewing works anywhere the HTML and sidecar
+  // are served together; writes go through window.omelette.writeFile, which
+  // the host allowlists to *.state.json basenames only.
+  const subs = new Set();
+  let slots = {};
+  // ids explicitly cleared before the sidecar fetch resolved — otherwise
+  // the merge below can't tell "never set" from "just deleted" and would
+  // resurrect the sidecar's stale value.
+  const tombstones = new Set();
+  let loaded = false;
+  let loadP = null;
+
+  function load() {
+    if (loadP) return loadP;
+    loadP = fetch(STATE_FILE)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        // Merge: sidecar loses to any in-memory change that raced ahead of
+        // the fetch (drop or clear) so neither is clobbered by hydration.
+        if (j && typeof j === 'object') {
+          const merged = Object.assign({}, j, slots);
+          // A framing-only write that raced ahead of hydration must not
+          // drop a user image that's only on disk — inherit u from the
+          // sidecar for any in-memory entry that lacks one.
+          for (const k in slots) {
+            if (merged[k] && !merged[k].u && j[k]) {
+              merged[k].u = typeof j[k] === 'string' ? j[k] : j[k].u;
+            }
+          }
+          for (const id of tombstones) delete merged[id];
+          slots = merged;
+        }
+        tombstones.clear();
+      })
+      .catch(() => {})
+      .then(() => { loaded = true; subs.forEach((fn) => fn()); });
+    return loadP;
+  }
+
+  // Serialize writes so two near-simultaneous drops on different slots
+  // can't reorder at the backend and leave the sidecar with only the
+  // first. A save requested mid-flight just marks dirty and re-fires on
+  // completion with the then-current slots.
+  let saving = false;
+  let saveDirty = false;
+  function save() {
+    if (saving) { saveDirty = true; return; }
+    const w = window.omelette && window.omelette.writeFile;
+    if (!w) return;
+    saving = true;
+    Promise.resolve(w(STATE_FILE, JSON.stringify(slots)))
+      .catch(() => {})
+      .then(() => { saving = false; if (saveDirty) { saveDirty = false; save(); } });
+  }
+
+  const S_MAX = 5;
+  const clampS = (s) => Math.max(1, Math.min(S_MAX, s));
+
+  // Normalize a stored slot value. Pre-reframe sidecars stored a bare
+  // data-URL string; newer ones store {u, s, x, y}. Either shape is valid.
+  function getSlot(id) {
+    const v = slots[id];
+    if (!v) return null;
+    return typeof v === 'string' ? { u: v, s: 1, x: 0, y: 0 } : v;
+  }
+
+  function setSlot(id, val) {
+    if (!id) return;
+    if (val) { slots[id] = val; tombstones.delete(id); }
+    else { delete slots[id]; if (!loaded) tombstones.add(id); }
+    subs.forEach((fn) => fn());
+    // A drop is rare + high-value — write immediately so nav-away can't lose
+    // it. Gate on the initial read so we don't overwrite a sidecar we haven't
+    // merged yet; the merge in load() keeps this change once the read lands.
+    if (loaded) save(); else load().then(save);
+  }
+
+  // ── Image downscale ─────────────────────────────────────────────────────
+  // Encode through a canvas so the sidecar carries resized bytes, not the
+  // raw upload. Longest side is capped at 2× the slot's rendered width
+  // (retina) and at MAX_DIM. WebP keeps alpha and is ~10× smaller than PNG
+  // for photos, so there's no need for per-image format picking.
+  async function toDataUrl(file, targetW) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      const cap = Math.min(MAX_DIM, Math.max(1, Math.round(targetW * 2)) || MAX_DIM);
+      const scale = Math.min(1, cap / Math.max(bitmap.width, bitmap.height));
+      const w = Math.max(1, Math.round(bitmap.width * scale));
+      const h = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+      return canvas.toDataURL('image/webp', 0.85);
+    } finally {
+      bitmap.close && bitmap.close();
+    }
+  }
+
+  // ── Custom element ──────────────────────────────────────────────────────
+  const stylesheet =
+    ':host{display:inline-block;position:relative;vertical-align:top;' +
+    '  font:13px/1.3 system-ui,-apple-system,sans-serif;color:rgba(0,0,0,.55);width:240px;height:160px}' +
+    '.frame{position:absolute;inset:0;overflow:hidden;background:rgba(0,0,0,.04)}' +
+    // .frame img (clipped) and .spill (unclipped ghost + handles) share the
+    // same left/top/width/height in frame-%, computed by _applyView(), so the
+    // inside-mask crop and the outside-mask spill stay pixel-aligned.
+    '.frame img{position:absolute;max-width:none;transform:translate(-50%,-50%);' +
+    '  -webkit-user-drag:none;user-select:none;touch-action:none}' +
+    // Reframe mode (double-click): the full image spills past the mask. The
+    // spill layer is sized to the IMAGE bounds so its corners are where the
+    // resize handles belong. The ghost <img> inside is translucent; the real
+    // clipped <img> underneath shows the opaque in-mask crop.
+    '.spill{position:absolute;transform:translate(-50%,-50%);display:none;z-index:1;' +
+    '  cursor:grab;touch-action:none}' +
+    ':host([data-panning]) .spill{cursor:grabbing}' +
+    '.spill .ghost{position:absolute;inset:0;width:100%;height:100%;opacity:.35;' +
+    '  pointer-events:none;-webkit-user-drag:none;user-select:none;' +
+    '  box-shadow:0 0 0 1px rgba(0,0,0,.2),0 12px 32px rgba(0,0,0,.2)}' +
+    '.spill .handle{position:absolute;width:12px;height:12px;border-radius:50%;' +
+    '  background:#fff;box-shadow:0 0 0 1.5px #c96442,0 1px 3px rgba(0,0,0,.3);' +
+    '  transform:translate(-50%,-50%)}' +
+    '.spill .handle[data-c=nw]{left:0;top:0;cursor:nwse-resize}' +
+    '.spill .handle[data-c=ne]{left:100%;top:0;cursor:nesw-resize}' +
+    '.spill .handle[data-c=sw]{left:0;top:100%;cursor:nesw-resize}' +
+    '.spill .handle[data-c=se]{left:100%;top:100%;cursor:nwse-resize}' +
+    ':host([data-reframe]){z-index:10}' +
+    ':host([data-reframe]) .spill{display:block}' +
+    ':host([data-reframe]) .frame{box-shadow:0 0 0 2px #c96442}' +
+    '.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;' +
+    '  justify-content:center;gap:6px;text-align:center;padding:12px;box-sizing:border-box;' +
+    '  cursor:pointer;user-select:none}' +
+    '.empty svg{opacity:.45}' +
+    '.empty .cap{max-width:90%;font-weight:500;letter-spacing:.01em}' +
+    '.empty .sub{font-size:11px}' +
+    '.empty .sub u{text-underline-offset:2px;text-decoration-color:rgba(0,0,0,.25)}' +
+    '.empty:hover .sub u{color:rgba(0,0,0,.75);text-decoration-color:currentColor}' +
+    ':host([data-over]) .frame{outline:2px solid #c96442;outline-offset:-2px;' +
+    '  background:rgba(201,100,66,.10)}' +
+    '.ring{position:absolute;inset:0;pointer-events:none;border:1.5px dashed rgba(0,0,0,.25);' +
+    '  transition:border-color .12s}' +
+    ':host([data-over]) .ring{border-color:#c96442}' +
+    ':host([data-filled]) .ring{display:none}' +
+    // Controls sit BELOW the mask (top:100%), absolutely positioned so the
+    // author-declared slot height is unaffected. The gap is padding, not a
+    // top offset, so the hover target stays contiguous with the frame.
+    '.ctl{position:absolute;top:100%;left:50%;transform:translateX(-50%);padding-top:8px;' +
+    '  display:flex;gap:6px;opacity:0;pointer-events:none;transition:opacity .12s;z-index:2;' +
+    '  white-space:nowrap}' +
+    ':host([data-filled][data-editable]:hover) .ctl,:host([data-reframe]) .ctl' +
+    '  {opacity:1;pointer-events:auto}' +
+    '.ctl button{appearance:none;border:0;border-radius:6px;padding:5px 10px;cursor:pointer;' +
+    '  background:rgba(0,0,0,.65);color:#fff;font:11px/1 system-ui,-apple-system,sans-serif;' +
+    '  backdrop-filter:blur(6px)}' +
+    '.ctl button:hover{background:rgba(0,0,0,.8)}' +
+    '.err{position:absolute;left:8px;bottom:8px;right:8px;color:#b3261e;font-size:11px;' +
+    '  background:rgba(255,255,255,.85);padding:4px 6px;border-radius:5px;pointer-events:none}';
+
+  const icon =
+    '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+    '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>' +
+    '<path d="m21 15-5-5L5 21"/></svg>';
+
+  class ImageSlot extends HTMLElement {
+    static get observedAttributes() {
+      return ['shape', 'radius', 'mask', 'fit', 'position', 'placeholder', 'src', 'id'];
+    }
+
+    constructor() {
+      super();
+      const root = this.attachShadow({ mode: 'open' });
+      // .spill and .ctl sit OUTSIDE .frame so overflow:hidden + border-radius
+      // on the frame (circle, pill, rounded) can't clip them.
+      root.innerHTML =
+        '<style>' + stylesheet + '</style>' +
+        '<div class="frame" part="frame">' +
+        '  <img part="image" alt="" draggable="false" style="display:none">' +
+        '  <div class="empty" part="empty">' + icon +
+        '    <div class="cap"></div>' +
+        '    <div class="sub">or <u>browse files</u></div></div>' +
+        '  <div class="ring" part="ring"></div>' +
+        '</div>' +
+        '<div class="spill">' +
+        '  <img class="ghost" alt="" draggable="false">' +
+        '  <div class="handle" data-c="nw"></div><div class="handle" data-c="ne"></div>' +
+        '  <div class="handle" data-c="sw"></div><div class="handle" data-c="se"></div>' +
+        '</div>' +
+        '<div class="ctl"><button data-act="replace" title="Replace image">Replace</button>' +
+        '  <button data-act="clear" title="Remove image">Remove</button></div>' +
+        '<input type="file" accept="' + ACCEPT.join(',') + '" hidden>';
+      this._frame = root.querySelector('.frame');
+      this._ring = root.querySelector('.ring');
+      this._img = root.querySelector('.frame img');
+      this._empty = root.querySelector('.empty');
+      this._cap = root.querySelector('.cap');
+      this._sub = root.querySelector('.sub');
+      this._spill = root.querySelector('.spill');
+      this._ghost = root.querySelector('.ghost');
+      this._err = null;
+      this._input = root.querySelector('input');
+      this._depth = 0;
+      this._gen = 0;
+      this._view = { s: 1, x: 0, y: 0 };
+      this._subFn = () => this._render();
+      // Shadow-DOM listeners live with the shadow DOM — bound once here so
+      // disconnect/reconnect (e.g. React remount) doesn't stack handlers.
+      this._empty.addEventListener('click', () => this._input.click());
+      root.addEventListener('click', (e) => {
+        const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
+        if (act === 'replace') { this._exitReframe(true); this._input.click(); }
+        if (act === 'clear') {
+          this._exitReframe(false);
+          this._gen++;
+          this._local = null;
+          if (this.id) setSlot(this.id, null); else this._render();
+        }
+      });
+      this._input.addEventListener('change', () => {
+        const f = this._input.files && this._input.files[0];
+        if (f) this._ingest(f);
+        this._input.value = '';
+      });
+      // naturalWidth/Height aren't known until load — re-apply so the cover
+      // baseline is computed from real dimensions, not the 100%×100% fallback.
+      this._img.addEventListener('load', () => this._applyView());
+      // Gated on editable + fit=cover so share links and contain/fill slots
+      // stay static.
+      this.addEventListener('dblclick', (e) => {
+        if (!this.hasAttribute('data-editable') || !this._reframes()) return;
+        e.preventDefault();
+        if (this.hasAttribute('data-reframe')) this._exitReframe(true);
+        else this._enterReframe();
+      });
+      // Pan + resize both originate on the spill layer. A handle pointerdown
+      // drives an aspect-locked resize anchored at the opposite corner; any
+      // other pointerdown on the spill pans. Offsets are frame-% so a
+      // reframed slot survives responsive resize / PPTX export.
+      this._spill.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || !this.hasAttribute('data-reframe')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        this._spill.setPointerCapture(e.pointerId);
+        const rect = this.getBoundingClientRect();
+        const fw = rect.width || 1, fh = rect.height || 1;
+        const corner = e.target.getAttribute && e.target.getAttribute('data-c');
+        let move;
+        if (corner) {
+          // Resize about the OPPOSITE corner. Viewport-px throughout (rect
+          // fw/fh, not clientWidth) so the math survives a transform:scale()
+          // ancestor — deck_stage renders slides scaled-to-fit.
+          const iw = this._img.naturalWidth || 1, ih = this._img.naturalHeight || 1;
+          const base = Math.max(fw / iw, fh / ih);
+          const sx = corner.includes('e') ? 1 : -1;
+          const sy = corner.includes('s') ? 1 : -1;
+          const s0 = this._view.s;
+          const w0 = iw * base * s0, h0 = ih * base * s0;
+          const cx0 = (50 + this._view.x) / 100 * fw;
+          const cy0 = (50 + this._view.y) / 100 * fh;
+          const ox = cx0 - sx * w0 / 2, oy = cy0 - sy * h0 / 2;
+          const diag0 = Math.hypot(w0, h0);
+          const ux = sx * w0 / diag0, uy = sy * h0 / diag0;
+          move = (ev) => {
+            const proj = (ev.clientX - rect.left - ox) * ux +
+                         (ev.clientY - rect.top - oy) * uy;
+            const s = clampS(s0 * proj / diag0);
+            const d = diag0 * s / s0;
+            this._view.s = s;
+            this._view.x = (ox + ux * d / 2) / fw * 100 - 50;
+            this._view.y = (oy + uy * d / 2) / fh * 100 - 50;
+            this._clampView();
+            this._applyView();
+          };
+        } else {
+          this.setAttribute('data-panning', '');
+          const start = { px: e.clientX, py: e.clientY, x: this._view.x, y: this._view.y };
+          move = (ev) => {
+            this._view.x = start.x + (ev.clientX - start.px) / fw * 100;
+            this._view.y = start.y + (ev.clientY - start.py) / fh * 100;
+            this._clampView();
+            this._applyView();
+          };
+        }
+        const up = () => {
+          try { this._spill.releasePointerCapture(e.pointerId); } catch {}
+          this._spill.removeEventListener('pointermove', move);
+          this._spill.removeEventListener('pointerup', up);
+          this._spill.removeEventListener('pointercancel', up);
+          this.removeAttribute('data-panning');
+          this._dragUp = null;
+        };
+        // Stashed so _exitReframe (Escape / outside-click mid-drag) can
+        // tear the capture + listeners down synchronously.
+        this._dragUp = up;
+        this._spill.addEventListener('pointermove', move);
+        this._spill.addEventListener('pointerup', up);
+        this._spill.addEventListener('pointercancel', up);
+      });
+      // Wheel zoom stays available inside reframe mode as a trackpad nicety —
+      // zooms toward the cursor (offset' = cursor·(1-k) + offset·k).
+      this.addEventListener('wheel', (e) => {
+        if (!this.hasAttribute('data-reframe')) return;
+        e.preventDefault();
+        const r = this.getBoundingClientRect();
+        const cx = (e.clientX - r.left) / r.width * 100 - 50;
+        const cy = (e.clientY - r.top) / r.height * 100 - 50;
+        const prev = this._view.s;
+        const next = clampS(prev * Math.pow(1.0015, -e.deltaY));
+        if (next === prev) return;
+        const k = next / prev;
+        this._view.s = next;
+        this._view.x = cx * (1 - k) + this._view.x * k;
+        this._view.y = cy * (1 - k) + this._view.y * k;
+        this._clampView();
+        this._applyView();
+      }, { passive: false });
+    }
+
+    connectedCallback() {
+      // Warn once per page — an id-less slot works for the session but
+      // cannot persist, and two id-less slots would share nothing.
+      if (!this.id && !ImageSlot._warned) {
+        ImageSlot._warned = true;
+        console.warn('<image-slot> without an id will not persist its dropped image.');
+      }
+      this.addEventListener('dragenter', this);
+      this.addEventListener('dragover', this);
+      this.addEventListener('dragleave', this);
+      this.addEventListener('drop', this);
+      subs.add(this._subFn);
+      // width%/height% in _applyView encode the frame aspect at call time —
+      // a host resize (responsive grid, pane divider) would stretch the
+      // image until the next _render. Re-render on size change: _render()
+      // re-seeds _view from stored before clamp/apply, so a shrink→grow
+      // cycle round-trips instead of ratcheting x/y toward the narrower
+      // frame's clamp range.
+      this._ro = new ResizeObserver(() => this._render());
+      this._ro.observe(this);
+      load();
+      this._render();
+    }
+
+    disconnectedCallback() {
+      subs.delete(this._subFn);
+      this.removeEventListener('dragenter', this);
+      this.removeEventListener('dragover', this);
+      this.removeEventListener('dragleave', this);
+      this.removeEventListener('drop', this);
+      if (this._ro) { this._ro.disconnect(); this._ro = null; }
+      this._exitReframe(false);
+    }
+
+    _enterReframe() {
+      if (this.hasAttribute('data-reframe')) return;
+      this.setAttribute('data-reframe', '');
+      this._applyView();
+      // Close on click outside (the spill handler stopPropagation()s so
+      // in-image drags don't reach this) and on Escape. Listeners are held
+      // on the instance so _exitReframe / disconnectedCallback can detach
+      // exactly what was attached.
+      this._outside = (e) => {
+        if (e.composedPath && e.composedPath().includes(this)) return;
+        this._exitReframe(true);
+      };
+      this._esc = (e) => { if (e.key === 'Escape') this._exitReframe(true); };
+      document.addEventListener('pointerdown', this._outside, true);
+      document.addEventListener('keydown', this._esc, true);
+    }
+
+    _exitReframe(commit) {
+      if (!this.hasAttribute('data-reframe')) return;
+      if (this._dragUp) this._dragUp();
+      this.removeAttribute('data-reframe');
+      this.removeAttribute('data-panning');
+      if (this._outside) document.removeEventListener('pointerdown', this._outside, true);
+      if (this._esc) document.removeEventListener('keydown', this._esc, true);
+      this._outside = this._esc = null;
+      if (commit) this._commitView();
+    }
+
+    attributeChangedCallback() { if (this.shadowRoot) this._render(); }
+
+    // handleEvent — one listener object for all four drag events keeps the
+    // add/remove symmetric and the depth counter correct.
+    handleEvent(e) {
+      if (e.type === 'dragenter' || e.type === 'dragover') {
+        // Without preventDefault the browser never fires 'drop'.
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        if (e.type === 'dragenter') this._depth++;
+        this.setAttribute('data-over', '');
+      } else if (e.type === 'dragleave') {
+        // dragenter/leave fire for every descendant crossing — count depth
+        // so hovering the icon inside the empty state doesn't flicker.
+        if (--this._depth <= 0) { this._depth = 0; this.removeAttribute('data-over'); }
+      } else if (e.type === 'drop') {
+        e.preventDefault();
+        e.stopPropagation();
+        this._depth = 0;
+        this.removeAttribute('data-over');
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) this._ingest(f);
+      }
+    }
+
+    async _ingest(file) {
+      this._setError(null);
+      if (!file || ACCEPT.indexOf(file.type) < 0) {
+        this._setError('Drop a PNG, JPEG, WebP, or AVIF image.');
+        return;
+      }
+      // toDataUrl can take hundreds of ms on a large photo. A Clear or a
+      // newer drop during that window would be clobbered when this await
+      // resumes — bump + capture a generation so stale encodes bail.
+      const gen = ++this._gen;
+      try {
+        const w = this.clientWidth || this.offsetWidth || MAX_DIM;
+        const url = await toDataUrl(file, w);
+        if (gen !== this._gen) return;
+        // Only exit reframe once the new image is in hand — a rejected type
+        // or decode failure leaves the in-progress crop untouched.
+        this._exitReframe(false);
+        const val = { u: url, s: 1, x: 0, y: 0 };
+        setSlot(this.id || '', val);
+        // Keep a session-local copy for id-less slots so the drop still
+        // shows, even though it cannot persist.
+        if (!this.id) { this._local = val; this._render(); }
+      } catch (err) {
+        if (gen !== this._gen) return;
+        this._setError('Could not read that image.');
+        console.warn('<image-slot> ingest failed:', err);
+      }
+    }
+
+    _setError(msg) {
+      if (this._err) { this._err.remove(); this._err = null; }
+      if (!msg) return;
+      const d = document.createElement('div');
+      d.className = 'err'; d.textContent = msg;
+      this.shadowRoot.appendChild(d);
+      this._err = d;
+      setTimeout(() => { if (this._err === d) { d.remove(); this._err = null; } }, 3000);
+    }
+
+    // Reframing (pan/resize) is only meaningful for fit=cover — contain/fill
+    // keep the old object-fit path and double-click is a no-op.
+    _reframes() {
+      return this.hasAttribute('data-filled') &&
+        (this.getAttribute('fit') || 'cover') === 'cover';
+    }
+
+    // Cover-baseline geometry, shared by clamp/apply/resize. Null until the
+    // img has loaded (naturalWidth is 0 before that) or when the slot has no
+    // layout box — ResizeObserver fires with a 0×0 rect under display:none,
+    // and clamping against a degenerate 1×1 frame would silently pull the
+    // stored pan toward zero.
+    _geom() {
+      const iw = this._img.naturalWidth, ih = this._img.naturalHeight;
+      const fw = this.clientWidth, fh = this.clientHeight;
+      if (!iw || !ih || !fw || !fh) return null;
+      return { iw, ih, fw, fh, base: Math.max(fw / iw, fh / ih) };
+    }
+
+    _clampView() {
+      // Pan range on each axis is half the overflow past the frame edge.
+      const g = this._geom();
+      if (!g) return;
+      const mx = Math.max(0, (g.iw * g.base * this._view.s / g.fw - 1) * 50);
+      const my = Math.max(0, (g.ih * g.base * this._view.s / g.fh - 1) * 50);
+      this._view.x = Math.max(-mx, Math.min(mx, this._view.x));
+      this._view.y = Math.max(-my, Math.min(my, this._view.y));
+    }
+
+    _applyView() {
+      const g = this._geom();
+      const fit = this.getAttribute('fit') || 'cover';
+      if (fit !== 'cover' || !g) {
+        // Non-cover, or dimensions not known yet (before img load).
+        this._img.style.width = '100%';
+        this._img.style.height = '100%';
+        this._img.style.left = '50%';
+        this._img.style.top = '50%';
+        this._img.style.objectFit = fit;
+        this._img.style.objectPosition = this.getAttribute('position') || '50% 50%';
+        return;
+      }
+      // Cover baseline: img fills the frame on its tighter axis at s=1, so
+      // pan works immediately on the overflowing axis without zooming first.
+      // Width/height and left/top are all frame-% — depends only on the
+      // frame aspect ratio, so a responsive resize keeps the same crop. The
+      // spill layer mirrors the same box so its corners = image corners.
+      const k = g.base * this._view.s;
+      const w = (g.iw * k / g.fw * 100) + '%';
+      const h = (g.ih * k / g.fh * 100) + '%';
+      const l = (50 + this._view.x) + '%';
+      const t = (50 + this._view.y) + '%';
+      this._img.style.width = w; this._img.style.height = h;
+      this._img.style.left = l; this._img.style.top = t;
+      this._img.style.objectFit = '';
+      this._spill.style.width = w; this._spill.style.height = h;
+      this._spill.style.left = l; this._spill.style.top = t;
+    }
+
+    _commitView() {
+      const v = { s: this._view.s, x: this._view.x, y: this._view.y };
+      if (this._userUrl) v.u = this._userUrl;
+      // Framing-only (no u) persists too so an author-src slot remembers its
+      // crop; clearing the sidecar still falls through to src=.
+      if (this.id) setSlot(this.id, v);
+      else { this._local = v; }
+    }
+
+    _render() {
+      // Shape / mask. Presets use border-radius so the dashed ring can
+      // follow the rounded outline; clip-path is only applied for an
+      // explicit `mask` (the ring is hidden there since a rectangle
+      // dashed border chopped by an arbitrary polygon looks broken).
+      const mask = this.getAttribute('mask');
+      const shape = (this.getAttribute('shape') || 'rounded').toLowerCase();
+      let radius = '';
+      if (shape === 'circle') radius = '50%';
+      else if (shape === 'pill') radius = '9999px';
+      else if (shape === 'rounded') {
+        const n = parseFloat(this.getAttribute('radius'));
+        radius = (Number.isFinite(n) ? n : 12) + 'px';
+      }
+      this._frame.style.borderRadius = mask ? '' : radius;
+      this._frame.style.clipPath = mask || '';
+      this._ring.style.borderRadius = mask ? '' : radius;
+      this._ring.style.display = mask ? 'none' : '';
+
+      // Controls and reframe entry gate on this so share links stay read-only.
+      const editable = !!(window.omelette && window.omelette.writeFile);
+      this.toggleAttribute('data-editable', editable);
+      this._sub.style.display = editable ? '' : 'none';
+
+      // Content. The sidecar is also writable by the agent's write_file
+      // tool, so its value isn't guaranteed canvas-originated — only accept
+      // data:image/ URLs from it. The `src` attribute is author-controlled
+      // (Claude wrote it into the HTML) so it passes through unchanged.
+      let stored = this.id ? getSlot(this.id) : this._local;
+      if (stored && stored.u && !/^data:image\//i.test(stored.u)) stored = null;
+      const srcAttr = this.getAttribute('src') || '';
+      this._userUrl = (stored && stored.u) || null;
+      const url = this._userUrl || srcAttr;
+      // Don't clobber an in-flight reframe with a store-triggered re-render.
+      if (!this.hasAttribute('data-reframe')) {
+        this._view = {
+          s: stored && Number.isFinite(stored.s) ? clampS(stored.s) : 1,
+          x: stored && Number.isFinite(stored.x) ? stored.x : 0,
+          y: stored && Number.isFinite(stored.y) ? stored.y : 0,
+        };
+      }
+      this._cap.textContent = this.getAttribute('placeholder') || 'Drop an image';
+      // Toggle via style.display — the [hidden] attribute alone loses to
+      // the display:flex / display:block rules in the stylesheet above.
+      if (url) {
+        if (this._img.getAttribute('src') !== url) {
+          this._img.src = url;
+          this._ghost.src = url;
+        }
+        this._img.style.display = 'block';
+        this._empty.style.display = 'none';
+        this.setAttribute('data-filled', '');
+        this._clampView();
+        this._applyView();
+      } else {
+        this._img.style.display = 'none';
+        this._img.removeAttribute('src');
+        this._ghost.removeAttribute('src');
+        this._empty.style.display = 'flex';
+        this.removeAttribute('data-filled');
+      }
+    }
+  }
+
+  if (!customElements.get('image-slot')) {
+    customElements.define('image-slot', ImageSlot);
+  }
+})();
+
+</script>
+<script>
+// @ds-adherence-ignore -- omelette starter scaffold (raw elements/hex/px by design)
+/* BEGIN USAGE */
+/**
+ * <deck-stage> — reusable web component for HTML decks.
+ *
+ * Handles:
+ *  (a) speaker notes — reads <script type="application/json" id="speaker-notes">
+ *      and posts {slideIndexChanged: N} to the parent window on nav.
+ *  (b) keyboard navigation — ←/→, PgUp/PgDn, Space, Home/End, number keys.
+ *      On touch devices, tapping the left/right half of the stage goes
+ *      prev/next — taps on links, buttons and other interactive slide
+ *      content are left alone.
+ *  (c) press R to reset to slide 0 (with a tasteful keyboard hint).
+ *  (d) bottom-center overlay showing slide count + hints, fades out on idle.
+ *  (e) auto-scaling — inner canvas is a fixed design size (default 1920×1080)
+ *      scaled with `transform: scale()` to fit the viewport, letterboxed.
+ *      Set the `noscale` attribute to render at authored size (1:1) — the
+ *      PPTX exporter sets this so its DOM capture sees unscaled geometry.
+ *  (f) print — `@media print` lays every slide out as its own page at the
+ *      design size, so the browser's Print → Save as PDF produces a clean
+ *      one-page-per-slide PDF with no extra setup.
+ *  (g) thumbnail rail — resizable left-hand column of per-slide thumbnails
+ *      (static clones). Click to navigate; ↑/↓ with a thumbnail focused to
+ *      step between slides; drag to reorder; right-click for
+ *      Skip / Move up / Move down / Duplicate / Delete (Delete opens a
+ *      Cancel/Delete confirm dialog). Drag the rail's right edge to resize;
+ *      width persists to
+ *      localStorage. Skipped slides carry `data-deck-skip`, are dimmed in
+ *      the rail, omitted from prev/next navigation, and hidden at print.
+ *      The rail is suppressed in presenting mode, in the host's Preview
+ *      mode (ViewerMode='none'), on `noscale`, on narrow viewports
+ *      (≤640px), and via the `no-rail` attribute. Rail mutations dispatch
+ *      a `dc-op` CustomEvent on the element (see docs/dc-ops.md) and do
+ *      NOT touch the DOM: the host applies the op and re-renders;
+ *      structural rail input is locked until the host posts
+ *      {__dc_op_ack: true, applied}.
+ *
+ * Slides are HIDDEN, not unmounted. Non-active slides stay in the DOM with
+ * `visibility: hidden` + `opacity: 0`, so their state (videos, iframes,
+ * form inputs, React trees) is preserved across navigation.
+ *
+ * Lifecycle event — the component dispatches a `slidechange` CustomEvent on
+ * itself whenever the active slide changes (including the initial mount).
+ * The event bubbles and composes out of shadow DOM, so you can listen on
+ * the <deck-stage> element or on document:
+ *
+ *   document.querySelector('deck-stage').addEventListener('slidechange', (e) => {
+ *     e.detail.index         // new 0-based index
+ *     e.detail.previousIndex // previous index, or -1 on init
+ *     e.detail.total         // total slide count
+ *     e.detail.slide         // the new active slide element
+ *     e.detail.previousSlide // the prior slide element, or null on init
+ *     e.detail.reason        // 'init' | 'keyboard' | 'click' | 'tap' | 'api'
+ *   });
+ *
+ * Persistence: none at the deck level. The host app keeps the current slide
+ * in its own URL (?slide=) and re-delivers it via location.hash on load, so a
+ * bare load with no hash always starts at slide 1.
+ *
+ * Usage:
+ *   <style>deck-stage:not(:defined){visibility:hidden}</style>
+ *   <deck-stage width="1920" height="1080">
+ *     <section data-label="Title">...</section>
+ *     <section data-label="Agenda">...</section>
+ *   </deck-stage>
+ *   <script src="deck-stage.js"></script>
+ *
+ * The :not(:defined) rule prevents a flash of the first slide at its
+ * authored styles before this script runs and attaches the shadow root.
+ *
+ * Slides are the direct element children of <deck-stage>. Each slide is
+ * automatically tagged with:
+ *   - data-screen-label="NN Label"   (1-indexed, for comment flow)
+ *   - data-om-validate="no_overflowing_text,no_overlapping_text,slide_sized_text"
+ *
+ * Speaker notes stay in sync because the component posts {slideIndexChanged: N}
+ * to the parent — just include the #speaker-notes script tag if asked for notes.
+ *
+ * Authoring guidance:
+ *   - Write slide bodies as static HTML inside <deck-stage>, with sizing via
+ *     CSS custom properties in a <style> block rather than JS constants.
+ *     Static slide markup is what lets the user click a heading in edit mode
+ *     and retype it directly; a slide rendered through <script type="text/babel">,
+ *     React, or a loop over a JS array has to round-trip every tweak through a
+ *     chat message instead. Reach for script-generated slides only when the
+ *     content genuinely needs interactive behaviour static HTML can't express.
+ *   - Do NOT set position/inset/width/height on the slide <section> elements —
+ *     the component absolutely positions every slotted child for you.
+ *   - Entrance animations: make the visible end-state the base style and
+ *     animate *from* hidden, so print and reduced-motion show content.
+ *     Gate the animation on [data-deck-active] and the motion query, e.g.
+ *     `@media (prefers-reduced-motion:no-preference){ [data-deck-active] .x{animation:fade-in .5s both} }`.
+ *     Avoid infinite decorative loops on slide content.
+ */
+/* END USAGE */
+
+(() => {
+  const DESIGN_W_DEFAULT = 1920;
+  const DESIGN_H_DEFAULT = 1080;
+  const OVERLAY_HIDE_MS = 1800;
+  const VALIDATE_ATTR = 'no_overflowing_text,no_overlapping_text,slide_sized_text';
+  const FINE_POINTER_MQ = matchMedia('(hover: hover) and (pointer: fine)');
+  const NARROW_MQ = matchMedia('(max-width: 640px)');
+  // Slide-authored controls that should keep a tap instead of it navigating.
+  const INTERACTIVE_SEL = 'a[href], button, input, select, textarea, summary, label, video[controls], audio[controls], [role="button"], [onclick], [tabindex]:not([tabindex^="-"]), [contenteditable]:not([contenteditable="false" i])';
+
+  const pad2 = (n) => String(n).padStart(2, '0');
+
+  // Label precedence: data-label → data-screen-label (number stripped) → first heading → "Slide".
+  const getSlideLabel = (el) => {
+    const explicit = el.getAttribute('data-label');
+    if (explicit) return explicit;
+
+    const existing = el.getAttribute('data-screen-label');
+    if (existing) return existing.replace(/^\s*\d+\s*/, '').trim() || existing;
+
+    const h = el.querySelector('h1, h2, h3, [data-title]');
+    const t = h && (h.textContent || '').trim().slice(0, 40);
+    if (t) return t;
+
+    return 'Slide';
+  };
+
+  const stylesheet = `
+    :host {
+      position: fixed;
+      inset: 0;
+      display: block;
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* connectedCallback holds this until document.fonts.ready (capped 2s) so
+     * the first visible paint has the deck's real typography + final rail
+     * layout. opacity (not visibility) so the active slide can't un-hide
+     * itself via the ::slotted([data-deck-active]) visibility:visible rule.
+     * Only the stage/rail hide — the black :host background stays, so the
+     * iframe doesn't flash the page's default white. */
+    :host([data-fonts-pending]) .stage,
+    :host([data-fonts-pending]) .rail { opacity: 0; pointer-events: none; }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .canvas {
+      position: relative;
+      transform-origin: center center;
+      flex-shrink: 0;
+      background: #fff;
+      will-change: transform;
+    }
+
+    /* Slides live in light DOM (via <slot>) so authored CSS still applies.
+       We absolutely position each slotted child to stack them. */
+    ::slotted(*) {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      box-sizing: border-box !important;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    ::slotted([data-deck-active]) {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .overlay {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translate(-50%, 6px) scale(0.92);
+      filter: blur(6px);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      background: #000;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 12px;
+      font-feature-settings: "tnum" 1;
+      letter-spacing: 0.01em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 260ms ease, transform 260ms cubic-bezier(.2,.8,.2,1), filter 260ms ease;
+      transform-origin: center bottom;
+      z-index: 2147483000;
+      user-select: none;
+    }
+    .overlay[data-visible] {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, 0) scale(1);
+      filter: blur(0);
+    }
+
+    .btn {
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      cursor: default;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 999px;
+      color: rgba(255,255,255,0.72);
+      transition: background 140ms ease, color 140ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn:active { background: rgba(255,255,255,0.18); }
+    .btn:focus { outline: none; }
+    .btn:focus-visible { outline: none; }
+    .btn::-moz-focus-inner { border: 0; }
+    .btn svg { width: 14px; height: 14px; display: block; }
+    .btn.reset {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 0 10px 0 12px;
+      gap: 6px;
+      color: rgba(255,255,255,0.72);
+    }
+    .btn.reset .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 10px;
+      line-height: 1;
+      color: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,0.12);
+      border-radius: 4px;
+    }
+
+    .count {
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      font-weight: 500;
+      padding: 0 8px;
+      min-width: 42px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .count .sep { color: rgba(255,255,255,0.45); margin: 0 3px; font-weight: 400; }
+    .count .total { color: rgba(255,255,255,0.55); }
+
+    .divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255,255,255,0.18);
+      margin: 0 2px;
+    }
+
+    /* ── Thumbnail rail ──────────────────────────────────────────────────
+       Fixed column on the left; each thumbnail is a static deep-clone of
+       the light-DOM slide scaled into a 16:9 (or design-aspect) frame. The
+       stage re-fits around it (see _fit); hidden during present / noscale
+       / print so capture geometry and fullscreen output are unchanged. */
+    .rail {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: var(--deck-rail-w, 188px);
+      background: #141414;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px 10px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 2147482500;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.18) transparent;
+    }
+    .rail::-webkit-scrollbar { width: 8px; }
+    .rail::-webkit-scrollbar-track { background: transparent; margin: 2px; }
+    .rail::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.18);
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+    .rail::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.28);
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+    :host([no-rail]) .rail,
+    :host([noscale]) .rail { display: none; }
+    .rail[data-presenting] { display: none; }
+    @media (max-width: 640px) {
+      .rail, .rail-resize { display: none; }
+    }
+    /* User-driven show/hide (the TweaksPanel toggle) slides instead of
+       popping. Transitions are gated on :host([data-rail-anim]) — set only
+       for the 200ms around the toggle — so window-resize and rail-width
+       drag (which also call _fit) don't lag behind the cursor. */
+    .rail[data-user-hidden] { transform: translateX(-100%); }
+    :host([data-rail-anim]) .rail { transition: transform 200ms cubic-bezier(.3,.7,.4,1); }
+    :host([data-rail-anim]) .stage { transition: left 200ms cubic-bezier(.3,.7,.4,1); }
+    :host([data-rail-anim]) .canvas { transition: transform 200ms cubic-bezier(.3,.7,.4,1); }
+    /* transition shorthand replaces rather than merges — repeat the base
+       .overlay opacity/transform/filter transitions so visibility changes
+       during the 200ms toggle window still fade instead of popping. */
+    :host([data-rail-anim]) .overlay {
+      transition: margin-left 200ms cubic-bezier(.3,.7,.4,1),
+                  opacity 260ms ease,
+                  transform 260ms cubic-bezier(.2,.8,.2,1),
+                  filter 260ms ease;
+    }
+
+    .thumb {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .thumb .num {
+      width: 16px;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 500;
+      text-align: right;
+      color: rgba(255,255,255,0.55);
+      padding-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+    .thumb .frame {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      aspect-ratio: var(--deck-aspect);
+      background: #fff;
+      border-radius: 4px;
+      outline: 2px solid transparent;
+      outline-offset: 0;
+      overflow: hidden;
+      transition: outline-color 120ms ease;
+    }
+    .thumb:hover .frame { outline-color: rgba(255,255,255,0.25); }
+    .thumb { outline: none; }
+    .thumb:focus-visible .frame { outline-color: rgba(255,255,255,0.5); }
+    .thumb[data-current] .num { color: #fff; }
+    .thumb[data-current] .frame { outline-color: #D97757; }
+    .thumb[data-dragging] { opacity: 0.35; }
+    .thumb::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      right: 0;
+      height: 3px;
+      border-radius: 2px;
+      background: #D97757;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .thumb[data-drop="before"]::before { top: -8px; opacity: 1; }
+    .thumb[data-drop="after"]::before { bottom: -8px; opacity: 1; }
+    .thumb[data-skip] .frame { opacity: 0.35; }
+    .thumb[data-skip] .frame::after {
+      content: 'Skipped';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .ctxmenu {
+      position: fixed;
+      min-width: 150px;
+      padding: 4px;
+      background: #242424;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 7px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      z-index: 2147483100;
+      display: none;
+      font-size: 12px;
+    }
+    .ctxmenu[data-open] { display: block; }
+    .ctxmenu button {
+      display: block;
+      width: 100%;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: #e8e8e8;
+      font: inherit;
+      text-align: left;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .ctxmenu button:hover:not(:disabled) { background: rgba(255,255,255,0.08); }
+    .ctxmenu button:disabled { opacity: 0.35; cursor: default; }
+    .ctxmenu hr {
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin: 4px 2px;
+    }
+
+    .rail-resize {
+      position: fixed;
+      left: calc(var(--deck-rail-w, 188px) - 3px);
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      cursor: col-resize;
+      z-index: 2147482600;
+      touch-action: none;
+    }
+    .rail-resize:hover,
+    .rail-resize[data-dragging] { background: rgba(255,255,255,0.12); }
+    :host([no-rail]) .rail-resize,
+    :host([noscale]) .rail-resize,
+    .rail[data-presenting] + .rail-resize,
+    .rail[data-user-hidden] + .rail-resize { display: none; }
+
+    /* Delete-confirm popup — matches the SPA's ConfirmDialog layout
+       (title + message body, depressed footer with Cancel / Delete). */
+    .confirm-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 2147483200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-backdrop[data-open] { display: flex; }
+    .confirm {
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      background: #2a2a2a;
+      color: #e8e8e8;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+      overflow: hidden;
+      font-family: inherit;
+      animation: deck-confirm-in 0.18s ease;
+    }
+    @keyframes deck-confirm-in {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .confirm .body { padding: 20px 20px 16px; }
+    .confirm .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .confirm .msg { font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.65); }
+    .confirm .footer {
+      padding: 14px 20px;
+      background: #1f1f1f;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .confirm button {
+      appearance: none;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .confirm .cancel {
+      background: transparent;
+      border: 0;
+      color: rgba(255,255,255,0.8);
+    }
+    .confirm .cancel:hover { background: rgba(255,255,255,0.08); }
+    .confirm .danger {
+      background: #c96442;
+      border: 1px solid rgba(0,0,0,0.15);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(166,50,68,0.3), 0 2px 6px rgba(166,50,68,0.18);
+    }
+    .confirm .danger:hover { background: #b5563a; }
+
+    /* ── Print: one page per slide, no chrome ────────────────────────────
+       The screen layout stacks every slide at inset:0 inside a scaled
+       canvas; for print we want them in document flow at the authored
+       design size so the browser paginates one slide per sheet. The
+       @page size is set from the width/height attributes via the inline
+       <style id="deck-stage-print-page"> that connectedCallback injects
+       into <head> (the @page at-rule has no effect inside shadow DOM). */
+    @media print {
+      :host {
+        position: static;
+        inset: auto;
+        background: none;
+        overflow: visible;
+        color: inherit;
+      }
+      .stage { position: static; display: block; }
+      .canvas {
+        transform: none !important;
+        width: auto !important;
+        height: auto !important;
+        background: none;
+        will-change: auto;
+      }
+      ::slotted(*) {
+        position: relative !important;
+        inset: auto !important;
+        width: var(--deck-design-w) !important;
+        height: var(--deck-design-h) !important;
+        box-sizing: border-box !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto;
+        break-after: page;
+        page-break-after: always;
+        break-inside: avoid;
+        overflow: hidden;
+      }
+      /* :last-child alone isn't enough once data-deck-skip hides the
+         trailing slide(s) — the last *visible* slide still carries
+         break-after:page and prints a blank sheet. _markLastVisible()
+         maintains data-deck-last-visible on the last non-skipped slide. */
+      ::slotted(*:last-child),
+      ::slotted([data-deck-last-visible]) {
+        break-after: auto;
+        page-break-after: auto;
+      }
+      ::slotted([data-deck-skip]) { display: none !important; }
+      .overlay, .rail, .rail-resize, .ctxmenu, .confirm-backdrop { display: none !important; }
+    }
+  `;
+
+  class DeckStage extends HTMLElement {
+    static get observedAttributes() { return ['width', 'height', 'noscale', 'no-rail']; }
+
+    constructor() {
+      super();
+      this._root = this.attachShadow({ mode: 'open' });
+      this._index = 0;
+      this._slides = [];
+      this._notes = [];
+      this._hideTimer = null;
+      this._mouseIdleTimer = null;
+      this._menuIndex = -1;
+
+      this._onKey = this._onKey.bind(this);
+      this._onResize = this._onResize.bind(this);
+      this._onSlotChange = this._onSlotChange.bind(this);
+      this._onMouseMove = this._onMouseMove.bind(this);
+      this._onTap = this._onTap.bind(this);
+      this._onMessage = this._onMessage.bind(this);
+      // Capture-phase close so a click anywhere dismisses the menu, but
+      // ignore clicks that land inside the menu itself — otherwise the
+      // capture handler runs before the menu's own (bubble) handler and
+      // clears _menuIndex out from under it.
+      this._onDocClick = (e) => {
+        if (this._menu && e.composedPath && e.composedPath().includes(this._menu)) return;
+        this._closeMenu();
+      };
+    }
+
+    get designWidth() {
+      return parseInt(this.getAttribute('width'), 10) || DESIGN_W_DEFAULT;
+    }
+    get designHeight() {
+      return parseInt(this.getAttribute('height'), 10) || DESIGN_H_DEFAULT;
+    }
+
+    connectedCallback() {
+      // Presenter-view popup loads deckUrl?_snthumb=...#N for its prev/cur/
+      // next thumbnails — the rail has no business rendering inside those
+      // (wrong scale, and it offsets the stage so the thumb shows a gutter).
+      if (/[?&]_snthumb=/.test(location.search)) this.setAttribute('no-rail', '');
+      this._render();
+      this._loadNotes();
+      this._syncPrintPageRule();
+      window.addEventListener('keydown', this._onKey);
+      window.addEventListener('resize', this._onResize);
+      window.addEventListener('mousemove', this._onMouseMove, { passive: true });
+      window.addEventListener('message', this._onMessage);
+      window.addEventListener('click', this._onDocClick, true);
+      this.addEventListener('click', this._onTap);
+      // Print lays every slide out as its own page, so [data-deck-active]-
+      // gated entrance styles need the attribute on every slide (not just
+      // the current one) or their content prints at the hidden base style.
+      // The transient freeze style lands BEFORE the attributes so any
+      // attribute-keyed transition fires at 0s (changing transition-
+      // duration after a transition has started doesn't affect it).
+      this._onBeforePrint = () => {
+        if (this._freezeStyle) this._freezeStyle.remove();
+        this._freezeStyle = document.createElement('style');
+        this._freezeStyle.textContent = '*,*::before,*::after{transition-duration:0s !important}';
+        document.head.appendChild(this._freezeStyle);
+        this._slides.forEach((s) => s.setAttribute('data-deck-active', ''));
+      };
+      this._onAfterPrint = () => {
+        this._applyIndex({ showOverlay: false, broadcast: false });
+        if (this._freezeStyle) { this._freezeStyle.remove(); this._freezeStyle = null; }
+      };
+      window.addEventListener('beforeprint', this._onBeforePrint);
+      window.addEventListener('afterprint', this._onAfterPrint);
+      // Initial collection + layout happens via slotchange, which fires on mount.
+      this._enableRail();
+      // Hold the stage hidden until webfonts are ready so the first visible
+      // paint has the deck's real typography — the :not(:defined) guard in
+      // the page HTML only covers custom-element upgrade, not font load.
+      // Capped so a 404'd font URL can't blank the deck indefinitely.
+      this.setAttribute('data-fonts-pending', '');
+      const reveal = () => this.removeAttribute('data-fonts-pending');
+      // rAF first: fonts.ready is a pre-resolved promise until layout has
+      // resolved the slotted text's font-family and pushed a FontFace into
+      // 'loading'. Reading it here in connectedCallback (parse-time) would
+      // settle the race in a microtask before any font fetch starts.
+      requestAnimationFrame(() => {
+        Promise.race([
+          document.fonts ? document.fonts.ready : Promise.resolve(),
+          new Promise((r) => setTimeout(r, 2000)),
+        ]).then(reveal, reveal);
+      });
+    }
+
+    _enableRail() {
+      // Idempotent — older host builds still post __omelette_rail_enabled.
+      // no-rail guard keeps the observers/stylesheet walk off the cheap path
+      // for presenter-popup thumbnail iframes (up to 9 per view).
+      if (this._railEnabled || this.hasAttribute('no-rail')) return;
+      this._railEnabled = true;
+      // Per-viewer preference — restored alongside rail width. Default on;
+      // only a stored '0' (from the TweaksPanel toggle) hides it.
+      this._railVisible = true;
+      try {
+        if (localStorage.getItem('deck-stage.railVisible') === '0') this._railVisible = false;
+      } catch (e) {}
+      // Live thumbnail updates: watch the light-DOM slides for content
+      // edits and re-clone just the affected thumb(s), debounced. Ignore
+      // the data-deck-* / data-screen-label / data-om-validate attributes
+      // this component itself writes so nav doesn't trigger spurious
+      // refreshes — except data-deck-skip, which now arrives from the host
+      // re-render and is what updates the rail badge, print bookkeeping,
+      // and deckSkipped re-broadcast.
+      const OWN_ATTRS = /^data-(deck-(?!skip$)|screen-label$|om-validate$)/;
+      this._liveDirty = new Set();
+      this._liveObserver = new MutationObserver((records) => {
+        for (const r of records) {
+          if (r.type === 'attributes' && OWN_ATTRS.test(r.attributeName || '')) continue;
+          let n = r.target;
+          while (n && n.parentElement !== this) n = n.parentElement;
+          // Skip/unskip is handled below without re-cloning (the badge sits
+          // on the thumb wrapper, not the clone) — don't mark the slide
+          // dirty for an attr change whose only visible effect is the badge.
+          if (n && this._slideSet && this._slideSet.has(n)
+              && !(r.type === 'attributes' && r.attributeName === 'data-deck-skip')) {
+            this._liveDirty.add(n);
+          }
+          // Host-driven skip toggle: sync the rail badge + print + presenter
+          // skipped-list the way _toggleSkip used to do locally.
+          if (r.type === 'attributes' && r.attributeName === 'data-deck-skip'
+              && n && this._slideSet && this._slideSet.has(n)) {
+            const i = this._slides.indexOf(n);
+            if (this._thumbs && this._thumbs[i]) {
+              if (n.hasAttribute('data-deck-skip')) this._thumbs[i].thumb.setAttribute('data-skip', '');
+              else this._thumbs[i].thumb.removeAttribute('data-skip');
+            }
+            this._markLastVisible();
+            try { window.postMessage({ slideIndexChanged: this._index, deckTotal: this._slides.length, deckSkipped: this._skippedIndices() }, '*'); } catch (e) {}
+          }
+        }
+        if (this._liveDirty.size && !this._liveTimer) {
+          this._liveTimer = setTimeout(() => {
+            this._liveTimer = null;
+            this._liveDirty.forEach((s) => this._refreshThumb(s));
+            this._liveDirty.clear();
+          }, 200);
+        }
+      });
+      this._liveObserver.observe(this, {
+        subtree: true, childList: true, characterData: true, attributes: true,
+      });
+      // Lazy thumbnail materialization — clone the slide only when its
+      // frame scrolls into (or near) the rail viewport. rootMargin gives
+      // ~4 thumbs of pre-load so fast scrolling doesn't flash blanks.
+      this._railObserver = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && e.target.__deckThumb) {
+            this._materialize(e.target.__deckThumb);
+          }
+        });
+      }, { root: this._rail, rootMargin: '400px 0px' });
+      // Tweaks typically change CSS vars / attrs OUTSIDE <deck-stage>
+      // (on <html>, <body>, a wrapper div, or a <style> tag), which
+      // _liveObserver can't see. Re-snapshot author CSS (constructable
+      // sheet is shared by reference, so one replaceSync updates every
+      // thumb shadow root) and re-sync each thumb host's attrs + custom
+      // properties. In-slide DOM mutations are _liveObserver's job.
+      // Debounced so slider drags don't thrash.
+      this._onTweakChange = () => {
+        clearTimeout(this._tweakTimer);
+        this._tweakTimer = setTimeout(() => {
+          this._snapshotAuthorCss();
+          // One getComputedStyle for the whole batch — each
+          // getPropertyValue read below reuses the same computed style
+          // as long as nothing invalidates layout between thumbs.
+          const cs = getComputedStyle(this);
+          (this._thumbs || []).forEach((t) => {
+            if (t.host) this._syncThumbHostAttrs(t.host, cs);
+          });
+        }, 120);
+      };
+      window.addEventListener('tweakchange', this._onTweakChange);
+      this._snapshotAuthorCss();
+      // Build the rail now that it's enabled — slotchange already fired,
+      // so _renderRail's early-return skipped the initial build.
+      this._syncRailHidden();
+      this._renderRail();
+      this._fit();
+    }
+
+    /** Snapshot document stylesheets into a constructable sheet that each
+     *  thumbnail's nested shadow root adopts — so author CSS styles the
+     *  cloned slide content without touching this component's chrome.
+     *  Cross-origin sheets throw on .cssRules — skip them. Re-callable:
+     *  the existing constructable sheet is reused via replaceSync so every
+     *  already-adopted shadow root picks up the fresh CSS without re-adopt. */
+    _snapshotAuthorCss() {
+      // :root in an adopted sheet inside a shadow root matches nothing
+      // (only the document root qualifies), so author rules like
+      // `:root[data-voice="modern"] .serif` never reach the clones.
+      // Rewrite :root → :host and mirror <html>'s data-*/class/lang onto
+      // each thumb host (see _syncThumbHostAttrs) so the same selectors
+      // match inside the thumbnail's shadow tree.
+      const authorCss = Array.from(document.styleSheets).map((sh) => {
+        try {
+          return Array.from(sh.cssRules).map((r) => r.cssText).join('\n');
+        } catch (e) { return ''; }
+      }).join('\n')
+        // The shadow host is featureless outside the functional :host(...)
+        // form, so any compound on :root — [attr], .class, #id, :pseudo —
+        // must become :host(<compound>) not :host<compound>. Same for the
+        // html type selector (Tailwind class-strategy dark mode emits
+        // html.dark; Pico uses html[data-theme]), which has nothing to
+        // match inside the thumb's shadow tree.
+        .replace(/:root((?:\[[^\]]*\]|[.#][-\w]+|:[-\w]+(?:\([^)]*\))?)+)/g, ':host($1)')
+        .replace(/:root\b/g, ':host')
+        .replace(/(^|[\s,>~+(}])html((?:\[[^\]]*\]|[.#][-\w]+|:[-\w]+(?:\([^)]*\))?)+)(?![-\w])/g, '$1:host($2)')
+        .replace(/(^|[\s,>~+(}])html(?![-\w])/g, '$1:host');
+      // Every custom property the author references. _syncThumbHostAttrs
+      // mirrors each one's *computed* value at <deck-stage> onto the
+      // thumb host so the live value wins over the :host default above
+      // regardless of which ancestor the tweak wrote to (<html>, <body>,
+      // a wrapper div, or the deck-stage element itself all inherit
+      // down to getComputedStyle(this)).
+      this._authorVars = new Set(authorCss.match(/--[\w-]+/g) || []);
+      try {
+        if (!this._adoptedSheet) this._adoptedSheet = new CSSStyleSheet();
+        this._adoptedSheet.replaceSync(authorCss);
+      } catch (e) {
+        this._adoptedSheet = null;
+        this._authorCss = authorCss;
+      }
+    }
+
+    _syncThumbHostAttrs(host, cs) {
+      const de = document.documentElement;
+      // setAttribute overwrites but can't delete — an attr removed from
+      // <html> (toggleAttribute off, classList emptied) would linger on
+      // the host and :host([data-*]) / :host(.foo) rules would keep
+      // matching. Remove stale mirrored attrs first; iterate backward
+      // because removeAttribute mutates the live NamedNodeMap.
+      for (let i = host.attributes.length - 1; i >= 0; i--) {
+        const n = host.attributes[i].name;
+        if ((n.startsWith('data-') || n === 'class' || n === 'lang')
+            && !de.hasAttribute(n)) {
+          host.removeAttribute(n);
+        }
+      }
+      for (const a of de.attributes) {
+        if (a.name.startsWith('data-') || a.name === 'class' || a.name === 'lang') {
+          host.setAttribute(a.name, a.value);
+        }
+      }
+      // The :root→:host rewrite in _snapshotAuthorCss pins each custom
+      // property to its stylesheet default on the thumb host, shadowing
+      // the live value that would otherwise inherit. Tweaks can write the
+      // live value on any ancestor — <html>, <body>, a wrapper div, the
+      // deck-stage element — so read it as the *computed* value at
+      // <deck-stage> (which sees the whole inheritance chain) rather than
+      // trying to guess which element the author wrote to. Inline on the
+      // host beats the :host{} rule. remove-stale covers vars dropped
+      // from the stylesheet between snapshots.
+      const vars = this._authorVars || new Set();
+      for (let i = host.style.length - 1; i >= 0; i--) {
+        const p = host.style[i];
+        if (p.startsWith('--') && !vars.has(p)) host.style.removeProperty(p);
+      }
+      const live = cs || getComputedStyle(this);
+      vars.forEach((p) => {
+        const v = live.getPropertyValue(p);
+        if (v) host.style.setProperty(p, v.trim());
+        else host.style.removeProperty(p);
+      });
+    }
+
+    disconnectedCallback() {
+      window.removeEventListener('keydown', this._onKey);
+      window.removeEventListener('resize', this._onResize);
+      window.removeEventListener('mousemove', this._onMouseMove);
+      window.removeEventListener('message', this._onMessage);
+      window.removeEventListener('click', this._onDocClick, true);
+      window.removeEventListener('beforeprint', this._onBeforePrint);
+      window.removeEventListener('afterprint', this._onAfterPrint);
+      if (this._freezeStyle) { this._freezeStyle.remove(); this._freezeStyle = null; }
+      this.removeEventListener('click', this._onTap);
+      if (this._hideTimer) clearTimeout(this._hideTimer);
+      if (this._mouseIdleTimer) clearTimeout(this._mouseIdleTimer);
+      if (this._liveTimer) clearTimeout(this._liveTimer);
+      if (this._tweakTimer) clearTimeout(this._tweakTimer);
+      if (this._railAnimTimer) clearTimeout(this._railAnimTimer);
+      if (this._scaleRaf) cancelAnimationFrame(this._scaleRaf);
+      if (this._liveObserver) this._liveObserver.disconnect();
+      if (this._railObserver) this._railObserver.disconnect();
+      if (this._onTweakChange) window.removeEventListener('tweakchange', this._onTweakChange);
+    }
+
+    attributeChangedCallback() {
+      if (this._canvas) {
+        this._canvas.style.width = this.designWidth + 'px';
+        this._canvas.style.height = this.designHeight + 'px';
+        this._canvas.style.setProperty('--deck-design-w', this.designWidth + 'px');
+        this._canvas.style.setProperty('--deck-design-h', this.designHeight + 'px');
+        if (this._rail) {
+          this._rail.style.setProperty('--deck-aspect', this.designWidth + '/' + this.designHeight);
+        }
+        this._fit();
+        this._scaleThumbs();
+        this._syncPrintPageRule();
+      }
+    }
+
+    _render() {
+      const style = document.createElement('style');
+      style.textContent = stylesheet;
+
+      const stage = document.createElement('div');
+      stage.className = 'stage';
+
+      const canvas = document.createElement('div');
+      canvas.className = 'canvas';
+      canvas.style.width = this.designWidth + 'px';
+      canvas.style.height = this.designHeight + 'px';
+      canvas.style.setProperty('--deck-design-w', this.designWidth + 'px');
+      canvas.style.setProperty('--deck-design-h', this.designHeight + 'px');
+
+      const slot = document.createElement('slot');
+      slot.addEventListener('slotchange', this._onSlotChange);
+      canvas.appendChild(slot);
+      stage.appendChild(canvas);
+
+      // Overlay: compact, solid black, with clickable controls.
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay export-hidden';
+      overlay.setAttribute('role', 'toolbar');
+      overlay.setAttribute('aria-label', 'Deck controls');
+      overlay.setAttribute('data-omelette-chrome', '');
+      overlay.innerHTML = `
+        <button class="btn prev" type="button" aria-label="Previous slide" title="Previous (←)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+        </button>
+        <span class="count" aria-live="polite"><span class="current">1</span><span class="sep">/</span><span class="total">1</span></span>
+        <button class="btn next" type="button" aria-label="Next slide" title="Next (→)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <span class="divider"></span>
+        <button class="btn reset" type="button" aria-label="Reset to first slide" title="Reset (R)">Reset<span class="kbd">R</span></button>
+      `;
+
+      overlay.querySelector('.prev').addEventListener('click', () => this._advance(-1, 'click'));
+      overlay.querySelector('.next').addEventListener('click', () => this._advance(1, 'click'));
+      overlay.querySelector('.reset').addEventListener('click', () => this._go(0, 'click'));
+
+      // Thumbnail rail + context menu. Thumbnails are populated in
+      // _renderRail() after _collectSlides().
+      const rail = document.createElement('div');
+      rail.className = 'rail export-hidden';
+      rail.setAttribute('data-omelette-chrome', '');
+      // Edit mode hooks wheel to pan the canvas; this opts the rail's own
+      // scrollview out so thumbnails stay scrollable while editing.
+      rail.setAttribute('data-dc-wheel-passthru', '');
+      rail.style.setProperty('--deck-aspect', this.designWidth + '/' + this.designHeight);
+      // Edge auto-scroll while dragging a thumb near the rail's top/bottom
+      // so off-screen drop targets are reachable. Native dragover fires
+      // continuously while the pointer is stationary, so a per-event nudge
+      // (ramped by edge proximity) is enough — no rAF loop needed.
+      rail.addEventListener('dragover', (e) => {
+        if (this._dragFrom == null) return;
+        const r = rail.getBoundingClientRect();
+        const EDGE = 40;
+        const dt = e.clientY - r.top;
+        const db = r.bottom - e.clientY;
+        if (dt < EDGE) rail.scrollTop -= Math.ceil((EDGE - dt) / 3);
+        else if (db < EDGE) rail.scrollTop += Math.ceil((EDGE - db) / 3);
+      });
+
+      const menu = document.createElement('div');
+      menu.className = 'ctxmenu export-hidden';
+      menu.setAttribute('data-omelette-chrome', '');
+      menu.innerHTML = `
+        <button type="button" data-act="skip">Skip slide</button>
+        <button type="button" data-act="up">Move up</button>
+        <button type="button" data-act="down">Move down</button>
+        <button type="button" data-act="duplicate">Duplicate slide</button>
+        <hr>
+        <button type="button" data-act="delete">Delete slide</button>
+      `;
+      menu.addEventListener('click', (e) => {
+        const act = e.target && e.target.getAttribute && e.target.getAttribute('data-act');
+        if (!act) return;
+        const i = this._menuIndex;
+        this._closeMenu();
+        if (act === 'skip') this._toggleSkip(i);
+        else if (act === 'up') this._moveSlide(i, i - 1);
+        else if (act === 'down') this._moveSlide(i, i + 1);
+        else if (act === 'duplicate') this._duplicateSlide(i);
+        else if (act === 'delete') this._openConfirm(i);
+      });
+      menu.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      // Rail resize handle — drag to set --deck-rail-w, persisted to
+      // localStorage so the width survives reloads.
+      const resize = document.createElement('div');
+      resize.className = 'rail-resize export-hidden';
+      resize.setAttribute('data-omelette-chrome', '');
+      resize.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        resize.setPointerCapture(e.pointerId);
+        resize.setAttribute('data-dragging', '');
+        const move = (ev) => this._setRailWidth(ev.clientX);
+        const up = () => {
+          resize.removeEventListener('pointermove', move);
+          resize.removeEventListener('pointerup', up);
+          resize.removeEventListener('pointercancel', up);
+          resize.removeAttribute('data-dragging');
+          try { localStorage.setItem('deck-stage.railWidth', String(this._railPx)); } catch (err) {}
+        };
+        resize.addEventListener('pointermove', move);
+        resize.addEventListener('pointerup', up);
+        resize.addEventListener('pointercancel', up);
+      });
+
+      // Delete-confirm dialog — mirrors the SPA's ConfirmDialog layout.
+      const confirm = document.createElement('div');
+      confirm.className = 'confirm-backdrop export-hidden';
+      confirm.setAttribute('data-omelette-chrome', '');
+      confirm.innerHTML = `
+        <div class="confirm" role="dialog" aria-modal="true">
+          <div class="body">
+            <div class="title">Delete slide?</div>
+            <div class="msg">This slide will be removed from the deck.</div>
+          </div>
+          <div class="footer">
+            <button type="button" class="cancel">Cancel</button>
+            <button type="button" class="danger">Delete</button>
+          </div>
+        </div>
+      `;
+      confirm.addEventListener('click', (e) => {
+        if (e.target === confirm) this._closeConfirm();
+      });
+      confirm.querySelector('.cancel').addEventListener('click', () => this._closeConfirm());
+      confirm.querySelector('.danger').addEventListener('click', () => {
+        const i = this._confirmIndex;
+        this._closeConfirm();
+        this._deleteSlide(i);
+      });
+
+      this._root.append(style, rail, resize, stage, overlay, menu, confirm);
+      this._canvas = canvas;
+      this._stage = stage;
+      this._slot = slot;
+      this._overlay = overlay;
+      this._rail = rail;
+      this._resize = resize;
+      this._menu = menu;
+      this._confirm = confirm;
+      this._countEl = overlay.querySelector('.current');
+      this._totalEl = overlay.querySelector('.total');
+
+      // Restore persisted rail width.
+      let rw = 188;
+      try {
+        const s = localStorage.getItem('deck-stage.railWidth');
+        if (s) rw = parseInt(s, 10) || rw;
+      } catch (err) {}
+      this._setRailWidth(rw);
+      this._syncRailHidden();
+    }
+
+    _setRailWidth(px) {
+      const w = Math.max(120, Math.min(360, Math.round(px)));
+      this._railPx = w;
+      this.style.setProperty('--deck-rail-w', w + 'px');
+      this._fit();
+      // _scaleThumbs forces a sync layout (frame.offsetWidth) then writes
+      // N transforms. During a resize drag this runs per-pointermove;
+      // coalesce to one per frame.
+      if (!this._scaleRaf) {
+        this._scaleRaf = requestAnimationFrame(() => {
+          this._scaleRaf = null;
+          this._scaleThumbs();
+        });
+      }
+    }
+
+    /** @page must live in the document stylesheet — it's a no-op inside
+     *  shadow DOM. Inject/update a single <head> style tag so the print
+     *  sheet matches the design size and Save-as-PDF yields one slide per
+     *  page with no margins. */
+    _syncPrintPageRule() {
+      const id = 'deck-stage-print-page';
+      let tag = document.getElementById(id);
+      if (!tag) {
+        tag = document.createElement('style');
+        tag.id = id;
+        document.head.appendChild(tag);
+      }
+      tag.textContent =
+        '@page { size: ' + this.designWidth + 'px ' + this.designHeight + 'px; margin: 0; } ' +
+        '@media print { html, body { margin: 0 !important; padding: 0 !important; background: none !important; overflow: visible !important; height: auto !important; } ' +
+        '* { -webkit-print-color-adjust: exact; print-color-adjust: exact; } ' +
+        // Jump authored animations/transitions to their end state so print
+        // never captures mid-entrance — pairs with the beforeprint handler
+        // in connectedCallback that sets data-deck-active on every slide.
+        '*, *::before, *::after { animation-delay: -99s !important; animation-duration: .001s !important; ' +
+        'animation-iteration-count: 1 !important; animation-fill-mode: both !important; ' +
+        'animation-play-state: running !important; transition-duration: 0s !important; } }';
+    }
+
+    _onSlotChange() {
+      // Self-mutate path already reconciled synchronously and emitted
+      // slidechange; skip the async slotchange it caused.
+      if (this._squelchSlotChange) { this._squelchSlotChange = false; return; }
+      // Primary lock-clear is the host's __deck_rail_ack; this clears on a
+      // dropped ack so the rail can't stay dead.
+      this._railLock = false;
+      this._collectSlides();
+      this._restoreIndex();
+      this._applyIndex({ showOverlay: false, broadcast: true, reason: 'init' });
+      this._fit();
+    }
+
+    _collectSlides() {
+      const assigned = this._slot.assignedElements({ flatten: true });
+      this._slides = assigned.filter((el) => {
+        // Skip template/style/script nodes even if someone slots them.
+        const tag = el.tagName;
+        return tag !== 'TEMPLATE' && tag !== 'SCRIPT' && tag !== 'STYLE';
+      });
+      this._slideSet = new Set(this._slides);
+
+      this._slides.forEach((slide, i) => {
+        const n = i + 1;
+        slide.setAttribute('data-screen-label', `${pad2(n)} ${getSlideLabel(slide)}`);
+
+        // Validation attribute for comment flow / auto-checks.
+        if (!slide.hasAttribute('data-om-validate')) {
+          slide.setAttribute('data-om-validate', VALIDATE_ATTR);
+        }
+
+        slide.setAttribute('data-deck-slide', String(i));
+      });
+
+      if (this._totalEl) this._totalEl.textContent = String(this._slides.length || 1);
+      if (this._index >= this._slides.length) this._index = Math.max(0, this._slides.length - 1);
+      this._markLastVisible();
+      this._renderRail();
+    }
+
+    /** Tag the last non-skipped slide so print CSS can drop its
+     *  break-after (see the @media print comment above — :last-child
+     *  alone matches a hidden skipped slide). */
+    _markLastVisible() {
+      let last = null;
+      this._slides.forEach((s) => {
+        s.removeAttribute('data-deck-last-visible');
+        if (!s.hasAttribute('data-deck-skip')) last = s;
+      });
+      if (last) last.setAttribute('data-deck-last-visible', '');
+    }
+
+    _loadNotes() {
+      // Per-slide data-speaker-notes is authoritative when present (attrs
+      // travel with the element on reorder/dup/delete); a slide without
+      // the attr falls through to the legacy #speaker-notes JSON array
+      // PER SLIDE so a single attr on a JSON-authored deck doesn't blank
+      // the rest.
+      const tag = document.getElementById('speaker-notes');
+      let json = null;
+      if (tag) try {
+        const p = JSON.parse(tag.textContent || '[]');
+        if (Array.isArray(p)) json = p;
+      } catch (e) {
+        console.warn('[deck-stage] Failed to parse #speaker-notes JSON:', e);
+      }
+      this._notes = this._slides.map((s, i) => {
+        const a = s.getAttribute('data-speaker-notes');
+        return a !== null ? a : (json && typeof json[i] === 'string' ? json[i] : '');
+      });
+    }
+
+    _restoreIndex() {
+      // The host's ?slide= param is delivered as a #<int> hash (1-indexed) on
+      // the iframe src. No hash → slide 1; the deck itself keeps no position
+      // state across loads.
+      const h = (location.hash || '').match(/^#(\d+)$/);
+      if (h) {
+        const n = parseInt(h[1], 10) - 1;
+        if (n >= 0 && n < this._slides.length) this._index = n;
+      }
+    }
+
+    _applyIndex({ showOverlay = true, broadcast = true, reason = 'init' } = {}) {
+      if (!this._slides.length) return;
+      const prev = this._prevIndex == null ? -1 : this._prevIndex;
+      const curr = this._index;
+      // Keep the iframe's own hash in sync so an in-iframe location.reload()
+      // (reload banner path in viewer-handle.ts) lands on the current slide,
+      // not the stale deep-link hash from initial load.
+      try { history.replaceState(null, '', '#' + (curr + 1)); } catch (e) {}
+      this._slides.forEach((s, i) => {
+        if (i === curr) s.setAttribute('data-deck-active', '');
+        else s.removeAttribute('data-deck-active');
+      });
+      if (this._countEl) this._countEl.textContent = String(curr + 1);
+      // Follow-scroll on every navigation (init deep-link, keyboard, click,
+      // tap, external goTo) — the only time we *don't* want the rail to
+      // track current is after a rail-internal mutation, where _renderRail
+      // has already restored the user's scroll position and yanking back to
+      // current would undo it.
+      this._syncRail(reason !== 'mutation');
+
+      if (broadcast) {
+        // (1) Legacy: host-window postMessage for speaker-notes renderers.
+        try { window.postMessage({ slideIndexChanged: curr, deckTotal: this._slides.length, deckSkipped: this._skippedIndices() }, '*'); } catch (e) {}
+
+        // (2) In-page CustomEvent on the <deck-stage> element itself.
+        //     Bubbles and composes out of shadow DOM so slide code can listen:
+        //       document.querySelector('deck-stage').addEventListener('slidechange', e => {
+        //         e.detail.index, e.detail.previousIndex, e.detail.total, e.detail.slide, e.detail.reason
+        //       });
+        const detail = {
+          index: curr,
+          previousIndex: prev,
+          total: this._slides.length,
+          slide: this._slides[curr] || null,
+          previousSlide: prev >= 0 ? (this._slides[prev] || null) : null,
+          reason: reason, // 'init' | 'keyboard' | 'click' | 'tap' | 'api'
+        };
+        this.dispatchEvent(new CustomEvent('slidechange', {
+          detail,
+          bubbles: true,
+          composed: true,
+        }));
+      }
+
+      this._prevIndex = curr;
+      if (showOverlay) this._flashOverlay();
+    }
+
+    _flashOverlay() {
+      // Host posts __omelette_presenting while in fullscreen/tab presentation
+      // mode — suppress the nav footer entirely (both hover and slide-change
+      // flash) so the audience sees clean slides.
+      if (!this._overlay || this._presenting) return;
+      this._overlay.setAttribute('data-visible', '');
+      if (this._hideTimer) clearTimeout(this._hideTimer);
+      this._hideTimer = setTimeout(() => {
+        this._overlay.removeAttribute('data-visible');
+      }, OVERLAY_HIDE_MS);
+    }
+
+    _railWidth() {
+      // State-based, no offsetWidth: the first _fit() can run before the
+      // rail has had layout on some load paths, and a 0 there paints the
+      // slide full-width for one frame before the post-slotchange _fit()
+      // corrects it.
+      if (!this._railEnabled || !this._railVisible || this.hasAttribute('no-rail')
+          || this.hasAttribute('noscale') || this._presenting || this._previewMode
+          || NARROW_MQ.matches) return 0;
+      return this._railPx || 0;
+    }
+
+    _fit() {
+      if (!this._canvas) return;
+      const stage = this._canvas.parentElement;
+      // PPTX export sets noscale so the DOM capture sees authored-size
+      // geometry — the scaled canvas is in shadow DOM, so the exporter's
+      // resetTransformSelector can't reach .canvas.style.transform directly.
+      if (this.hasAttribute('noscale')) {
+        this._canvas.style.transform = 'none';
+        if (stage) stage.style.left = '0';
+        if (this._overlay) this._overlay.style.marginLeft = '0';
+        return;
+      }
+      const rw = this._railWidth();
+      if (stage) stage.style.left = rw + 'px';
+      // Overlay is centred on the viewport via left:50% + translate(-50%);
+      // marginLeft shifts the centre by rw/2 so it lands in the middle of
+      // the [rw, innerWidth] stage region.
+      if (this._overlay) this._overlay.style.marginLeft = (rw / 2) + 'px';
+      const vw = window.innerWidth - rw;
+      const vh = window.innerHeight;
+      const s = Math.min(vw / this.designWidth, vh / this.designHeight);
+      this._canvas.style.transform = `scale(${s})`;
+    }
+
+    _onResize() {
+      this._fit();
+      // Crossing the narrow-viewport breakpoint reveals the rail — rerun the
+      // thumbnail scale the same way _setRailWidth does.
+      if (!this._scaleRaf) {
+        this._scaleRaf = requestAnimationFrame(() => {
+          this._scaleRaf = null;
+          this._scaleThumbs();
+        });
+      }
+    }
+
+    _onMouseMove() {
+      // Keep overlay visible while mouse moves; hide after idle.
+      this._flashOverlay();
+    }
+
+    _onMessage(e) {
+      const d = e.data;
+      if (d && typeof d.__omelette_presenting === 'boolean') {
+        this._presenting = d.__omelette_presenting;
+        if (this._presenting && this._overlay) {
+          this._overlay.removeAttribute('data-visible');
+          if (this._hideTimer) clearTimeout(this._hideTimer);
+        }
+        this._syncRailHidden();
+        this._closeMenu();
+        this._closeConfirm();
+        this._fit();
+        this._scaleThumbs();
+      }
+      // Host's Preview segment (ViewerMode='none'): the rail's drag-reorder /
+      // right-click skip-delete affordances are editing chrome, so hide it
+      // while the user is just looking at the deck. Same hard-hide path as
+      // presenting; independent of the user's _railVisible preference so
+      // returning to Edit restores whatever they had.
+      if (d && typeof d.__omelette_preview_mode === 'boolean') {
+        if (d.__omelette_preview_mode === this._previewMode) return;
+        this._previewMode = d.__omelette_preview_mode;
+        this._syncRailHidden();
+        this._closeMenu();
+        this._closeConfirm();
+        this._fit();
+        this._scaleThumbs();
+      }
+      // Host has processed a dc-op; rail input is safe again. Not tied to
+      // slotchange — setAttr and refusal don't fire one. On refusal,
+      // revert the optimistic _index/hash adjustment so the next nav
+      // starts from what's actually on screen.
+      if (d && d.__dc_op_ack) {
+        this._railLock = false;
+        if (d.applied === false && this._indexBeforeEmit != null) {
+          this._index = this._indexBeforeEmit;
+          try { history.replaceState(null, '', '#' + (this._index + 1)); } catch (e) {}
+        }
+        this._indexBeforeEmit = null;
+      }
+      // Per-viewer show/hide, driven by the TweaksPanel's auto-injected
+      // "Thumbnail rail" toggle (or any author script). Independent of
+      // whether the Tweaks panel itself is open — closing the panel
+      // doesn't change rail visibility. Persists alongside rail width.
+      if (d && d.type === '__deck_rail_visible' && typeof d.on === 'boolean') {
+        if (d.on === this._railVisible) return;
+        this._railVisible = d.on;
+        try { localStorage.setItem('deck-stage.railVisible', d.on ? '1' : '0'); } catch (e) {}
+        // Arm the transition, commit it, then flip state — otherwise the
+        // browser coalesces both writes and nothing animates on show.
+        this.setAttribute('data-rail-anim', '');
+        void (this._rail && this._rail.offsetHeight);
+        this._syncRailHidden();
+        this._fit();
+        this._scaleThumbs();
+        clearTimeout(this._railAnimTimer);
+        this._railAnimTimer = setTimeout(() => this.removeAttribute('data-rail-anim'), 220);
+      }
+      if (d && d.type === '__omelette_rail_enabled') this._enableRail();
+    }
+
+    _syncRailHidden() {
+      if (!this._rail) return;
+      // data-presenting is the hard hide (display:none) for flag-off,
+      // presentation mode, and the host's Preview segment — instant, no
+      // transition. data-user-hidden is the soft hide (translateX(-100%))
+      // for the viewer's rail toggle, so show/hide slides under
+      // :host([data-rail-anim]).
+      const hard = !this._railEnabled || this._presenting || this._previewMode;
+      if (hard) this._rail.setAttribute('data-presenting', '');
+      else this._rail.removeAttribute('data-presenting');
+      if (!this._railVisible) this._rail.setAttribute('data-user-hidden', '');
+      else this._rail.removeAttribute('data-user-hidden');
+      // translateX hide leaves thumbs (tabIndex=0) in the tab order —
+      // inert keeps them unfocusable while the rail is off-screen.
+      this._rail.inert = hard || !this._railVisible;
+    }
+
+    _onTap(e) {
+      // Touch-only — keyboard + the overlay toolbar cover nav on desktop.
+      if (FINE_POINTER_MQ.matches) return;
+      // Only taps that land on the stage (slide content or letterbox); the
+      // overlay / rail / menus are siblings with their own click handlers.
+      const path = e.composedPath();
+      if (!this._stage || !path.includes(this._stage)) return;
+      // Let interactive slide content keep the tap. composedPath (not
+      // e.target.closest) so we see through open shadow roots — a <button>
+      // inside a slide-authored custom element retargets e.target to the
+      // host but still appears in the composed path.
+      if (e.defaultPrevented) return;
+      for (const n of path) {
+        if (n === this._stage) break;
+        if (n.matches && n.matches(INTERACTIVE_SEL)) return;
+      }
+      e.preventDefault();
+      const rw = this._railWidth();
+      const mid = rw + (window.innerWidth - rw) / 2;
+      this._advance(e.clientX < mid ? -1 : 1, 'tap');
+    }
+
+    _onKey(e) {
+      // Ignore when the user is typing.
+      const t = e.target;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      // Confirm dialog swallows nav keys while open; Escape cancels. Enter
+      // is left to the focused button's native activation so Tab→Cancel
+      // →Enter activates Cancel, not the window-level confirm path.
+      if (this._confirm && this._confirm.hasAttribute('data-open')) {
+        if (e.key === 'Escape') { this._closeConfirm(); e.preventDefault(); }
+        return;
+      }
+      if (e.key === 'Escape' && this._menu && this._menu.hasAttribute('data-open')) {
+        this._closeMenu();
+        e.preventDefault();
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const key = e.key;
+      let handled = true;
+
+      if (key === 'ArrowRight' || key === 'PageDown' || key === ' ' || key === 'Spacebar') {
+        this._advance(1, 'keyboard');
+      } else if (key === 'ArrowLeft' || key === 'PageUp') {
+        this._advance(-1, 'keyboard');
+      } else if (key === 'Home') {
+        this._go(0, 'keyboard');
+      } else if (key === 'End') {
+        this._go(this._slides.length - 1, 'keyboard');
+      } else if (key === 'r' || key === 'R') {
+        this._go(0, 'keyboard');
+      } else if (/^[0-9]$/.test(key)) {
+        // 1..9 jump to that slide; 0 jumps to 10.
+        const n = key === '0' ? 9 : parseInt(key, 10) - 1;
+        if (n < this._slides.length) this._go(n, 'keyboard');
+      } else {
+        handled = false;
+      }
+
+      if (handled) {
+        e.preventDefault();
+        this._flashOverlay();
+      }
+    }
+
+    _go(i, reason = 'api') {
+      if (!this._slides.length) return;
+      const clamped = Math.max(0, Math.min(this._slides.length - 1, i));
+      if (clamped === this._index) {
+        this._flashOverlay();
+        return;
+      }
+      this._index = clamped;
+      this._applyIndex({ showOverlay: true, broadcast: true, reason });
+    }
+
+    /** Step forward/back skipping any slide marked data-deck-skip. Falls
+     *  back to _go's clamp-at-ends behaviour (flash overlay) when there's
+     *  nothing further in that direction. */
+    _advance(dir, reason) {
+      if (!this._slides.length) return;
+      let i = this._index + dir;
+      while (i >= 0 && i < this._slides.length && this._slides[i].hasAttribute('data-deck-skip')) {
+        i += dir;
+      }
+      if (i < 0 || i >= this._slides.length) { this._flashOverlay(); return; }
+      this._go(i, reason);
+    }
+
+    // ── Thumbnail rail ────────────────────────────────────────────────────
+    //
+    // Thumbs are keyed by slide element and reused across _renderRail()
+    // calls, so a reorder/delete is an O(changed) DOM shuffle instead of an
+    // O(N) teardown-and-re-clone. Each thumb starts as a lightweight shell
+    // (num + empty frame); the clone is materialized lazily by an
+    // IntersectionObserver when the frame scrolls into (or near) view, so
+    // only visible-ish slides pay the clone + image-decode cost.
+
+    _renderRail() {
+      if (!this._rail || !this._railEnabled) { this._thumbs = []; return; }
+      // FLIP: record each *materialized* thumb's top before the reconcile.
+      // Off-screen (non-materialized) thumbs don't need the animation and
+      // skipping their getBoundingClientRect saves a forced layout per
+      // off-screen thumb on large decks.
+      const prevTops = new Map();
+      (this._thumbs || []).forEach(({ thumb, slide, host }) => {
+        if (host) prevTops.set(slide, thumb.getBoundingClientRect().top);
+      });
+      const st = this._rail.scrollTop;
+
+      // Reconcile: reuse thumbs that already exist for a slide, create
+      // shells for new slides, drop thumbs for removed slides.
+      const bySlide = new Map();
+      (this._thumbs || []).forEach((t) => bySlide.set(t.slide, t));
+      const next = [];
+      this._slides.forEach((slide) => {
+        let t = bySlide.get(slide);
+        if (t) bySlide.delete(slide);
+        else t = this._makeThumb(slide);
+        next.push(t);
+      });
+      // Orphans — slides removed since last render.
+      bySlide.forEach((t) => {
+        if (this._railObserver) this._railObserver.unobserve(t.frame);
+        t.thumb.remove();
+      });
+      // Put thumbs into document order to match _slides. insertBefore on
+      // an already-correctly-placed node is a no-op, so this is cheap
+      // when nothing moved.
+      next.forEach((t, i) => {
+        const want = t.thumb;
+        const at = this._rail.children[i];
+        if (at !== want) this._rail.insertBefore(want, at || null);
+        t.i = i;
+        t.num.textContent = String(i + 1);
+        if (t.slide.hasAttribute('data-deck-skip')) t.thumb.setAttribute('data-skip', '');
+        else t.thumb.removeAttribute('data-skip');
+      });
+      this._thumbs = next;
+
+      this._rail.scrollTop = st;
+      if (prevTops.size) {
+        const moved = [];
+        this._thumbs.forEach(({ thumb, slide }) => {
+          const old = prevTops.get(slide);
+          if (old == null) return;
+          const dy = old - thumb.getBoundingClientRect().top;
+          if (Math.abs(dy) < 1) return;
+          thumb.style.transition = 'none';
+          thumb.style.transform = `translateY(${dy}px)`;
+          moved.push(thumb);
+        });
+        if (moved.length) {
+          // Commit the inverted positions before flipping the transition
+          // on — otherwise the browser coalesces both style writes and
+          // nothing animates.
+          void this._rail.offsetHeight;
+          moved.forEach((t) => {
+            t.style.transition = 'transform 180ms cubic-bezier(.2,.7,.3,1)';
+            t.style.transform = '';
+          });
+          setTimeout(() => moved.forEach((t) => { t.style.transition = ''; }), 220);
+        }
+      }
+      requestAnimationFrame(() => this._scaleThumbs());
+      this._syncRail(false);
+    }
+
+    /** Create a lightweight thumb shell for one slide. The clone is
+     *  materialized later by the IntersectionObserver. Event handlers
+     *  look up the thumb's *current* index (via _thumbs.indexOf) so the
+     *  same element can be reused across reorders. */
+    _makeThumb(slide) {
+      const thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      thumb.tabIndex = 0;
+      const num = document.createElement('div');
+      num.className = 'num';
+      const frame = document.createElement('div');
+      frame.className = 'frame';
+      thumb.append(num, frame);
+
+      const entry = { thumb, num, frame, slide, clone: null, host: null, i: -1 };
+      // entry.i is refreshed on every _renderRail reconcile pass, so
+      // handlers read the thumb's current position without an O(N) scan.
+      const idx = () => entry.i;
+
+      thumb.addEventListener('click', () => this._go(idx(), 'click'));
+      // ↑/↓ step through the rail when a thumb has focus. _go clamps at the
+      // ends and _applyIndex→_syncRail scrolls the new current thumb into
+      // view; we move focus to it (preventScroll — _syncRail already
+      // scrolled) so a held key walks the whole list. stopPropagation keeps
+      // this out of the window-level _onKey nav handler.
+      thumb.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        e.preventDefault();
+        e.stopPropagation();
+        this._go(idx() + (e.key === 'ArrowDown' ? 1 : -1), 'keyboard');
+        const cur = this._thumbs && this._thumbs[this._index];
+        if (cur) cur.thumb.focus({ preventScroll: true });
+      });
+      thumb.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        this._openMenu(idx(), e.clientX, e.clientY);
+      });
+      thumb.draggable = true;
+      thumb.addEventListener('dragstart', (e) => {
+        this._dragFrom = idx();
+        thumb.setAttribute('data-dragging', '');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', String(this._dragFrom)); } catch (err) {}
+      });
+      thumb.addEventListener('dragend', () => {
+        thumb.removeAttribute('data-dragging');
+        this._clearDrop();
+        this._dragFrom = null;
+      });
+      thumb.addEventListener('dragover', (e) => {
+        if (this._dragFrom == null) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const r = thumb.getBoundingClientRect();
+        this._setDrop(idx(), e.clientY < r.top + r.height / 2 ? 'before' : 'after');
+      });
+      thumb.addEventListener('drop', (e) => {
+        if (this._dragFrom == null) return;
+        e.preventDefault();
+        const i = idx();
+        const r = thumb.getBoundingClientRect();
+        let to = e.clientY >= r.top + r.height / 2 ? i + 1 : i;
+        if (this._dragFrom < to) to--;
+        const from = this._dragFrom;
+        this._clearDrop();
+        this._dragFrom = null;
+        if (to !== from) this._moveSlide(from, to);
+      });
+
+      if (this._railObserver) this._railObserver.observe(frame);
+      frame.__deckThumb = entry;
+      return entry;
+    }
+
+    /** Lazily build the clone for a thumb that has scrolled into view. */
+    _materialize(entry) {
+      if (entry.host) return;
+      const dw = this.designWidth, dh = this.designHeight;
+      let clone = entry.slide.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.removeAttribute('data-deck-active');
+      clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+      // Neuter heavy media; replace <video> with its poster so the box
+      // keeps a visual. <iframe>/<audio> become empty placeholders.
+      clone.querySelectorAll('iframe, audio, object, embed').forEach((el) => {
+        el.removeAttribute('src');
+        el.removeAttribute('srcdoc');
+        el.removeAttribute('data');
+        el.innerHTML = '';
+      });
+      clone.querySelectorAll('video').forEach((el) => {
+        if (!el.poster) { el.removeAttribute('src'); el.innerHTML = ''; return; }
+        const img = document.createElement('img');
+        img.src = el.poster;
+        img.alt = '';
+        img.style.cssText = el.style.cssText + ';object-fit:cover;width:100%;height:100%;';
+        img.className = el.className;
+        el.replaceWith(img);
+      });
+      // Images: defer decode and let the browser pick the smallest
+      // srcset candidate for the ~140px thumb. Same-URL clones reuse the
+      // slide's decoded bitmap (URL-keyed cache), so the remaining cost
+      // is paint/composite — lazy+async keeps that off the main thread.
+      clone.querySelectorAll('img').forEach((el) => {
+        el.loading = 'lazy';
+        el.decoding = 'async';
+        if (el.srcset) el.sizes = (this._railPx || 188) + 'px';
+      });
+      // Custom elements inside the slide would have their
+      // connectedCallback fire when the clone is appended. Replace them
+      // with inert boxes so a component-heavy deck doesn't run N copies
+      // of each component's mount logic in the rail. Children are
+      // preserved so layout-wrapper elements (<my-column><h2>…</h2>)
+      // still show their authored content; the querySelectorAll NodeList
+      // is static, so nested custom elements in the moved subtree are
+      // still visited on later iterations.
+      const neuter = (el) => {
+        const box = document.createElement('div');
+        box.style.cssText = (el.getAttribute('style') || '') +
+          ';background:rgba(0,0,0,0.06);border:1px dashed rgba(0,0,0,0.15);';
+        box.className = el.className;
+        // Preserve theming/i18n hooks so [data-*] / :lang() / [dir]
+        // descendant selectors still match the neutered root.
+        for (const a of el.attributes) {
+          const n = a.name;
+          if (n.startsWith('data-') || n.startsWith('aria-') ||
+              n === 'lang' || n === 'dir' || n === 'role' || n === 'title') {
+            box.setAttribute(n, a.value);
+          }
+        }
+        while (el.firstChild) box.appendChild(el.firstChild);
+        return box;
+      };
+      // querySelectorAll('*') returns descendants only — a custom-element
+      // slide root (<my-slide>…</my-slide>) would slip through and upgrade
+      // on append. Swap the root first.
+      if (clone.tagName.includes('-')) clone = neuter(clone);
+      clone.querySelectorAll('*').forEach((el) => {
+        if (el.tagName.includes('-')) el.replaceWith(neuter(el));
+      });
+      clone.style.cssText += ';position:absolute;top:0;left:0;transform-origin:0 0;' +
+        'pointer-events:none;width:' + dw + 'px;height:' + dh + 'px;' +
+        'box-sizing:border-box;overflow:hidden;visibility:visible;opacity:1;';
+      const host = document.createElement('div');
+      host.style.cssText = 'position:absolute;inset:0;';
+      this._syncThumbHostAttrs(host);
+      const sr = host.attachShadow({ mode: 'open' });
+      if (this._adoptedSheet) sr.adoptedStyleSheets = [this._adoptedSheet];
+      else {
+        const st = document.createElement('style');
+        st.textContent = this._authorCss || '';
+        sr.appendChild(st);
+      }
+      sr.appendChild(clone);
+      entry.frame.appendChild(host);
+      entry.host = host;
+      entry.clone = clone;
+      if (this._thumbScale) clone.style.transform = 'scale(' + this._thumbScale + ')';
+      // Once materialized the IO callback is a no-op early-return —
+      // unobserve so scroll doesn't keep firing it.
+      if (this._railObserver) this._railObserver.unobserve(entry.frame);
+    }
+
+    /** Re-clone a single thumb (live-update path). No-op if the thumb
+     *  hasn't been materialized yet — it'll pick up current content when
+     *  it scrolls into view. */
+    _refreshThumb(slide) {
+      const entry = (this._thumbs || []).find((t) => t.slide === slide);
+      if (!entry || !entry.host) return;
+      entry.host.remove();
+      entry.host = entry.clone = null;
+      this._materialize(entry);
+    }
+
+    _scaleThumbs() {
+      if (!this._thumbs || !this._thumbs.length) return;
+      // Every frame is the same width; if it reads 0 the rail is
+      // display:none (noscale / no-rail / presenting / print) — leave the
+      // clones as-is and re-run when the rail is revealed.
+      const fw = this._thumbs[0].frame.offsetWidth;
+      if (!fw) return;
+      this._thumbScale = fw / this.designWidth;
+      this._thumbs.forEach(({ clone }) => {
+        if (clone) clone.style.transform = 'scale(' + this._thumbScale + ')';
+      });
+    }
+
+    _setDrop(i, where) {
+      // dragover fires at pointer-event rate; touch only the previous
+      // and new target rather than sweeping all N thumbs.
+      const t = this._thumbs && this._thumbs[i];
+      if (this._dropOn && this._dropOn !== t) {
+        this._dropOn.thumb.removeAttribute('data-drop');
+      }
+      if (t) t.thumb.setAttribute('data-drop', where);
+      this._dropOn = t || null;
+    }
+
+    _clearDrop() {
+      if (this._dropOn) this._dropOn.thumb.removeAttribute('data-drop');
+      this._dropOn = null;
+    }
+
+    _syncRail(follow) {
+      if (!this._thumbs) return;
+      this._thumbs.forEach(({ thumb }, i) => {
+        if (i === this._index) {
+          thumb.setAttribute('data-current', '');
+          if (follow && typeof thumb.scrollIntoView === 'function') {
+            thumb.scrollIntoView({ block: 'nearest' });
+          }
+        } else {
+          thumb.removeAttribute('data-current');
+        }
+      });
+    }
+
+    _openMenu(i, x, y) {
+      if (!this._menu) return;
+      this._menuIndex = i;
+      const slide = this._slides[i];
+      const skip = slide && slide.hasAttribute('data-deck-skip');
+      this._menu.querySelector('[data-act="skip"]').textContent = skip ? 'Unskip slide' : 'Skip slide';
+      this._menu.querySelector('[data-act="up"]').disabled = i <= 0;
+      this._menu.querySelector('[data-act="down"]').disabled = i >= this._slides.length - 1;
+      this._menu.querySelector('[data-act="delete"]').disabled = this._slides.length <= 1;
+      // Place, then clamp to viewport after it's measurable.
+      this._menu.style.left = x + 'px';
+      this._menu.style.top = y + 'px';
+      this._menu.setAttribute('data-open', '');
+      const r = this._menu.getBoundingClientRect();
+      const nx = Math.min(x, window.innerWidth - r.width - 4);
+      const ny = Math.min(y, window.innerHeight - r.height - 4);
+      this._menu.style.left = Math.max(4, nx) + 'px';
+      this._menu.style.top = Math.max(4, ny) + 'px';
+    }
+
+    _closeMenu() {
+      if (this._menu) this._menu.removeAttribute('data-open');
+      this._menuIndex = -1;
+    }
+
+    _openConfirm(i) {
+      if (!this._confirm) return;
+      this._confirmIndex = i;
+      this._confirm.querySelector('.title').textContent = 'Delete slide ' + (i + 1) + '?';
+      this._confirm.setAttribute('data-open', '');
+      const btn = this._confirm.querySelector('.danger');
+      if (btn && btn.focus) btn.focus();
+    }
+
+    _closeConfirm() {
+      if (this._confirm) this._confirm.removeAttribute('data-open');
+      this._confirmIndex = -1;
+    }
+
+    /** Rail mutations. When a dc-runtime is present (`window.__dcUpdate`)
+     *  the host owns the light DOM — handlers emit a dc-op only and the
+     *  host applies it (to the editor's model or to the source file) and
+     *  re-renders via dc-runtime; slotchange catches the rail up.
+     *  Structural ops lock rail input until the host acks so a rapid second
+     *  click can't address a stale index; setAttr/removeAttr respect the
+     *  lock but don't set it (indices unchanged; the host serializes).
+     *  `newIndex` is written to location.hash so slotchange's
+     *  _restoreIndex lands on the right slide.
+     *
+     *  With NO dc-runtime (a raw .html deck), there's no re-render path,
+     *  so handlers self-mutate locally for an instant update and emit
+     *  `emitOnly: false`; the host persists to disk without
+     *  re-rendering over the already-mutated DOM.
+     *
+     *  See docs/dc-ops.md for the contract. */
+    _emitDcOp(op, slide, lock, newIndex) {
+      // Slide index (template/script/style filtered — same as
+      // _collectSlides). deck-stage is a filtered-index dc-op emitter;
+      // the host resolves against findDeckStage().slideTids. Callers
+      // already pass `to` as a slide index.
+      op.at = this._slides.indexOf(slide);
+      op.witness = { childCount: this._slides.length };
+      // dc-runtime wraps an <x-import>-mounted component in a
+      // <div class="sc-host-x" data-dc-tpl="N"> host — the stamp is on the
+      // WRAPPER, not this element. closest() finds it (or this element's
+      // own stamp when directly templated).
+      const host = this.closest('[data-dc-tpl]');
+      const tid = host && host.getAttribute('data-dc-tpl');
+      op.mount = { tid: tid !== null ? parseInt(tid, 10) : null, tag: 'deck-stage' };
+      op.emitOnly = !!window.__dcUpdate;
+      if (op.emitOnly) {
+        if (lock) this._railLock = true;
+        if (newIndex != null && newIndex !== this._index) {
+          this._indexBeforeEmit = this._index;
+          this._index = newIndex;
+          try { history.replaceState(null, '', '#' + (newIndex + 1)); } catch (e) {}
+        }
+      }
+      this.dispatchEvent(new CustomEvent('dc-op', {
+        detail: op, bubbles: true, composed: true,
+      }));
+      return op.emitOnly;
+    }
+
+    _deleteSlide(i) {
+      if (this._railLock) return;
+      const slide = this._slides[i];
+      if (!slide || this._slides.length <= 1) return;
+      const cur = this._index;
+      const ni = (i < cur || (i === cur && i === this._slides.length - 1)) ? cur - 1 : cur;
+      if (this._emitDcOp({ op: 'remove' }, slide, true, ni)) return;
+      this._index = ni;
+      this._squelchSlotChange = true;
+      slide.remove();
+      this._collectSlides();
+      this._applyIndex({ showOverlay: true, broadcast: true, reason: 'mutation' });
+    }
+
+    _duplicateSlide(i) {
+      if (this._railLock) return;
+      const slide = this._slides[i];
+      if (!slide) return;
+      if (this._emitDcOp({ op: 'duplicate' }, slide, true, i + 1)) return;
+      const copy = slide.cloneNode(true);
+      copy.removeAttribute('id');
+      copy.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+      this._index = i + 1;
+      this._squelchSlotChange = true;
+      this.insertBefore(copy, slide.nextSibling);
+      this._collectSlides();
+      this._applyIndex({ showOverlay: true, broadcast: true, reason: 'mutation' });
+    }
+
+    _toggleSkip(i) {
+      if (this._railLock) return;
+      const slide = this._slides[i];
+      if (!slide) return;
+      const on = !slide.hasAttribute('data-deck-skip');
+      if (this._emitDcOp(
+        on ? { op: 'setAttr', attr: 'data-deck-skip', value: '' }
+           : { op: 'removeAttr', attr: 'data-deck-skip' },
+        slide, false
+      )) return;
+      if (on) slide.setAttribute('data-deck-skip', '');
+      else slide.removeAttribute('data-deck-skip');
+    }
+
+    _skippedIndices() {
+      const out = [];
+      for (let i = 0; i < this._slides.length; i++) {
+        if (this._slides[i].hasAttribute('data-deck-skip')) out.push(i);
+      }
+      return out;
+    }
+
+    _moveSlide(i, j) {
+      if (this._railLock || j < 0 || j >= this._slides.length || j === i) return;
+      const cur = this._index;
+      const ni = cur === i ? j
+        : (i < cur && j >= cur) ? cur - 1
+        : (i > cur && j <= cur) ? cur + 1
+        : cur;
+      const slide = this._slides[i];
+      if (this._emitDcOp({ op: 'move', to: j }, slide, true, ni)) return;
+      const ref = j < i ? this._slides[j] : this._slides[j].nextSibling;
+      this._index = ni;
+      this._squelchSlotChange = true;
+      this.insertBefore(slide, ref);
+      this._collectSlides();
+      this._applyIndex({ showOverlay: false, broadcast: true, reason: 'mutation' });
+    }
+
+    // Public API ------------------------------------------------------------
+
+    /** Current slide index (0-based). */
+    get index() { return this._index; }
+    /** Total slide count. */
+    get length() { return this._slides.length; }
+    /** Programmatically navigate. */
+    goTo(i) { this._go(i, 'api'); }
+    next() { this._advance(1, 'api'); }
+    prev() { this._advance(-1, 'api'); }
+    reset() { this._go(0, 'api'); }
+  }
+
+  if (!customElements.get('deck-stage')) {
+    customElements.define('deck-stage', DeckStage);
+  }
+})();
+
+</script>
+</body>
+</html>
