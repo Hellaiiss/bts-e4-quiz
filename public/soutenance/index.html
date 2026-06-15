@@ -445,22 +445,28 @@
               <text x="350" y="288" fill="#F2B33B" font-size="12">τ</text>
             </g>
           </svg>
-          <p class="dim" style="font-size:18px;text-align:center;margin-top:8px;">Réponse indicielle relevée à l'oscilloscope Control Expert, en boucle ouverte</p>
+          <p class="dim" style="font-size:18px;text-align:center;margin-top:8px;">Réponse indicielle à l'oscilloscope Control Expert — seuils Broïda à 28 % et 40 % : t₁ = 2,53 s, t₂ = 2,77 s</p>
         </div>
         <div class="col" data-anim="right" data-d="3">
-          <p class="lead" style="font-size:22px;">J'envoie un <strong>échelon en boucle ouverte</strong> et je relève la réponse. La méthode de <strong>Broïda</strong> en déduit les paramètres du procédé, dont je tire un premier réglage <span class="code">Kp</span> / <span class="code">Ti</span>, affiné ensuite sur banc.</p>
-          <div class="grid g2" style="gap:16px;height:auto;">
-            <div class="kpi"><span class="v">4,0</span><span class="l">gain proportionnel Kp</span></div>
-            <div class="kpi"><span class="v cy">2,0 s</span><span class="l">temps d'intégration Ti</span></div>
+          <p class="lead" style="font-size:21px;">Échelon <strong>0 → 100 %</strong> en boucle ouverte, réponse relevée à l'oscilloscope. Broïda en déduit d'abord un réglage <strong>PIDFF</strong> théorique — puis l'essai en boucle fermée m'oblige à <span class="gr">supprimer la dérivée</span>.</p>
+          <div class="card" style="padding:18px 22px;">
+            <table class="t" style="font-size:19px;">
+              <thead><tr><th>Param.</th><th>Broïda PIDFF</th><th>Retenu PI</th></tr></thead>
+              <tbody>
+                <tr><td class="lead-col mono">Kp</td><td class="dim">4,61</td><td><span class="gr">4,0</span></td></tr>
+                <tr><td class="lead-col mono">Ti</td><td class="dim">2,16 s</td><td><span class="gr">2,0 s</span></td></tr>
+                <tr><td class="lead-col mono">Td</td><td class="dim">0,51 s</td><td><span class="am">absent</span></td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="card edge-am" style="padding:18px 22px;">
-            <div class="kicker">Réglage usine</div>
-            <p style="font-size:19px;">Ces valeurs sont la référence : une fiche réflexe A5 plastifiée laissée près du pupitre permet aux enseignants de les retrouver en cas de dérive.</p>
+          <div class="strip" style="margin-top:0;padding:16px 22px;">
+            <span class="b am"><span class="dot"></span>Pourquoi sans Td</span>
+            <p style="font-size:18px;">Le terme dérivé amplifiait le bruit codeur (±1 incrément) → oscillation HF (bug B07). Td supprimé, <span class="code">Kp</span> / <span class="code">Ti</span> réajustés sur banc. <strong>Kp = 4,0 · Ti = 2,0 s</strong> devient le réglage usine, laissé sur une fiche réflexe A5 près du pupitre.</p>
           </div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">Broïda</span> · identification → Kp / Ti → affinage banc</span><span class="mono">13</span></div>
+    <div class="foot"><span><span class="brandmark">Broïda</span> · PIDFF 4,61 / 2,16 / 0,51 → PI retenu 4,0 / 2,0</span><span class="mono">13</span></div>
   </div>
 </section>
 
@@ -652,8 +658,9 @@
           </div>
         </div>
         <div class="col" data-anim="right" data-d="3">
-          <div class="comp"><span class="cc">C15</span><p>Concevoir et écrire le programme — projet, sections, IHM</p></div>
-          <div class="comp"><span class="cc">C16</span><p>Mettre en service et régler l'asservissement</p></div>
+          <div class="comp"><span class="cc">C14</span><p>Organiser le chantier &amp; câbler les entrées codeurs / la sortie analogique</p></div>
+          <div class="comp"><span class="cc">C15</span><p>Programmer l'automate &amp; l'IHM, paramétrer l'asservissement</p></div>
+          <div class="comp"><span class="cc">C16</span><p>Mettre en service et valider les 8 essais E1→E8</p></div>
           <div class="comp"><span class="cc">C4</span><p>Réceptionner, former, conduire la communication de chantier</p></div>
           <div class="strip" style="margin-top:4px;">
             <span class="b gr"><span class="dot"></span>60 h</span>
@@ -689,7 +696,7 @@
         <div class="kpi"><span class="v">8/8</span><span class="l">essais validés à la réception</span></div>
         <div class="kpi"><span class="v cy">V4.2</span><span class="l">version livrée, stable</span></div>
         <div class="kpi"><span class="v am">&lt;5 mm</span><span class="l">précision de position</span></div>
-        <div class="kpi"><span class="v">C4·15·16</span><span class="l">compétences couvertes</span></div>
+        <div class="kpi"><span class="v">C14·15·16·4</span><span class="l">compétences couvertes</span></div>
       </div>
     </div>
     <div class="cover-sign" data-anim="fade" data-d="6">
@@ -715,7 +722,7 @@
   "Le programme est organisé en quatre sections exécutées dans un ordre fixé : REGULATION qui lit les codeurs et exécute le PI ; le GRAFCET maître qui gère les cinq modes ; le GRAFCET d'init pour la prise d'origine ; et SECURITE. Le point que je veux vraiment expliquer, c'est le principe M_CMD. Aucun GRAFCET n'écrit directement sur une sortie physique. Chacun exprime seulement une intention — par exemple « je veux que AX2 monte » — en écrivant un flag M_CMD. Et c'est la section SECURITE, et elle seule, qui décide en fin de cycle si cette intention devient une action réelle. Avantage énorme : tous les interblocages, fins de course et sécurités sont au même endroit. Ajouter une sécurité, c'est modifier un seul bloc — pas parcourir tout le programme.",
   "Le GRAFCET maître, c'est une étoile autour de l'étape REPOS. Depuis REPOS, quatre branches selon le mode demandé sur l'IHM : INIT, MANU, APP, AUTO. Chaque branche revient à REPOS quand le mode se termine, ou quand une CONDITION_SORTIE calculée dans SECURITE l'interrompt. À retenir : à l'origine j'avais quatre GRAFCETs séparés. Les fusionner en un seul maître a tout simplifié — j'y reviens à l'acte III, parce que ça a corrigé deux bugs d'un coup.",
   "Concentrons-nous sur l'asservissement de l'axe G/D. Voici la boucle fermée. La consigne vient de l'IHM. On la compare à la position mesurée par le codeur : ça donne l'erreur. Le correcteur PI traite cette erreur et sort une commande de 0 à 100 %. Cette commande devient une tension 0-10 V sur la sortie analogique, amplifiée par l'Atos, qui ouvre le distributeur et déplace le vérin. Et le codeur referme la boucle. Tout ça tourne à chaque cycle automate, environ toutes les 10 millisecondes. Détail technique : les gains Kp et Ti sont des nombres réels, donc stockés en flottants, et exposés en secondes côté IHM pour que l'opérateur les lise facilement.",
-  "Comment j'ai réglé ce PI ? Pas au hasard. J'ai utilisé la méthode de Broïda : j'envoie un échelon en boucle ouverte, je relève la réponse à l'oscilloscope intégré de Control Expert, et la méthode me donne les paramètres du procédé. J'en tire un premier réglage, que j'affine ensuite sur le banc. Résultat : Kp égale 4,0 et Ti égale 2 secondes. Ce sont les valeurs usine, que j'ai laissées sur une fiche réflexe plastifiée près du pupitre pour que les enseignants les retrouvent en cas de dérive.",
+  "Comment j'ai réglé ce PI ? Pas au hasard. J'ai utilisé la méthode de Broïda : j'envoie un échelon de 0 à 100 % en boucle ouverte, je relève la réponse à l'oscilloscope intégré de Control Expert. Les seuils à 28 et 40 % me donnent t1 égale 2,53 secondes et t2 égale 2,77 secondes, et les formules de Broïda en déduisent un premier réglage théorique sur un correcteur PIDFF : Kp égale 4,61, Ti égale 2,16 secondes, Td égale 0,51 seconde. Mais au premier essai en boucle fermée, ce PIDFF se met à osciller à 50 hertz, bras immobile : le terme dérivé amplifie le bruit du codeur, à plus ou moins un incrément. J'ai donc supprimé la dérivée — je passe sur un bloc PI — et réajusté sur banc à Kp égale 4,0 et Ti égale 2 secondes. Ce sont les valeurs usine, laissées sur une fiche réflexe plastifiée près du pupitre pour que les enseignants les retrouvent en cas de dérive.",
   "Dernière brique de la programmation : l'IHM, l'interface opérateur. Six écrans : accueil, manuel, apprentissage, auto, réglages, et défauts avec ses 8 lampes de diagnostic. Communication en Modbus TCP. Deux adaptations à assumer honnêtement : l'écran prévu à l'étude n'était plus disponible, j'ai donc tout refondu sur un écran HMIS5T plus petit ; et la licence d'import direct n'étant pas arrivée, j'ai contourné par un import CSV des 89 variables. Toutes les fonctions prévues sont bien là, simplement sur un format plus contraint.",
   "Acte III : la mise au point. Sept bugs, quatre versions. Je l'assume complètement : ce n'est pas un aveu d'erreurs, c'est la trace d'une vraie démarche d'ingénieur. Chaque bug a été identifié à l'usage, isolé, expliqué, puis corrigé par une modification calibrée. Et cet historique est un livrable à part entière, conservé au dossier pour la maintenance future.",
   "Voici la frise. V1, la première écriture, avec mes quatre GRAFCETs séparés. V2, la refonte : elle corrige B01, l'axe qui retombait au repos avant la cible, et B02, le codeur AX2 qui décomptait à l'envers. V3, la stabilisation : trois bugs corrigés sans toucher à l'architecture — le battement des distributeurs réglé par un anti-chattering, un import refusé, une position jamais validée. Et V4.2, la version livrée : l'INIT non relançable après défaut, et le plus intéressant, B07, une oscillation haute fréquence — le bruit du codeur amplifié par le terme dérivé du PIDFF. Je suis passé du bloc PIDFF au bloc PI, plus stable.",
