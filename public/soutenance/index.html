@@ -3,737 +3,1197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Soutenance U6.2 — Rétrofit MPH600 — S. Devallière</title>
-<link rel="stylesheet" href="styles.css">
+<title>U6.2 — Réalisation & mise en service MPH600 — Sullivan DEVALLIÈRE</title>
+<style>
+:root {
+  --dark: #0D1B2A;
+  --accent: #1565C0;
+  --accent-light: #E3F2FD;
+  --accent-dark: #0D47A1;
+  --success: #2E7D32;
+  --danger: #C62828;
+  --warning: #F57F17;
+  --gray: #607D8B;
+  --gray-light: #F5F7FA;
+  --engie-blue: #00AAFF;
+  --shem-green: #8BC34A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0f1a;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  color: #333;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* VIEWPORT */
+#viewport {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+#canvas {
+  position: absolute;
+  width: 10000px;
+  height: 8000px;
+  transform-origin: 0 0;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* SLIDES */
+.prezi-slide {
+  position: absolute;
+  width: 960px;
+  height: 540px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.prezi-slide.dark { background: var(--dark); color: #fff; }
+
+/* SLIDE INTERNALS */
+.s-header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--dark); color: #fff;
+  padding: 0 24px; height: 48px; font-size: 17px; font-weight: 700;
+}
+.s-tag {
+  background: var(--accent); color: #fff;
+  padding: 3px 12px; border-radius: 4px;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+}
+.s-tag.green { background: var(--success); }
+.s-tag.orange { background: var(--warning); }
+.s-tag.red { background: var(--danger); }
+.s-body { padding: 14px 24px; height: 492px; position: relative; overflow: hidden; }
+.s-title { font-size: 22px; font-weight: 700; color: var(--accent-dark); margin-bottom: 10px; }
+.s-text { font-size: 14px; line-height: 1.5; color: #333; }
+.s-grid { display: grid; gap: 12px; }
+.g2 { grid-template-columns: 1fr 1fr; }
+.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.g60-40 { grid-template-columns: 3fr 2fr; }
+.g40-60 { grid-template-columns: 2fr 3fr; }
+.g70-30 { grid-template-columns: 7fr 3fr; }
+.g30-70 { grid-template-columns: 3fr 7fr; }
+
+/* Cards */
+.card {
+  background: #fff; border-radius: 6px;
+  padding: 12px; border: 1px solid #e0e0e0;
+}
+.card.accent { border-left: 4px solid var(--accent); }
+.card.green { border-left: 4px solid var(--success); }
+.card.red { border-left: 4px solid var(--danger); }
+.card.orange { border-left: 4px solid var(--warning); }
+.card.blue-bg { background: var(--accent-light); border-color: #BBDEFB; }
+.card.dark-bg { background: var(--dark); color: #fff; border: none; }
+.card.green-bg { background: #E8F5E9; border-color: #C8E6C9; }
+.card.red-bg { background: #FFEBEE; border-color: #FFCDD2; }
+.card.orange-bg { background: #FFF8E1; border-color: #FFECB3; }
+
+/* KPI */
+.kpi-row { display: flex; gap: 10px; }
+.kpi { flex: 1; text-align: center; padding: 8px 6px; background: var(--gray-light); border-radius: 6px; }
+.kpi .kv { font-size: 26px; font-weight: 800; color: var(--accent); }
+.kpi .kv.green { color: var(--success); }
+.kpi .kv.red { color: var(--danger); }
+.kpi .kv.orange { color: var(--warning); }
+.kpi .kl { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+/* Images */
+.slide-img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+.img-frame { border-radius: 6px; overflow: hidden; background: #f0f0f0; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; padding: 6px 8px; background: var(--dark); color: #fff; font-size: 11px; }
+td { padding: 5px 8px; border-bottom: 1px solid #eee; }
+tr.win td { background: #E8F5E9; font-weight: 600; }
+tr.fail td { background: #FFEBEE; }
+tr.fix td { background: #FFF8E1; }
+
+/* Tags */
+.badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.badge.green { background: #E8F5E9; color: #2E7D32; }
+.badge.red { background: #FFEBEE; color: #C62828; }
+.badge.blue { background: #E3F2FD; color: #1565C0; }
+.badge.orange { background: #FFF8E1; color: #F57F17; }
+.badge.gray { background: #ECEFF1; color: #455A64; }
+
+.label { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.small { font-size: 12px; }
+.tiny { font-size: 10px; }
+.strong { font-weight: 700; }
+.mono { font-family: "Consolas", "Courier New", monospace; }
+.mb2 { margin-bottom: 2px; } .mb4 { margin-bottom: 4px; } .mb6 { margin-bottom: 6px; }
+.mb8 { margin-bottom: 8px; } .mb12 { margin-bottom: 12px; }
+.mt4 { margin-top: 4px; } .mt8 { margin-top: 8px; }
+
+/* Footer */
+.s-footer {
+  position: absolute; bottom: 6px; left: 24px; right: 24px;
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: #bbb;
+}
+.prezi-slide.dark .s-footer { color: #607D8B; }
+
+/* NAV PANEL */
+#nav {
+  position: fixed; left: 0; top: 0;
+  width: 54px; height: 100vh;
+  background: rgba(13,27,42,0.95); z-index: 100;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 0; gap: 3px;
+  overflow-y: auto; scrollbar-width: none;
+}
+#nav::-webkit-scrollbar { display: none; }
+.nav-dot {
+  width: 36px; height: 24px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: rgba(255,255,255,0.4);
+  transition: all 0.3s; flex-shrink: 0;
+}
+.nav-dot:hover { background: rgba(21,101,192,0.4); color: #fff; }
+.nav-dot.active { background: var(--accent); color: #fff; font-weight: 700; }
+
+/* PROGRESS BAR */
+#progress {
+  position: fixed; bottom: 0; left: 54px; height: 3px;
+  background: var(--accent); transition: width 0.5s ease; z-index: 100;
+}
+
+/* CONTROLS */
+#controls { position: fixed; bottom: 16px; right: 16px; display: flex; gap: 8px; z-index: 100; }
+#controls button {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: none; background: rgba(13,27,42,0.9); color: #fff;
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+#controls button:hover { background: var(--accent); }
+
+/* Cover */
+.cover-content { position: relative; }
+.cover-circles::before, .cover-circles::after {
+  content: ""; position: absolute;
+  top: -80px; right: -80px; width: 350px; height: 350px;
+  border-radius: 50%; background: rgba(255,255,255,0.05);
+}
+
+/* Phase cards */
+.phase-card { border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0; background: #fff; }
+.phase-header { padding: 10px; color: #fff; text-align: center; font-size: 13px; font-weight: 700; }
+.phase-body { padding: 10px; font-size: 12px; line-height: 1.5; }
+
+/* Boxes used in process flows */
+.box {
+  padding: 6px 10px; background: var(--accent-light);
+  border: 1px solid #90CAF9; border-radius: 4px;
+  font-size: 11px; color: var(--accent-dark); font-weight: 600;
+  text-align: center;
+}
+.box.green { background: #E8F5E9; border-color: #A5D6A7; color: var(--success); }
+.box.red { background: #FFEBEE; border-color: #EF9A9A; color: var(--danger); }
+.box.orange { background: #FFF8E1; border-color: #FFD54F; color: var(--warning); }
+.box.dark { background: var(--dark); border-color: var(--dark); color: #fff; }
+
+.arrow { color: var(--gray); font-weight: 700; text-align: center; font-size: 14px; padding: 4px 0; }
+
+/* SVG diag */
+.svg-wrap { width: 100%; height: 100%; }
+
+/* Vertical flow */
+.vflow { display: flex; flex-direction: column; gap: 4px; }
+.vflow .step {
+  background: #fff; border: 1.5px solid var(--accent); border-radius: 4px;
+  padding: 4px 8px; text-align: center; font-size: 11px; font-weight: 600;
+}
+.vflow .step.init { border: 2.5px double var(--accent-dark); background: var(--accent-light); }
+.vflow .trans { text-align: center; font-size: 10px; color: var(--danger); font-style: italic; }
+.vflow .bar { height: 2px; background: var(--dark); margin: 2px 0; }
+</style>
 </head>
 <body>
-<deck-stage>
 
-<!-- 01 · COUVERTURE -->
-<section class="slide" data-screen-label="01">
-  <div class="cover-fx" aria-hidden="true">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
-    <svg class="cover-trace" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-      <path class="draw" style="--len:2600" d="M-40 760 H560 L660 660 H1040 L1140 760 H1500 L1600 540 H2000" fill="none" stroke="rgba(124,226,132,.5)" stroke-width="2"/>
-      <path class="draw" style="--len:2600" d="M-40 880 H420 L520 820 H980 L1080 880 H1480 L1560 700 H2000" fill="none" stroke="rgba(43,196,255,.32)" stroke-width="2"/>
-      <circle class="live" cx="660" cy="660" r="5" fill="var(--lime)"/>
-      <circle class="live" cx="1140" cy="760" r="5" fill="var(--lime)"/>
-      <circle class="live" cx="1600" cy="540" r="5" fill="var(--lime)"/>
-    </svg>
-  </div>
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">U6.2</span> BTS Électrotechnique · Session juin 2026</div>
-      <div class="tags"><span class="tag c">Soutenance</span><span class="tag cy">≈ 20 min</span></div>
-    </div>
-    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-      <div class="cover-kick mono" data-anim="up" data-d="1">RÉTROFIT · AUTOMATISME · MISE EN SERVICE</div>
-      <h1 class="cover-title" data-anim="up" data-d="2">Rétrofit de l'armoire<br>électrique du bras<br><span class="em">manipulateur MPH600</span></h1>
-      <p class="lead" data-anim="up" data-d="4" style="margin-top:30px;">Conception logicielle, configuration de l'automate <strong>Schneider M340</strong> et mise en service de l'asservissement hydraulique — la part <strong>automatisme</strong> d'un chantier mené en binôme.</p>
-    </div>
-    <div class="cover-sign" data-anim="fade" data-d="6">
-      <div class="who">
-        <div class="name">Sullivan DEVALLIÈRE</div>
-        <div class="role mono">Partie automatisme · programmation · asservissement</div>
-      </div>
-      <div class="who right">
-        <div class="name dim">En binôme avec Tom FROIDEFOND</div>
-        <div class="role mono">Partie câblage général de l'armoire</div>
-      </div>
-    </div>
-  </div>
-</section>
+<div id="nav"></div>
+<div id="progress" style="width:0%"></div>
 
-<!-- 02 · BINÔME -->
-<section class="slide" data-screen-label="02">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">00</span> Organisation du chantier</div>
-      <div class="tags"><span class="tag">60 h · contrat individuel</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:26px;">Un chantier, <span class="gr">deux métiers</span> — une frontière nette</h2>
-    <div class="body">
-      <div class="split2">
-        <div class="person-card" data-anim="left" data-d="2">
-          <div class="pc-top"><span class="pc-init">SD</span><div><div class="pc-name">Sullivan DEVALLIÈRE</div><div class="pc-tag mono gr">MOI · AUTOMATISME</div></div></div>
-          <ul class="pc-list">
-            <li>Création du projet Control&nbsp;Expert &amp; configuration du rack M340</li>
-            <li>Programmation des sections automate (SFC + ST)</li>
-            <li>Asservissement PI &amp; mise en service de la boucle</li>
-            <li>Soudure / recâblage de l'embase de l'amplificateur</li>
-          </ul>
-        </div>
-        <div class="frontier" data-anim="scale" data-d="3" aria-hidden="true">
-          <span class="frontier-line"></span><span class="frontier-dot"></span><span class="frontier-word mono">FRONTIÈRE</span><span class="frontier-dot"></span><span class="frontier-line"></span>
-        </div>
-        <div class="person-card dim-card" data-anim="right" data-d="3">
-          <div class="pc-top"><span class="pc-init alt">TF</span><div><div class="pc-name">Tom FROIDEFOND</div><div class="pc-tag mono cy">BINÔME · CÂBLAGE</div></div></div>
-          <ul class="pc-list">
-            <li>Câblage général de l'armoire</li>
-            <li>Distribution de puissance &amp; alimentations</li>
-            <li>Borniers, cheminements, repérage</li>
-            <li>Hors interfaces de signal sensibles</li>
-          </ul>
-        </div>
-      </div>
-      <div class="strip" data-anim="up" data-d="5">
-        <span class="b gr"><span class="dot"></span>2 mondes · 1 armoire</span>
-        <p>Tom donne le <strong>courant</strong>, je donne <strong>l'intelligence</strong>. Cette présentation suit exclusivement <span class="gr">ma partie automatisme</span> — du premier fichier projet jusqu'à la réception client.</p>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">MPH600</span> · U6.2 · S. Devallière</span><span class="mono">02</span></div>
-  </div>
-</section>
+<div id="controls">
+  <button onclick="goHome()" title="Vue d'ensemble">⌂</button>
+  <button onclick="goPrev()" title="Précédent">◀</button>
+  <button onclick="goNext()" title="Suivant">▶</button>
+</div>
 
-<!-- 03 · CONTEXTE -->
-<section class="slide" data-screen-label="03">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">00</span> Le système</div>
-      <div class="tags"><span class="tag cy">Bras hydraulique 3 axes</span><span class="tag">Pédagogique</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:26px;">Le <span class="gr">MPH600</span> — un bras hydraulique à remettre à neuf</h2>
-    <div class="body">
-      <div class="grid g3" style="grid-template-columns:1.15fr 1fr 1fr; align-items:stretch;">
-        <div class="card edge-gr" data-anim="up" data-d="2">
-          <div class="kicker">Le système</div>
-          <h3>Trois axes, une pince</h3>
-          <p><span class="cy">AX1 (G/D)</span> asservi en position par distributeur proportionnel. <span class="cy">AX2 / AX3</span> en tout-ou-rien, plus une pince. Le tout piloté à l'huile sous pression.</p>
-        </div>
-        <div class="card edge-am" data-anim="up" data-d="3">
-          <div class="kicker">La mission</div>
-          <h3>Rétrofit complet</h3>
-          <p>Remplacer une commande obsolète par un automate moderne <span class="gr">Schneider M340</span> + IHM Harmony, sans toucher à la mécanique du bras.</p>
-        </div>
-        <div class="card" data-anim="up" data-d="4">
-          <div class="kicker">Ma cible</div>
-          <h3>Du fichier vide à la réception</h3>
-          <p>Tout le logiciel : configuration matérielle, programme, IHM, réglage de l'asservissement et validation par <span class="gr">8 essais</span>.</p>
-        </div>
-      </div>
-      <div class="kpibar" data-anim="up" data-d="5">
-        <div class="kpi"><span class="v">3</span><span class="l">axes pilotés + 1 pince</span></div>
-        <div class="kpi"><span class="v cy">6</span><span class="l">modules dans le rack M340</span></div>
-        <div class="kpi"><span class="v am">26 h</span><span class="l">de programmation sur 60 h</span></div>
-        <div class="kpi"><span class="v">138</span><span class="l">variables déclarées</span></div>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">MPH600</span> · U6.2 · S. Devallière</span><span class="mono">03</span></div>
-  </div>
-</section>
+<div id="viewport">
+<div id="canvas">
 
-<!-- 04 · ACTE I DIVIDER -->
-<section class="slide divider" data-screen-label="04">
-  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
-  <div class="pad">
-    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; I &nbsp;·&nbsp; FONDATIONS</div>
-    <h2 class="dv-title" data-anim="up" data-d="2">Créer<br>le <span class="em">projet</span>.</h2>
-    <p class="dv-sub" data-anim="up" data-d="3">Avant la moindre ligne de programme : bâtir la maquette logicielle de l'automate. Donner à chaque module sa place et son nom dans le rack M340.</p>
-    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
-      <span class="tag c">EcoStruxure Control Expert</span><span class="tag">Modicon M340</span><span class="tag">Rack 6 emplacements</span>
+<!-- ============================================================
+     S0 — COUVERTURE
+============================================================ -->
+<div class="prezi-slide dark" id="s0" style="left:4500px;top:200px;">
+  <div style="width:960px;height:540px;background:linear-gradient(135deg,#0D1B2A 0%,#1B3A5C 50%,#1565C0 100%);display:flex;align-items:center;padding:40px;position:relative;overflow:hidden;">
+    <div class="cover-circles"></div>
+    <div class="cover-content" style="flex:1;">
+      <div style="font-size:14px;color:#64B5F6;font-weight:600;letter-spacing:2px;margin-bottom:8px;">ÉPREUVE U6.2 — RÉALISATION & MISE EN SERVICE</div>
+      <div style="font-size:30px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:12px;">Comment réaliser, programmer et<br>mettre en service un retrofit<br>d'armoire industrielle ?</div>
+      <div style="font-size:15px;color:#90CAF9;margin-bottom:24px;">Bras hydraulique MPH600 — 60 h chantier — atelier Schneider Marèges</div>
+      <div style="font-size:15px;color:#fff;font-weight:600;">Sullivan DEVALLIÈRE</div>
+      <div style="font-size:13px;color:#78909C;margin-top:4px;">BTS Électrotechnique, Session 2026<br>CFAI du Limousin • Alternance SHEM (Groupe ENGIE) • Atelier Marèges</div>
+    </div>
+    <div style="width:300px;display:flex;flex-direction:column;gap:10px;">
+      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;color:#90CAF9;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Compétences évaluées</div>
+        <div style="font-size:14px;color:#fff;font-weight:600;line-height:1.6;">C4 · Organiser<br>C14 · Réaliser<br>C15 · Mettre en service<br>C16 · Réceptionner</div>
+      </div>
+      <div style="background:rgba(139,195,74,0.18);border:1px solid rgba(139,195,74,0.35);border-radius:8px;padding:12px;">
+        <div style="font-size:11px;color:#C5E1A5;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Tâches couvertes</div>
+        <div style="font-size:13px;color:#fff;line-height:1.6;">T6.1 · T6.2 · T6.3a · T6.3b<br>T7.1 · T7.2 · T7.3 · T8.4</div>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- 05 · CRÉATION DU PROJET CONTROL EXPERT -->
-<section class="slide" data-screen-label="05">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">I</span> Création du projet</div>
-      <div class="tags"><span class="tag c">Schneider Electric</span><span class="tag">EcoStruxure Control Expert</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:24px;">Ma première action : <span class="gr">faire naître le projet</span></h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1fr 1fr; gap:40px; align-items:center;">
-        <div class="col" data-anim="left" data-d="2">
-          <p class="lead" style="font-size:24px;">Un projet automate ne démarre pas par du code, mais par une <strong>déclaration de matériel</strong>. J'ai construit dans Control Expert la copie exacte de l'automate physique — avant de pouvoir lui parler.</p>
-          <div class="strip" style="margin-top:6px;">
-            <span class="b gr"><span class="dot"></span>Règle d'or</span>
-            <p>Si la configuration matérielle est fausse, <strong>aucune</strong> ligne de programme ne fonctionnera ensuite. C'est la fondation.</p>
-          </div>
-        </div>
-        <div class="steps" data-anim="right" data-d="3">
-          <div class="step"><span class="n">1</span><div class="sc"><h3>Créer le fichier projet</h3><p>Nouveau projet dans EcoStruxure Control&nbsp;Expert, l'atelier logiciel de Schneider.</p></div></div>
-          <div class="step"><span class="n">2</span><div class="sc"><h3>Assigner l'automate</h3><p>Choix de la plateforme <span class="code">Modicon M340</span> et de son processeur.</p></div></div>
-          <div class="step"><span class="n">3</span><div class="sc"><h3>Définir le rack</h3><p>Un rack de <strong>6 emplacements</strong>, conforme aux plans préliminaires.</p></div></div>
-          <div class="step"><span class="n">4</span><div class="sc"><h3>Peupler &amp; nommer</h3><p>Chaque module à sa place, chaque place à son nom — pour le repérage.</p></div></div>
+<!-- ============================================================
+     S1 — PLAN DE LA SOUTENANCE
+============================================================ -->
+<div class="prezi-slide" id="s1" style="left:600px;top:200px;">
+  <div class="s-header"><span>Plan de la soutenance</span><span class="s-tag">Sommaire</span></div>
+  <div class="s-body">
+    <div class="s-grid g3" style="height:90%;">
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--accent);">1. PRÉPARER</div>
+        <div class="phase-body">
+          <div class="mb6"><span class="badge blue">T6.1</span> Organisation chantier</div>
+          <div class="mb6"><span class="badge blue">T6.2</span> Câblage codeurs + AO</div>
+          <div class="small" style="color:var(--gray);">Consignation, séparation puissance/signal, schéma d'interfaçage Atos</div>
         </div>
       </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">MPH600</span> · Création du projet · C15</span><span class="mono">05</span></div>
-  </div>
-</section>
-
-<!-- 06 · CONFIGURATION DU RACK M340 -->
-<section class="slide" data-screen-label="06">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">I</span> Configuration matérielle</div>
-      <div class="tags"><span class="tag c">Modicon M340</span><span class="tag">Rack BMX · 6 slots</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Le rack <span class="gr">M340</span> — une place et un nom pour chacun</h2>
-    <div class="body" style="display:flex;flex-direction:column;">
-      <div class="rack" data-anim="scale" data-d="2" style="flex:1;">
-        <div class="slot alim" data-stagger data-d="1"><span class="led"></span><span class="si">SLOT 0</span><span class="sref">BMX CPS 2000</span><span class="srole">Alimentation du rack</span></div>
-        <div class="slot cpu" data-stagger data-d="2"><span class="led"></span><span class="si">SLOT 1</span><span class="sref">BMX P34 2020</span><span class="srole">Processeur · CPU + Ethernet</span></div>
-        <div class="slot" data-stagger data-d="3"><span class="led"></span><span class="si">SLOT 2</span><span class="sref">BMX DDI 1602</span><span class="srole">16 entrées TOR</span></div>
-        <div class="slot" data-stagger data-d="4"><span class="led"></span><span class="si">SLOT 3</span><span class="sref">BMX DRA 1605</span><span class="srole">16 sorties relais</span></div>
-        <div class="slot sig" data-stagger data-d="5"><span class="led"></span><span class="si">SLOT 4</span><span class="sref">BMX EHC 0800</span><span class="srole">8 voies comptage codeurs</span></div>
-        <div class="slot sig" data-stagger data-d="6"><span class="led"></span><span class="si">SLOT 5</span><span class="sref">BMX AMM 0600</span><span class="srole">Analogique · 4 E / 2 S</span></div>
-      </div>
-      <div class="legend" data-anim="up" data-d="4">
-        <div class="li"><span class="sw" style="background:var(--amber)"></span>Énergie</div>
-        <div class="li"><span class="sw" style="background:var(--lime)"></span>Cerveau (CPU)</div>
-        <div class="li"><span class="sw" style="background:var(--paper-dim)"></span>Tout-ou-rien</div>
-        <div class="li"><span class="sw" style="background:var(--cyan)"></span>Interfaces de signal · la frontière avec le câblage</div>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">MPH600</span> · Implantation rack · suivant les plans préliminaires</span><span class="mono">06</span></div>
-  </div>
-</section>
-
-<!-- 07 · CHAÎNE DE SIGNAL -->
-<section class="slide" data-screen-label="07">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">I</span> La chaîne de signal</div>
-      <div class="tags"><span class="tag cy">Mesurer → Décider → Agir</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:24px;">Comment l'automate <span class="gr">voit et agit</span> sur le bras</h2>
-    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:36px;">
-      <div class="chain" data-anim="up" data-d="2">
-        <div class="cnode"><span class="ci">Mesurer</span><h4>Codeurs</h4><p>3 codeurs incrémentaux → module <span class="cy">BMX EHC 0800</span>. Position réelle de chaque axe, à chaque cycle.</p></div>
-        <div class="carrow">→<span class="mono">position</span></div>
-        <div class="cnode hot"><span class="ci">Décider</span><h4>CPU M340</h4><p><span class="gr">BMX P34 2020</span> compare consigne et mesure, calcule la correction.</p></div>
-        <div class="carrow">→<span class="mono">commande</span></div>
-        <div class="cnode"><span class="ci">Agir</span><h4>Distributeur</h4><p>Sortie analogique <span class="cy">BMX AMM 0600</span> → amplificateur → distributeur proportionnel.</p></div>
-      </div>
-      <div class="strip" data-anim="up" data-d="5" style="margin-top:0;">
-        <span class="b cy"><span class="dot"></span>Boucle fermée</span>
-        <p>La mesure revient en permanence vers la CPU : c'est cette boucle qui permet d'<strong>asservir la position</strong> de l'axe G/D — pas seulement de l'ouvrir ou de le fermer. Tout le talent du programme est là.</p>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">Chaîne</span> · capteurs ↔ CPU ↔ actionneurs</span><span class="mono">07</span></div>
-  </div>
-</section>
-
-<!-- 08 · AMPLIFICATEUR ATOS — SOUDURE -->
-<section class="slide" data-screen-label="08">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">I</span> Geste métier · amplificateur proportionnel</div>
-      <div class="tags"><span class="tag am">Atos E-BM-AC-05F</span><span class="tag">Soudure embase</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Un obstacle matériel : l'<span class="gr">embase obsolète</span> de l'amplificateur</h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1.32fr 1fr; align-items:stretch; gap:34px;">
-        <div class="col">
-          <div class="ba" data-anim="up" data-d="2">
-            <div class="ba-card before">
-              <div class="ba-tag"><span class="dot"></span>Avant · bloqué</div>
-              <h4>Embase d'origine inutilisable</h4>
-              <p>L'amplificateur proportionnel arrivait avec une <strong>ancienne embase totalement obsolète</strong>, impossible à réutiliser en l'état. Aucun raccordement propre vers l'automate n'était possible.</p>
-            </div>
-            <div class="ba-mid"><span class="iron">⌁</span></div>
-            <div class="ba-card after">
-              <div class="ba-tag"><span class="dot"></span>Après · recâblé</div>
-              <h4>Nouveau câblage soudé main</h4>
-              <p>J'ai réalisé les <strong>soudures sur l'embase</strong> pour refaire un câblage propre, reliant l'amplificateur à la sortie analogique de l'automate et au distributeur proportionnel.</p>
-            </div>
-          </div>
-          <div class="strip" data-anim="up" data-d="4" style="margin-top:0;">
-            <span class="b gr"><span class="dot"></span>Geste métier</span>
-            <p>De la <strong>configuration logicielle</strong> au <strong>fer à souder</strong> : un automaticien doit aussi savoir rétablir le lien physique quand le matériel ne suit pas.</p>
-          </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--success);">2. PROGRAMMER</div>
+        <div class="phase-body">
+          <div class="mb6"><span class="badge green">T6.3a</span> Automate M340</div>
+          <div class="mb6"><span class="badge green">T6.3b</span> IHM Vijeo</div>
+          <div class="small" style="color:var(--gray);">4 sections MAST, identification Broïda + PI, 4 vues HMIS5T</div>
         </div>
-        <div class="shot" data-anim="right" data-d="3">
-          <image-slot id="mph_soudure" shape="rect" placeholder="Glissez ici votre photo des soudures sur l'embase de l'amplificateur Atos"></image-slot>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--warning);">3. METTRE EN SERVICE</div>
+        <div class="phase-body">
+          <div class="mb6"><span class="badge orange">T7.1</span> Mise en service progressive</div>
+          <div class="mb6"><span class="badge orange">T7.2</span> Essais E1 → E8</div>
+          <div class="mb6"><span class="badge orange">T7.3</span> Réception + formation</div>
+          <div class="small" style="color:var(--gray);">8 bugs détectés et corrigés, recette signée</div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">Atos E-BM-AC-05F</span> · sortie %QW0.5.4 → 0-10 V → distributeur</span><span class="mono">08</span></div>
-  </div>
-</section>
-
-<!-- 09 · ACTE II DIVIDER -->
-<section class="slide divider" data-screen-label="09">
-  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
-  <div class="pad">
-    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; II &nbsp;·&nbsp; INTELLIGENCE</div>
-    <h2 class="dv-title" data-anim="up" data-d="2">Programmer<br>le <span class="em">comportement</span>.</h2>
-    <p class="dv-sub" data-anim="up" data-d="3">26 heures de programmation. Quatre sections, un principe d'architecture unique, un asservissement PI réglé sur banc — et une IHM pour piloter le tout.</p>
-    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
-      <span class="tag c">4 sections MAST</span><span class="tag">SFC + ST</span><span class="tag cy">138 variables</span>
+    <div class="card dark-bg mt8" style="text-align:center;">
+      <span class="s-text strong" style="color:#64B5F6;">T8.4 — Conduite de chantier &nbsp;·&nbsp; bilan compétences C4/C14/C15/C16 &nbsp;·&nbsp; perspectives V5</span>
     </div>
   </div>
-</section>
+  <div class="s-footer"><span>Sullivan DEVALLIÈRE — U6.2</span><span>Slide 1</span></div>
+</div>
 
-<!-- 10 · ARCHITECTURE 4 SECTIONS + M_CMD -->
-<section class="slide" data-screen-label="10">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">II</span> Architecture du programme</div>
-      <div class="tags"><span class="tag c">Tâche MAST</span><span class="tag">Ordre d'exécution fixé</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Quatre sections, et une <span class="gr">règle d'or</span> : le principe M_CMD</h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1.05fr 1fr; gap:34px; align-items:stretch;">
-        <div class="steps" data-anim="left" data-d="2">
-          <div class="step"><span class="n">1</span><div class="sc"><h3>REGULATION <span class="dim mono" style="font-size:16px;">· ST</span></h3><p>Acquisition codeurs, exécution du correcteur PI, recopie vers l'IHM.</p></div></div>
-          <div class="step"><span class="n">2</span><div class="sc"><h3>GRAFCET_MAITRE <span class="dim mono" style="font-size:16px;">· SFC</span></h3><p>Cinq modes : REPOS, INIT, MANU, APP, AUTO.</p></div></div>
-          <div class="step"><span class="n">3</span><div class="sc"><h3>GRAFCET_INIT <span class="dim mono" style="font-size:16px;">· SFC</span></h3><p>Prise d'origine (homing) après mise sous tension.</p></div></div>
-          <div class="step"><span class="n">4</span><div class="sc"><h3>SECURITE <span class="dim mono" style="font-size:16px;">· ST · 190 lignes</span></h3><p>Traduit les intentions M_CMD en sorties physiques.</p></div></div>
+<!-- ============================================================
+     S2 — RAPPEL CONTEXTE (lien U6.1)
+============================================================ -->
+<div class="prezi-slide" id="s2" style="left:1900px;top:200px;">
+  <div class="s-header"><span>Rappel — De l'étude (U6.1) à la réalisation (U6.2)</span><span class="s-tag">Contexte</span></div>
+  <div class="s-body">
+    <div class="s-grid g60-40" style="height:88%;">
+      <div>
+        <div class="s-title">Le MPH600 et son rétrofit</div>
+        <div class="s-text mb8">Bras hydraulique 3 axes utilisé à l'atelier Schneider Marèges pour la manutention lourde. L'armoire de commande d'origine — relais + temporisateurs — est devenue obsolète. <strong>U6.1</strong> a défini la solution : automate Schneider M340 + IHM tactile Magelis + asservissement PI sur l'axe G/D.</div>
+        <div class="card accent mb8">
+          <div class="label">Mission U6.2 — 60 h chantier</div>
+          <div class="s-text">Réaliser le câblage des codeurs et de la sortie analogique, écrire et déboguer le programme automate, programmer l'IHM, mettre en service, valider huit essais, livrer.</div>
         </div>
-        <div class="card edge-gr" data-anim="right" data-d="3" style="display:flex;flex-direction:column;justify-content:center;">
-          <div class="kicker">Le principe M_CMD</div>
-          <p style="font-size:23px;line-height:1.5;">Aucun GRAFCET n'écrit <strong>directement</strong> sur une sortie. Chacun exprime une <em>intention</em> — <span class="code">M_CMD_AX2_MONT</span> — et la section <strong>SECURITE</strong>, seule, décide en fin de cycle si l'intention devient une action physique.</p>
-          <div class="strip" style="margin-top:22px;padding:16px 20px;">
-            <span class="b gr"><span class="dot"></span>1 seule loi</span>
-            <p style="font-size:18px;">Interblocages, fins de course, anti-chattering : tout au même endroit. Ajouter une sécurité = modifier <strong>un seul bloc</strong>.</p>
-          </div>
+        <div class="card green-bg">
+          <div class="s-text strong" style="color:var(--success);">État livré → V4.2 stable</div>
+          <div class="s-text small">Asservissement PI fonctionnel, 8 essais validés, recette signée le 12 mai 2026.</div>
+        </div>
+      </div>
+      <div>
+        <div class="kpi-row mb8" style="flex-direction:column;gap:8px;">
+          <div class="kpi"><div class="kv">60h</div><div class="kl">Volume horaire chantier</div></div>
+          <div class="kpi"><div class="kv green">8/8</div><div class="kl">Essais validés E1 → E8</div></div>
+          <div class="kpi"><div class="kv orange">7</div><div class="kl">Bugs détectés et corrigés</div></div>
+          <div class="kpi"><div class="kv">138</div><div class="kl">Variables automate</div></div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">MAST</span> · découplage intention / action · C15</span><span class="mono">10</span></div>
   </div>
-</section>
+  <div class="s-footer"><span>Sullivan DEVALLIÈRE — U6.2</span><span>Slide 2</span></div>
+</div>
 
-<!-- 11 · GRAFCET MAÎTRE -->
-<section class="slide" data-screen-label="11">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">II</span> Le GRAFCET maître</div>
-      <div class="tags"><span class="tag c">5 modes</span><span class="tag">Étoile autour de REPOS</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:22px;">Une <span class="gr">étoile</span> de modes autour du repos</h2>
-    <div class="body" style="display:flex;align-items:center;">
-      <div class="grid g2" style="grid-template-columns:1.25fr 1fr; gap:40px; align-items:center; width:100%;">
-        <div data-anim="scale" data-d="2" style="display:flex;justify-content:center;">
-          <svg viewBox="0 0 520 440" style="width:100%;max-width:520px;">
-            <defs>
-              <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="var(--lime)"/></marker>
-            </defs>
-            <!-- branches -->
-            <g stroke="var(--lime)" stroke-width="2" fill="none" opacity=".55" marker-end="url(#ar)">
-              <line class="draw" style="--len:200" x1="260" y1="200" x2="110" y2="90"/>
-              <line class="draw" style="--len:200" x1="260" y1="200" x2="410" y2="90"/>
-              <line class="draw" style="--len:200" x1="260" y1="200" x2="110" y2="350"/>
-              <line class="draw" style="--len:200" x1="260" y1="200" x2="410" y2="350"/>
-            </g>
-            <!-- center REPOS -->
-            <g>
-              <rect x="190" y="165" width="140" height="70" rx="12" fill="url(#gc)" stroke="var(--lime)" stroke-width="2"/>
-              <circle class="live" cx="260" cy="200" r="58" fill="none" stroke="var(--lime)" stroke-width="1" opacity=".3"/>
-            </g>
-            <defs><linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16291b"/><stop offset="1" stop-color="#0d1a11"/></linearGradient></defs>
-            <text x="260" y="195" text-anchor="middle" fill="#EAF3EE" font-family="IBM Plex Mono" font-size="22" font-weight="600">REPOS</text>
-            <text x="260" y="217" text-anchor="middle" fill="#9BE45B" font-family="IBM Plex Mono" font-size="13">étape pivot</text>
-            <!-- mode nodes -->
-            <g font-family="IBM Plex Mono" font-size="17" font-weight="600">
-              <g><rect x="40" y="58" width="140" height="56" rx="11" fill="#101A16" stroke="#2BC4FF" stroke-width="1.6"/><text x="110" y="83" text-anchor="middle" fill="#2BC4FF">INIT</text><text x="110" y="101" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">homing</text></g>
-              <g><rect x="340" y="58" width="140" height="56" rx="11" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/><text x="410" y="83" text-anchor="middle" fill="#EAF3EE">MANU</text><text x="410" y="101" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">joysticks</text></g>
-              <g><rect x="40" y="318" width="140" height="56" rx="11" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/><text x="110" y="343" text-anchor="middle" fill="#EAF3EE">APP</text><text x="110" y="361" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">apprentissage</text></g>
-              <g><rect x="340" y="318" width="140" height="56" rx="11" fill="#101A16" stroke="#9BE45B" stroke-width="1.6"/><text x="410" y="343" text-anchor="middle" fill="#9BE45B">AUTO</text><text x="410" y="361" text-anchor="middle" fill="#76897F" font-size="12" font-weight="400">cycle P1→P3</text></g>
-            </g>
-          </svg>
+<!-- ============================================================
+     S3 — T6.1 ORGANISATION CHANTIER
+============================================================ -->
+<div class="prezi-slide" id="s3" style="left:3200px;top:200px;">
+  <div class="s-header"><span>T6.1 — Organisation du chantier &amp; consignation</span><span class="s-tag">Préparer</span></div>
+  <div class="s-body">
+    <div class="s-grid g60-40" style="height:88%;">
+      <div>
+        <div class="s-title">Sécuriser avant d'agir</div>
+        <div class="card red mb6">
+          <div class="s-text strong" style="color:var(--danger);">Consignation NF C 18-510</div>
+          <div class="s-text small">Identification du départ → coupure prise tri canalis → cadenas + étiquette personnelle → VAT → consignation hydraulique (purge pression bras).</div>
         </div>
-        <div class="col" data-anim="right" data-d="4">
-          <p class="lead" style="font-size:23px;">Depuis <strong>REPOS</strong>, quatre branches conditionnelles selon le mode demandé sur l'IHM. Chaque branche <strong>revient à REPOS</strong> quand le mode se termine ou qu'une <span class="code">CONDITION_SORTIE</span> calculée dans SECURITE l'interrompt.</p>
-          <div class="card edge-cy" style="padding:20px 24px;">
-            <div class="kicker">Tournant d'architecture</div>
-            <p style="font-size:20px;">À l'origine, j'avais <strong>quatre GRAFCETs séparés</strong>. Les fusionner en un seul maître a tout simplifié — et corrigé deux bugs d'un coup (voir Acte III).</p>
-          </div>
+        <div class="card orange mb6">
+          <div class="s-text strong" style="color:var(--warning);">Balisage zone de câblage</div>
+          <div class="s-text small">Bras déjà dans son enceinte grillagée fermée. Balisage limité à la zone armoire / poste à souder où je travaillais.</div>
+        </div>
+        <div class="card accent">
+          <div class="s-text strong" style="color:var(--accent-dark);">Préparation poste</div>
+          <div class="s-text small">Outillage isolé 1 000 V, multimètre Fluke, VAT, sertisseuse embouts, EPI : casque, gants isolants cat. 0, chaussures S3.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label">Étapes consignation</div>
+        <div class="vflow mt8">
+          <div class="step init">Identifier départ</div>
+          <div class="trans">↓</div>
+          <div class="step">Séparer (prise tri)</div>
+          <div class="trans">↓</div>
+          <div class="step">Condamner (cadenas)</div>
+          <div class="trans">↓</div>
+          <div class="step">Identifier (étiquette)</div>
+          <div class="trans">↓</div>
+          <div class="step">Vérifier absence tension</div>
+          <div class="trans">↓</div>
+          <div class="step">Purger pression hydraulique</div>
+          <div class="trans">↓ <strong>OK travaux</strong></div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">GRAFCET_MAITRE</span> · 5 modes opérationnels</span><span class="mono">11</span></div>
   </div>
-</section>
+  <div class="s-footer"><span>C4 — Organiser</span><span>Slide 3</span></div>
+</div>
 
-<!-- 12 · ASSERVISSEMENT — BOUCLE PI -->
-<section class="slide" data-screen-label="12">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">II</span> Asservissement de position · axe G/D</div>
-      <div class="tags"><span class="tag c">Bloc PI1 · CONT_CTL</span><span class="tag">Cycle ~10 ms</span></div>
+<!-- ============================================================
+     S4 — T6.2 CÂBLAGE CODEURS
+============================================================ -->
+<div class="prezi-slide" id="s4" style="left:600px;top:1100px;">
+  <div class="s-header"><span>T6.2 — Câblage codeurs incrémentaux</span><span class="s-tag">Réaliser</span></div>
+  <div class="s-body">
+    <div class="s-grid g40-60" style="height:88%;">
+      <div>
+        <div class="s-title">3 codeurs HSC</div>
+        <div class="s-text mb6">Module <span class="mono strong">BMXEHC0800</span> — 8 voies comptage rapide. Trois codeurs incrémentaux récupérés sur l'installation (axes G/D, AX2 vertical, AX3 rotation).</div>
+        <div class="card blue-bg mb6">
+          <div class="s-text strong">Câbles multipaire blindés</div>
+          <div class="s-text small">Câblage extérieur d'origine conservé. Seuls les éléments de l'armoire ont été déposés. Reprise blindage à la terre <strong>côté armoire uniquement</strong> (anti-boucle de masse — IEEE 1100).</div>
+        </div>
+        <div class="card green">
+          <div class="s-text strong" style="color:var(--success);">Repérage</div>
+          <div class="s-text small">Chaque conducteur repéré par bague numérotée. Cohérence avec schéma QElectrotech mis à jour par Tom.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label">Affectation des voies HSC</div>
+        <table class="mt4">
+          <tr><th>Axe</th><th>Voie</th><th>Adresse</th><th>Signaux</th></tr>
+          <tr><td><strong>G/D</strong></td><td>0</td><td class="mono">%IW0.3.0</td><td>A · B · Z</td></tr>
+          <tr><td><strong>AX2</strong></td><td>2</td><td class="mono">%IW0.3.2</td><td>A · B · Z</td></tr>
+          <tr><td><strong>AX3</strong></td><td>4</td><td class="mono">%IW0.3.4</td><td>A · B · Z</td></tr>
+        </table>
+        <div class="card orange-bg mt8">
+          <div class="s-text strong" style="color:var(--warning);">Bug B02 — AX2 inversé</div>
+          <div class="s-text small">À la première lecture, la valeur AX2 décroissait quand le bras montait. Permutation logicielle A↔B dans la configuration HSC plutôt qu'au câblage — moins invasif, traçable.</div>
+        </div>
+      </div>
     </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">La <span class="gr">boucle fermée</span> qui amène l'axe pile à la consigne</h2>
-    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:30px;">
-      <div data-anim="up" data-d="2" style="display:flex;justify-content:center;">
-        <svg viewBox="0 0 1180 250" style="width:100%;max-width:1180px;">
-          <defs><marker id="lar" markerWidth="11" markerHeight="11" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9BE45B"/></marker></defs>
-          <g font-family="IBM Plex Sans" fill="#EAF3EE">
-            <!-- consigne -->
-            <rect x="10" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#2BC4FF" stroke-width="1.5"/>
-            <text x="85" y="100" text-anchor="middle" font-size="19" font-weight="600">Consigne</text>
-            <text x="85" y="122" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">IHM · MF_SP_GD</text>
-            <!-- comparator -->
-            <circle cx="225" cy="103" r="24" fill="#0B1210" stroke="#EAF3EE" stroke-width="1.5"/>
-            <text x="225" y="111" text-anchor="middle" font-size="26" fill="#EAF3EE">−</text>
-            <line class="draw" style="--len:50" x1="160" y1="103" x2="198" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
-            <!-- erreur -->
-            <line class="draw" style="--len:80" x1="249" y1="103" x2="318" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
-            <text x="285" y="92" text-anchor="middle" font-size="13" fill="#76897F" font-style="italic">erreur ε</text>
-            <!-- PI -->
-            <rect x="320" y="70" width="180" height="66" rx="10" fill="url(#pig)" stroke="#9BE45B" stroke-width="2"/>
-            <text x="410" y="98" text-anchor="middle" font-size="20" font-weight="600" fill="#EAF3EE">Correcteur PI</text>
-            <text x="410" y="120" text-anchor="middle" font-size="14" fill="#9BE45B" font-family="IBM Plex Mono">Kp=4,0 · Ti=2,0s</text>
-            <defs><linearGradient id="pig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16291b"/><stop offset="1" stop-color="#0d1a11"/></linearGradient></defs>
-            <!-- AO -->
-            <line class="draw" style="--len:80" x1="500" y1="103" x2="568" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
-            <text x="535" y="92" text-anchor="middle" font-size="13" fill="#76897F">0-100%</text>
-            <rect x="570" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#2BC4FF" stroke-width="1.5"/>
-            <text x="645" y="98" text-anchor="middle" font-size="18" font-weight="600">Sortie AO</text>
-            <text x="645" y="120" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">AMM0600 · %QW0.5.4</text>
-            <!-- ampli -->
-            <line class="draw" style="--len:60" x1="720" y1="103" x2="788" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
-            <text x="755" y="92" text-anchor="middle" font-size="13" fill="#76897F">0-10V</text>
-            <rect x="790" y="70" width="150" height="66" rx="10" fill="#101A16" stroke="#F2B33B" stroke-width="1.5"/>
-            <text x="865" y="98" text-anchor="middle" font-size="18" font-weight="600">Ampli Atos</text>
-            <text x="865" y="120" text-anchor="middle" font-size="13" fill="#76897F">distributeur + vérin</text>
-            <!-- vérin out -->
-            <line class="draw" style="--len:60" x1="940" y1="103" x2="1010" y2="103" stroke="#9BE45B" stroke-width="2" marker-end="url(#lar)"/>
-            <rect x="1010" y="70" width="160" height="66" rx="10" fill="#101A16" stroke="#EAF3EE" stroke-width="1.4"/>
-            <text x="1090" y="98" text-anchor="middle" font-size="18" font-weight="600">Axe G/D</text>
-            <text x="1090" y="120" text-anchor="middle" font-size="13" fill="#76897F">position réelle</text>
-            <!-- feedback codeur -->
-            <path class="draw" style="--len:1100" d="M1090,136 V210 H225 V130" fill="none" stroke="#2BC4FF" stroke-width="2" marker-end="url(#lar)" opacity=".8"/>
-            <rect x="540" y="186" width="220" height="48" rx="9" fill="#0e2230" stroke="#2BC4FF" stroke-width="1.4"/>
-            <text x="650" y="208" text-anchor="middle" font-size="16" font-weight="600" fill="#2BC4FF">Codeur incrémental</text>
-            <text x="650" y="226" text-anchor="middle" font-size="13" fill="#76897F" font-family="IBM Plex Mono">HSC voie 0 → MF_PV_GD</text>
+  </div>
+  <div class="s-footer"><span>C14 — Réaliser</span><span>Slide 4</span></div>
+</div>
+
+<!-- ============================================================
+     S5 — T6.2 SCHÉMA CÂBLAGE ATOS
+============================================================ -->
+<div class="prezi-slide" id="s5" style="left:1900px;top:1100px;">
+  <div class="s-header"><span>T6.2 — Sortie analogique &amp; driver Atos</span><span class="s-tag">Réaliser</span></div>
+  <div class="s-body">
+    <div class="s-grid g40-60" style="height:88%;">
+      <div>
+        <div class="s-title">Chaîne de commande G/D</div>
+        <div class="s-text mb6">Le module <span class="mono strong">BMXAMM0600</span> sort une tension 0–10 V (<span class="mono">%QW0.5.4</span>). Le driver proportionnel <strong>Atos E-BM-AC-05F</strong> existant convertit cette tension en courant régulé pour la bobine du distributeur.</div>
+        <div class="card accent mb6">
+          <div class="s-text strong" style="color:var(--accent-dark);">Pinout Atos (table G025)</div>
+          <div class="s-text tiny mono">A11 = +24V · A1 = 0V<br>B1 = CMD1 · B2 = CMD− · B3 = CMD2<br>C1 = OUT+ · C2 = OUT− · D3 = enable</div>
+        </div>
+        <div class="card green-bg">
+          <div class="s-text strong" style="color:var(--success);">Sécurité firmware</div>
+          <div class="s-text small">Valeur de repli AMM0600 paramétrée à 0 %. CPU stop ou faute critique → sortie retombe à 0 V → distributeur neutre.</div>
+        </div>
+      </div>
+      <div>
+        <svg viewBox="0 0 480 350" xmlns="http://www.w3.org/2000/svg" class="svg-wrap">
+          <!-- AMM0600 -->
+          <rect x="20" y="40" width="120" height="80" fill="#E3F2FD" stroke="#1565C0" stroke-width="2" rx="4"/>
+          <text x="80" y="60" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0D47A1">BMXAMM0600</text>
+          <text x="80" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#0D47A1">AO voie 4</text>
+          <text x="80" y="105" text-anchor="middle" font-family="monospace" font-size="11" font-weight="600" fill="#1B5E20">%QW0.5.4</text>
+
+          <!-- Câble -->
+          <line x1="140" y1="80" x2="220" y2="80" stroke="#0D1B2A" stroke-width="2.5"/>
+          <line x1="140" y1="92" x2="220" y2="92" stroke="#0D1B2A" stroke-width="2.5"/>
+          <text x="180" y="74" text-anchor="middle" font-family="sans-serif" font-size="10" font-style="italic" fill="#607D8B">paire torsadée blindée</text>
+          <text x="180" y="110" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#607D8B">0–10 V</text>
+
+          <!-- Atos driver -->
+          <rect x="220" y="40" width="140" height="120" fill="#FFF8E1" stroke="#F57F17" stroke-width="2" rx="4"/>
+          <text x="290" y="60" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#E65100">Atos E-BM-AC-05F</text>
+          <text x="290" y="78" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#E65100">driver proportionnel</text>
+          <text x="225" y="100" font-family="monospace" font-size="9" fill="#333">B1 ← CMD1</text>
+          <text x="225" y="115" font-family="monospace" font-size="9" fill="#333">B2 ← CMD−</text>
+          <text x="225" y="130" font-family="monospace" font-size="9" fill="#333">A11 ← +24V</text>
+          <text x="225" y="145" font-family="monospace" font-size="9" fill="#333">D3 ← enable</text>
+
+          <!-- Câble sortie -->
+          <line x1="360" y1="100" x2="430" y2="100" stroke="#C62828" stroke-width="3"/>
+          <text x="395" y="92" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#C62828">~1,5 A</text>
+
+          <!-- Distributeur -->
+          <rect x="380" y="180" width="80" height="60" fill="#0D1B2A" stroke="#0D1B2A" stroke-width="2" rx="4"/>
+          <text x="420" y="208" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#fff">Bobine</text>
+          <text x="420" y="225" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#fff">distributeur</text>
+          <line x1="430" y1="100" x2="430" y2="180" stroke="#C62828" stroke-width="3"/>
+
+          <!-- Terre -->
+          <line x1="80" y1="160" x2="80" y2="200" stroke="#1B5E20" stroke-width="2"/>
+          <line x1="60" y1="200" x2="100" y2="200" stroke="#1B5E20" stroke-width="2"/>
+          <line x1="68" y1="208" x2="92" y2="208" stroke="#1B5E20" stroke-width="2"/>
+          <line x1="74" y1="216" x2="86" y2="216" stroke="#1B5E20" stroke-width="2"/>
+          <text x="115" y="208" font-family="sans-serif" font-size="10" fill="#1B5E20" font-weight="600">PE armoire</text>
+
+          <!-- Blindage repris côté armoire -->
+          <path d="M 140 105 Q 100 130 80 160" stroke="#1B5E20" stroke-width="1.5" stroke-dasharray="3,3" fill="none"/>
+          <text x="125" y="148" font-family="sans-serif" font-size="9" font-style="italic" fill="#1B5E20">blindage</text>
+
+          <!-- Légende -->
+          <rect x="20" y="270" width="440" height="70" fill="#F5F7FA" stroke="#CFD8DC" rx="4"/>
+          <text x="30" y="290" font-family="sans-serif" font-size="10" font-weight="700" fill="#0D47A1">Principe de l'asservissement G/D</text>
+          <text x="30" y="306" font-family="sans-serif" font-size="9" fill="#333">Consigne IHM (mm) → PI dans automate → %QW0.5.4 (0–10 V) → Atos → courant bobine →</text>
+          <text x="30" y="320" font-family="sans-serif" font-size="9" fill="#333">distributeur proportionnel → vérin → capteur G/D %IW0.3.0 → mesure rebouclée sur PI.</text>
+          <text x="30" y="334" font-family="sans-serif" font-size="9" font-style="italic" fill="#607D8B">Boucle fermée 10 ms (période MAST).</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C14 — Réaliser</span><span>Slide 5</span></div>
+</div>
+
+<!-- ============================================================
+     S6 — T6.3a ARCHITECTURE PROGRAMME
+============================================================ -->
+<div class="prezi-slide" id="s6" style="left:3200px;top:1100px;">
+  <div class="s-header"><span>T6.3a — Architecture du programme automate</span><span class="s-tag green">Programmer</span></div>
+  <div class="s-body">
+    <div class="s-title">4 sections MAST · période 10 ms · 138 variables</div>
+    <div class="s-grid g4 mt8">
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--success);">REGULATION</div>
+        <div class="phase-body small">
+          <div class="strong mb4">ST · 79 lignes</div>
+          Bloc PI1 (Kp=4,0 / Ti=2,0 s)<br>
+          Saturation 0–5000<br>
+          Acquittement codeurs HSC<br>
+          Calcul consigne G/D
+        </div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--accent);">GRAFCET_MAITRE</div>
+        <div class="phase-body small">
+          <div class="strong mb4">SFC · 5 modes</div>
+          REPOS · INIT · MANU<br>
+          APP (apprentissage) · AUTO<br>
+          CONDITION_SORTIE<br>
+          centralisée
+        </div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--accent-dark);">GRAFCET_INIT</div>
+        <div class="phase-body small">
+          <div class="strong mb4">SFC · 5 étapes</div>
+          Homing 3 axes<br>
+          Référencement Z codeurs<br>
+          INIT_OK := TRUE en fin<br>
+          (correction B06)
+        </div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--danger);">SECURITE</div>
+        <div class="phase-body small">
+          <div class="strong mb4">ST · diagnostic</div>
+          Watchdog 250<br>
+          Anti-chattering AX2/AX3<br>
+          Freinage prédictif<br>
+          Reset bits IHM
+        </div>
+      </div>
+    </div>
+    <div class="card dark-bg mt8">
+      <div class="s-text" style="color:#fff;">
+        <strong style="color:#64B5F6;">Principe M_CMD</strong> — découpler les commandes logiques (<span class="mono">M_CMD_AX2_UP</span>) des sorties physiques (<span class="mono">%Q0.4.0</span>). Une commande peut venir de MANU, AUTO ou INIT, mais SECURITE garde la main pour bloquer en cas de défaut. Cette indirection simplifie le débogage et a permis d'isoler B01 (écrasement ACT_REPOS_AUTO).
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C14 — Programmer · Schneider Control Expert V14.1</span><span>Slide 6</span></div>
+</div>
+
+<!-- ============================================================
+     S7 — GRAFCET MAITRE
+============================================================ -->
+<div class="prezi-slide" id="s7" style="left:4500px;top:1100px;">
+  <div class="s-header"><span>T6.3a — GRAFCET_MAITRE — 5 modes opérationnels</span><span class="s-tag green">Programmer</span></div>
+  <div class="s-body">
+    <div class="s-grid g30-70" style="height:88%;">
+      <div>
+        <div class="s-title">5 branches depuis REPOS</div>
+        <div class="s-text small mb6">Étape initiale <span class="mono strong">REPOS</span>. Divergence conditionnelle en quatre branches selon le mode demandé sur l'IHM. Chaque branche revient à REPOS en fin de mode ou sur <span class="mono">CONDITION_SORTIE</span>.</div>
+        <div class="card red-bg">
+          <div class="s-text strong" style="color:var(--danger);">CONDITION_SORTIE</div>
+          <div class="s-text tiny">Arrêt automate · défaut codeur · perte INIT_OK · AU IHM<br>→ court-circuite les 4 branches vers REPOS</div>
+        </div>
+      </div>
+      <div>
+        <svg viewBox="0 0 580 410" xmlns="http://www.w3.org/2000/svg" class="svg-wrap">
+          <g font-family="Arial,sans-serif" fill="#000">
+            <!-- REPOS étape initiale -->
+            <rect x="240" y="10" width="100" height="28" fill="#E3F2FD" stroke="#0D47A1" stroke-width="2" rx="2"/>
+            <rect x="244" y="14" width="92" height="20" fill="none" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="290" y="29" text-anchor="middle" font-size="13" font-weight="700" fill="#0D47A1">REPOS</text>
+            <line x1="290" y1="38" x2="290" y2="58" stroke="#000" stroke-width="1.5"/>
+            <!-- Barre divergence -->
+            <line x1="50" y1="58" x2="530" y2="58" stroke="#000" stroke-width="2.5"/>
+            <!-- 4 branches descendantes -->
+            <line x1="80" y1="58" x2="80" y2="78" stroke="#000" stroke-width="1.5"/>
+            <line x1="220" y1="58" x2="220" y2="78" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="58" x2="360" y2="78" stroke="#000" stroke-width="1.5"/>
+            <line x1="500" y1="58" x2="500" y2="78" stroke="#000" stroke-width="1.5"/>
+            <!-- Transitions -->
+            <rect x="69" y="74" width="22" height="6" fill="#000"/>
+            <text x="80" y="92" text-anchor="middle" font-size="10">T_VERS_INIT</text>
+            <rect x="209" y="74" width="22" height="6" fill="#000"/>
+            <text x="220" y="92" text-anchor="middle" font-size="10">T_VERS_MANU</text>
+            <rect x="349" y="74" width="22" height="6" fill="#000"/>
+            <text x="360" y="92" text-anchor="middle" font-size="10">T_VERS_APP</text>
+            <rect x="489" y="74" width="22" height="6" fill="#000"/>
+            <text x="500" y="92" text-anchor="middle" font-size="10">T_VERS_AUTO</text>
+            <line x1="80" y1="92" x2="80" y2="108" stroke="#000" stroke-width="1.5"/>
+            <line x1="220" y1="92" x2="220" y2="108" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="92" x2="360" y2="108" stroke="#000" stroke-width="1.5"/>
+            <line x1="500" y1="92" x2="500" y2="108" stroke="#000" stroke-width="1.5"/>
+            <!-- Étapes de branche -->
+            <rect x="35" y="108" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="80" y="124" text-anchor="middle" font-size="11">ATTENTE_INIT</text>
+            <rect x="175" y="108" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="220" y="124" text-anchor="middle" font-size="11">MANU_ACTIF</text>
+            <rect x="315" y="108" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="360" y="124" text-anchor="middle" font-size="11">APP_ACTIF</text>
+            <rect x="455" y="108" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="500" y="124" text-anchor="middle" font-size="11">AUTO_CHARGE</text>
+            <!-- Transitions sortie -->
+            <line x1="80" y1="132" x2="80" y2="148" stroke="#000" stroke-width="1.5"/>
+            <line x1="220" y1="132" x2="220" y2="148" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="132" x2="360" y2="148" stroke="#000" stroke-width="1.5"/>
+            <line x1="500" y1="132" x2="500" y2="148" stroke="#000" stroke-width="1.5"/>
+            <rect x="69" y="144" width="22" height="6" fill="#000"/>
+            <text x="80" y="162" text-anchor="middle" font-size="10">T_INIT_OK</text>
+            <rect x="209" y="144" width="22" height="6" fill="#000"/>
+            <text x="220" y="162" text-anchor="middle" font-size="10">T_SORTIE_MANU</text>
+            <rect x="349" y="144" width="22" height="6" fill="#000"/>
+            <text x="360" y="162" text-anchor="middle" font-size="10">T_SORTIE_APP</text>
+            <rect x="489" y="144" width="22" height="6" fill="#000"/>
+            <text x="500" y="162" text-anchor="middle" font-size="10">T_POS_ATTEINTE</text>
+            <line x1="80" y1="162" x2="80" y2="178" stroke="#000" stroke-width="1.5"/>
+            <line x1="220" y1="162" x2="220" y2="178" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="162" x2="360" y2="178" stroke="#000" stroke-width="1.5"/>
+            <line x1="500" y1="162" x2="500" y2="178" stroke="#000" stroke-width="1.5"/>
+            <!-- Chevrons retour REPOS -->
+            <path d="M 50 178 L 100 178 L 112 188 L 100 198 L 50 198 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="78" y="192" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS</text>
+            <path d="M 190 178 L 240 178 L 252 188 L 240 198 L 190 198 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="218" y="192" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS</text>
+            <path d="M 330 178 L 380 178 L 392 188 L 380 198 L 330 198 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="358" y="192" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS</text>
+
+            <!-- Branche AUTO continue -->
+            <rect x="455" y="178" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="500" y="194" text-anchor="middle" font-size="11">AUTO_DEPLACE</text>
+            <line x1="500" y1="202" x2="500" y2="218" stroke="#000" stroke-width="1.5"/>
+            <rect x="489" y="214" width="22" height="6" fill="#000"/>
+            <text x="540" y="222" font-size="10">T_TEMPO_OK</text>
+            <line x1="500" y1="220" x2="500" y2="236" stroke="#000" stroke-width="1.5"/>
+            <rect x="455" y="236" width="90" height="24" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="500" y="252" text-anchor="middle" font-size="11">AUTO_ATTENTE</text>
+            <!-- Divergence finale AUTO -->
+            <line x1="500" y1="260" x2="500" y2="276" stroke="#000" stroke-width="1.5"/>
+            <line x1="430" y1="276" x2="565" y2="276" stroke="#000" stroke-width="2"/>
+            <line x1="450" y1="276" x2="450" y2="292" stroke="#000" stroke-width="1.5"/>
+            <line x1="550" y1="276" x2="550" y2="292" stroke="#000" stroke-width="1.5"/>
+            <rect x="439" y="288" width="22" height="6" fill="#000"/>
+            <text x="420" y="306" text-anchor="end" font-size="10">T_FIN_CYCLE</text>
+            <rect x="539" y="288" width="22" height="6" fill="#000"/>
+            <text x="570" y="306" font-size="10">T_POS_SUIVANTE</text>
+            <line x1="450" y1="294" x2="450" y2="310" stroke="#000" stroke-width="1.5"/>
+            <line x1="550" y1="294" x2="550" y2="310" stroke="#000" stroke-width="1.5"/>
+            <path d="M 420 310 L 470 310 L 482 320 L 470 330 L 420 330 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="448" y="324" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS</text>
+            <path d="M 520 310 L 580 310 L 580 330 L 520 330 Z" fill="#FFF8E1" stroke="#F57F17" stroke-width="1.2"/>
+            <text x="550" y="324" text-anchor="middle" font-size="9" fill="#E65100" font-weight="600">AUTO_CHARGE</text>
+
+            <!-- Annotation CONDITION_SORTIE -->
+            <text x="20" y="370" font-size="10" font-style="italic" fill="#C62828">⚠ CONDITION_SORTIE force le retour vers REPOS sur toutes les branches</text>
+            <text x="20" y="385" font-size="10" font-style="italic" fill="#C62828">en cas d'arrêt automate, défaut codeur, perte INIT_OK ou AU IHM.</text>
           </g>
         </svg>
       </div>
-      <div class="strip" data-anim="up" data-d="6" style="margin-top:0;">
-        <span class="b gr"><span class="dot"></span>%MF flottants</span>
-        <p>Les gains <span class="code">Kp</span> et <span class="code">Ti</span> sont des réels — stockés en flottants 32 bits, exposés en secondes côté IHM pour rester lisibles par l'opérateur, et convertis en type <span class="code">TIME</span> pour le bloc PI1.</p>
+    </div>
+  </div>
+  <div class="s-footer"><span>C14 — Programmer · section SFC</span><span>Slide 7</span></div>
+</div>
+
+<!-- ============================================================
+     S8 — GRAFCET INIT
+============================================================ -->
+<div class="prezi-slide" id="s8" style="left:5800px;top:1100px;">
+  <div class="s-header"><span>T6.3a — GRAFCET_INIT — homing 3 axes</span><span class="s-tag green">Programmer</span></div>
+  <div class="s-body">
+    <div class="s-grid g30-70" style="height:88%;">
+      <div>
+        <div class="s-title">Référencement au démarrage</div>
+        <div class="s-text small mb6">Séquence linéaire de cinq étapes. À la mise sous tension du bras, les codeurs incrémentaux n'ont pas de référence absolue — il faut chercher les fins de course pour remettre les compteurs HSC à zéro.</div>
+        <div class="card orange-bg mb6">
+          <div class="s-text strong" style="color:var(--warning);">Bug B06 corrigé en V4.2</div>
+          <div class="s-text tiny"><span class="mono">INIT_OK := FALSE</span> placé en début d'étape REF_AX23 garantit qu'un relancement INIT depuis l'IHM est toujours pris en compte.</div>
+        </div>
+        <div class="card green-bg">
+          <div class="s-text strong" style="color:var(--success);">Garde-fou</div>
+          <div class="s-text tiny">Tant que <span class="mono">INIT_OK</span> est faux, aucun autre mode ne peut démarrer (verrou dans CONDITION_SORTIE).</div>
+        </div>
+      </div>
+      <div>
+        <svg viewBox="0 0 580 410" xmlns="http://www.w3.org/2000/svg" class="svg-wrap">
+          <g font-family="Arial,sans-serif" fill="#000">
+            <!-- Étape initiale -->
+            <rect x="230" y="10" width="120" height="28" fill="#E3F2FD" stroke="#0D47A1" stroke-width="2" rx="2"/>
+            <rect x="234" y="14" width="112" height="20" fill="none" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="290" y="29" text-anchor="middle" font-size="13" font-weight="700" fill="#0D47A1">REPOS_INIT</text>
+            <line x1="290" y1="38" x2="290" y2="58" stroke="#000" stroke-width="1.5"/>
+            <rect x="279" y="54" width="22" height="6" fill="#000"/>
+            <text x="315" y="62" font-size="10">T_DEMARRER_INIT</text>
+            <line x1="290" y1="60" x2="290" y2="78" stroke="#000" stroke-width="1.5"/>
+
+            <!-- ATTENTE_PRESSION -->
+            <rect x="230" y="78" width="120" height="28" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="290" y="97" text-anchor="middle" font-size="12">ATTENTE_PRESSION</text>
+            <line x1="290" y1="106" x2="290" y2="124" stroke="#000" stroke-width="1.5"/>
+            <!-- Divergence -->
+            <line x1="180" y1="124" x2="400" y2="124" stroke="#000" stroke-width="2.5"/>
+            <line x1="220" y1="124" x2="220" y2="142" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="124" x2="360" y2="142" stroke="#000" stroke-width="1.5"/>
+            <rect x="209" y="138" width="22" height="6" fill="#000"/>
+            <text x="200" y="156" text-anchor="end" font-size="10">T_PRESSION_OK</text>
+            <rect x="349" y="138" width="22" height="6" fill="#000"/>
+            <text x="380" y="156" font-size="10">T_SORTIE_INIT</text>
+            <line x1="220" y1="156" x2="220" y2="172" stroke="#000" stroke-width="1.5"/>
+            <line x1="360" y1="156" x2="360" y2="172" stroke="#000" stroke-width="1.5"/>
+
+            <!-- REF_AX23 + chevron sortie -->
+            <rect x="160" y="172" width="120" height="28" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="220" y="191" text-anchor="middle" font-size="12">REF_AX23</text>
+            <path d="M 330 172 L 400 172 L 412 186 L 400 200 L 330 200 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="368" y="190" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS_INIT</text>
+            <text x="288" y="218" font-size="9" font-style="italic" fill="#C62828">INIT_OK := FALSE (B06)</text>
+
+            <line x1="220" y1="200" x2="220" y2="226" stroke="#000" stroke-width="1.5"/>
+            <rect x="209" y="222" width="22" height="6" fill="#000"/>
+            <text x="240" y="230" font-size="10">T_AX23_REF_OK</text>
+            <line x1="220" y1="228" x2="220" y2="244" stroke="#000" stroke-width="1.5"/>
+
+            <!-- REF_GD -->
+            <rect x="160" y="244" width="120" height="28" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="220" y="263" text-anchor="middle" font-size="12">REF_GD</text>
+            <line x1="220" y1="272" x2="220" y2="290" stroke="#000" stroke-width="1.5"/>
+            <rect x="209" y="286" width="22" height="6" fill="#000"/>
+            <text x="240" y="294" font-size="10">T_GD_REF_OK</text>
+            <line x1="220" y1="292" x2="220" y2="308" stroke="#000" stroke-width="1.5"/>
+
+            <!-- VALIDER_INIT -->
+            <rect x="160" y="308" width="120" height="28" fill="#fff" stroke="#000" stroke-width="1.2" rx="2"/>
+            <text x="220" y="327" text-anchor="middle" font-size="12">VALIDER_INIT</text>
+            <text x="288" y="322" font-size="9" font-style="italic" fill="#2E7D32">INIT_OK := TRUE</text>
+            <line x1="220" y1="336" x2="220" y2="354" stroke="#000" stroke-width="1.5"/>
+            <rect x="209" y="350" width="22" height="6" fill="#000"/>
+            <text x="240" y="358" font-size="10">T_INIT_TERMINEE</text>
+            <line x1="220" y1="356" x2="220" y2="372" stroke="#000" stroke-width="1.5"/>
+
+            <!-- Retour final -->
+            <path d="M 180 372 L 260 372 L 272 386 L 260 400 L 180 400 Z" fill="#E3F2FD" stroke="#0D47A1" stroke-width="1.2"/>
+            <text x="220" y="390" text-anchor="middle" font-size="10" fill="#0D47A1" font-weight="600">REPOS_INIT</text>
+          </g>
+        </svg>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">Boucle G/D</span> · consigne − mesure → PI → AO</span><span class="mono">12</span></div>
   </div>
-</section>
+  <div class="s-footer"><span>C14 — Programmer · section SFC</span><span>Slide 8</span></div>
+</div>
 
-<!-- 13 · IDENTIFICATION BROÏDA + RÉGLAGE -->
-<section class="slide" data-screen-label="13">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">II</span> Réglage de l'asservissement · méthode Broïda</div>
-      <div class="tags"><span class="tag c">Identification boucle ouverte</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Régler le PI sur le <span class="gr">comportement réel</span> du banc</h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1.25fr 1fr; gap:38px; align-items:center;">
-        <div data-anim="left" data-d="2">
-          <svg viewBox="0 0 560 320" style="width:100%;">
-            <g font-family="IBM Plex Mono" font-size="14">
-              <!-- axes -->
-              <line x1="60" y1="40" x2="60" y2="270" stroke="#56655D" stroke-width="1.5"/>
-              <line x1="60" y1="270" x2="540" y2="270" stroke="#56655D" stroke-width="1.5"/>
-              <text x="30" y="50" fill="#76897F" font-size="12">pos.</text>
-              <text x="510" y="292" fill="#76897F" font-size="12">temps</text>
-              <!-- consigne step -->
-              <path d="M60,200 H160 V90 H540" fill="none" stroke="#2BC4FF" stroke-width="2" stroke-dasharray="6 4" opacity=".7"/>
-              <text x="430" y="80" fill="#2BC4FF" font-size="13">consigne</text>
-              <!-- response curve (Broïda S-curve) -->
-              <path class="draw" style="--len:700" d="M60,200 H160 C210,200 230,190 270,150 C310,112 360,96 420,92 C470,90 510,90 540,90" fill="none" stroke="#9BE45B" stroke-width="3"/>
-              <text x="300" y="135" fill="#9BE45B" font-size="13">réponse mesurée</text>
-              <!-- tau / theta markers -->
-              <line x1="160" y1="270" x2="160" y2="200" stroke="#F2B33B" stroke-width="1" stroke-dasharray="3 3"/>
-              <line x1="270" y1="270" x2="270" y2="150" stroke="#F2B33B" stroke-width="1" stroke-dasharray="3 3"/>
-              <text x="200" y="288" fill="#F2B33B" font-size="12">θ</text>
-              <text x="350" y="288" fill="#F2B33B" font-size="12">τ</text>
-            </g>
-          </svg>
-          <p class="dim" style="font-size:18px;text-align:center;margin-top:8px;">Réponse indicielle à l'oscilloscope Control Expert — seuils Broïda à 28 % et 40 % : t₁ = 2,53 s, t₂ = 2,77 s</p>
+<!-- ============================================================
+     S9 — IDENTIFICATION BROIDA + PI
+============================================================ -->
+<div class="prezi-slide" id="s9" style="left:600px;top:2000px;">
+  <div class="s-header"><span>T6.3a — Identification Broïda &amp; régulateur PI</span><span class="s-tag green">Programmer</span></div>
+  <div class="s-body">
+    <div class="s-grid g40-60" style="height:88%;">
+      <div>
+        <div class="s-title">Démarche Broïda</div>
+        <div class="s-text small mb6">Méthode adaptée d'un cours BTS — j'ai appliqué la procédure pas à pas sur l'axe G/D : échelon 18,6 cm, relevés à 28 % et 40 % de la réponse, puis calculs.</div>
+        <div class="kpi-row mb6" style="flex-direction:column;gap:6px;">
+          <div class="kpi"><div class="kv" style="font-size:18px;">K = 0,186 m/%</div><div class="kl">Gain statique</div></div>
+          <div class="kpi"><div class="kv" style="font-size:18px;">τ = 2,10 s</div><div class="kl">Constante de temps</div></div>
+          <div class="kpi"><div class="kv" style="font-size:18px;">θ = 1,32 s</div><div class="kl">Retard pur</div></div>
         </div>
-        <div class="col" data-anim="right" data-d="3">
-          <p class="lead" style="font-size:21px;">Échelon <strong>0 → 100 %</strong> en boucle ouverte, réponse relevée à l'oscilloscope. Broïda en déduit d'abord un réglage <strong>PIDFF</strong> théorique — puis l'essai en boucle fermée m'oblige à <span class="gr">supprimer la dérivée</span>.</p>
-          <div class="card" style="padding:18px 22px;">
-            <table class="t" style="font-size:19px;">
-              <thead><tr><th>Param.</th><th>Broïda PIDFF</th><th>Retenu PI</th></tr></thead>
-              <tbody>
-                <tr><td class="lead-col mono">Kp</td><td class="dim">4,61</td><td><span class="gr">4,0</span></td></tr>
-                <tr><td class="lead-col mono">Ti</td><td class="dim">2,16 s</td><td><span class="gr">2,0 s</span></td></tr>
-                <tr><td class="lead-col mono">Td</td><td class="dim">0,51 s</td><td><span class="am">absent</span></td></tr>
-              </tbody>
-            </table>
+        <div class="card red-bg">
+          <div class="s-text strong" style="color:var(--danger);">Pourquoi PIDFF abandonné</div>
+          <div class="s-text tiny">Bug B07 — le bloc PIDFF de Schneider intégrait l'erreur même en mode MANU. Bascule vers bloc PI1 simple, plus prévisible.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label mb4">Réglages retenus (V4.2)</div>
+        <table class="mt4">
+          <tr><th>Paramètre</th><th>Théorique</th><th>Retenu</th></tr>
+          <tr><td>Kp (gain)</td><td>4,61</td><td class="strong" style="color:var(--success);">4,0</td></tr>
+          <tr><td>Ti (intégrale)</td><td>2,16 s</td><td class="strong" style="color:var(--success);">2,0 s</td></tr>
+          <tr><td>Td (dérivée)</td><td>0,51 s</td><td class="strong" style="color:var(--danger);">0 (PI)</td></tr>
+          <tr><td>Saturation OUT</td><td>—</td><td class="mono">[0 ; 5000]</td></tr>
+          <tr><td>Période MAST</td><td>—</td><td>10 ms</td></tr>
+        </table>
+        <div class="card accent mt8">
+          <div class="s-text strong" style="color:var(--accent-dark);">Performance mesurée</div>
+          <div class="s-text small">Temps de réponse à ±2 % : ≈ 4 s sur déplacement 200 mm. Dépassement &lt; 5 %. Pas d'oscillation entretenue.</div>
+        </div>
+        <div class="card dark-bg mt8">
+          <div class="s-text tiny" style="color:#fff;"><strong style="color:#64B5F6;">Code REGULATION (extrait)</strong><br>
+          <span class="mono">IF PI1_GD.OUT &gt; 5000.0 THEN SORTIE_GD := 5000;</span><br>
+          <span class="mono">ELSIF PI1_GD.OUT &lt; 0.0 THEN SORTIE_GD := 0;</span><br>
+          <span class="mono">ELSE SORTIE_GD := REAL_TO_INT(PI1_GD.OUT); END_IF;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C14 — Programmer · asservissement</span><span>Slide 9</span></div>
+</div>
+
+<!-- ============================================================
+     S10 — ITÉRATIONS V2 → V3 → V4.2
+============================================================ -->
+<div class="prezi-slide" id="s10" style="left:1900px;top:2000px;">
+  <div class="s-header"><span>T6.3a — Itérations : 7 bugs débusqués V2 → V4.2</span><span class="s-tag orange">Adapter</span></div>
+  <div class="s-body">
+    <div class="s-title">L'apprenti adapte, ajuste, corrige</div>
+    <div class="s-text small mb6">Je ne suis pas concepteur du programme. Je l'ai repris, testé, identifié les défauts en mise en service, proposé et appliqué les corrections version par version.</div>
+    <table class="mt4">
+      <tr><th>ID</th><th>Version</th><th>Symptôme observé</th><th>Cause</th><th>Correction</th></tr>
+      <tr class="fix"><td><strong>B01</strong></td><td>V2</td><td>Sortie auto figée</td><td>ACT_REPOS_AUTO écrasait la commande</td><td>Conditionner par MW_MODE</td></tr>
+      <tr class="fix"><td><strong>B02</strong></td><td>V2</td><td>AX2 décompte inversé</td><td>Codeur câblé A↔B</td><td>Inversion logicielle HSC</td></tr>
+      <tr class="fix"><td><strong>B03</strong></td><td>V3</td><td>Chattering FDC AX2/AX3</td><td>Rebond mécanique fin de course</td><td>Anti-chattering 30 ON / 20 OFF</td></tr>
+      <tr class="fix"><td><strong>B04</strong></td><td>V3</td><td>Compilation échoue</td><td>Imports XSF manquants</td><td>Import bibliothèque PIDFF</td></tr>
+      <tr class="fix"><td><strong>B05</strong></td><td>V3</td><td>T_POSITION_ATTEINTE jamais vraie</td><td>Tolérance 0 mm</td><td>Bande morte ±2 mm</td></tr>
+      <tr class="fix"><td><strong>B06</strong></td><td>V4.2</td><td>INIT non re-jouable</td><td>INIT_OK reste TRUE</td><td>INIT_OK := FALSE en début REF_AX23</td></tr>
+      <tr class="fix"><td><strong>B07</strong></td><td>V4.2</td><td>Dérive PIDFF en MANU</td><td>Intégrale active hors AUTO</td><td>Bascule PIDFF → PI1 simple</td></tr>
+    </table>
+    <div class="card green-bg mt8">
+      <div class="s-text strong" style="color:var(--success);">Apprentissage retenu</div>
+      <div class="s-text small">Chaque bug a généré une fiche de modification datée. La progression V2 → V3 → V4.2 est tracée. Cette discipline servira aussi au mainteneur futur — la mémoire du chantier reste dans le code et les commentaires.</div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C14 — Adapter le programme</span><span>Slide 10</span></div>
+</div>
+
+<!-- ============================================================
+     S11 — T6.3b IHM VIJEO
+============================================================ -->
+<div class="prezi-slide" id="s11" style="left:3200px;top:2000px;">
+  <div class="s-header"><span>T6.3b — Programmation IHM Vijeo Designer</span><span class="s-tag green">Programmer</span></div>
+  <div class="s-body">
+    <div class="s-grid g60-40" style="height:88%;">
+      <div>
+        <div class="s-title">4 vues sur écran Magelis HMIS5T 320×240</div>
+        <div class="s-grid g2">
+          <div class="card accent">
+            <div class="strong" style="color:var(--accent-dark);">Vue Accueil</div>
+            <div class="s-text small">Choix mode (INIT, MANU, APP, AUTO). État codeurs en temps réel. Voyant INIT_OK.</div>
           </div>
-          <div class="strip" style="margin-top:0;padding:16px 22px;">
-            <span class="b am"><span class="dot"></span>Pourquoi sans Td</span>
-            <p style="font-size:18px;">Le terme dérivé amplifiait le bruit codeur (±1 incrément) → oscillation HF (bug B07). Td supprimé, <span class="code">Kp</span> / <span class="code">Ti</span> réajustés sur banc. <strong>Kp = 4,0 · Ti = 2,0 s</strong> devient le réglage usine, laissé sur une fiche réflexe A5 près du pupitre.</p>
+          <div class="card accent">
+            <div class="strong" style="color:var(--accent-dark);">Vue Manuel</div>
+            <div class="s-text small">Jog AX2 / AX3 / G-D. Affichage des compteurs HSC. Bouton AU.</div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">Broïda</span> · PIDFF 4,61 / 2,16 / 0,51 → PI retenu 4,0 / 2,0</span><span class="mono">13</span></div>
-  </div>
-</section>
-
-<!-- 14 · IHM HMIS5T -->
-<section class="slide" data-screen-label="14">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">II</span> Interface opérateur · IHM Harmony</div>
-      <div class="tags"><span class="tag c">HMIS5T</span><span class="tag cy">Modbus TCP · 502</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Six écrans pour <span class="gr">piloter sans lire le code</span></h2>
-    <div class="body" style="display:flex;flex-direction:column;justify-content:center;gap:24px;">
-      <div class="screens" data-anim="up" data-d="2">
-        <div class="scr"><div class="sid">P_ACCUEIL</div><h4>Accueil</h4><p>Lampes d'état, sélection du mode, accès écrans</p></div>
-        <div class="scr"><div class="sid">P_MANU</div><h4>Manuel</h4><p>3 axes, consigne G/D éditable, pince</p></div>
-        <div class="scr"><div class="sid">P_APP</div><h4>Apprentissage</h4><p>Mémoriser la position courante, tout effacer</p></div>
-        <div class="scr"><div class="sid">P_AUTO</div><h4>Auto</h4><p>Index, consigne / position / erreur, lancer</p></div>
-        <div class="scr"><div class="sid">P_REGL</div><h4>Réglages</h4><p>Kp, Ti, tolérances, freinage prédictif</p></div>
-        <div class="scr alert"><div class="sid">P_DEF</div><h4>Défauts</h4><p>8 lampes diagnostic (AU, pression, timeouts…)</p></div>
-      </div>
-      <div class="strip" data-anim="up" data-d="4" style="margin-top:0;">
-        <span class="b am"><span class="dot"></span>Deux adaptations assumées</span>
-        <p>L'écran prévu (GTU 10″) n'étant plus dispo, refonte complète sur une <strong>HMIS5T 320×240</strong>. Licence VXML absente → contournement par <strong>import CSV</strong> des 89 variables. Toutes les fonctions prévues sont bien là.</p>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">Vijeo Designer</span> · 6 écrans · 89 variables Modbus</span><span class="mono">14</span></div>
-  </div>
-</section>
-
-<!-- 15 · ACTE III DIVIDER -->
-<section class="slide divider" data-screen-label="15">
-  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
-  <div class="pad">
-    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; III &nbsp;·&nbsp; MISE AU POINT</div>
-    <h2 class="dv-title" data-anim="up" data-d="2">Débusquer,<br>puis <span class="em">corriger</span>.</h2>
-    <p class="dv-sub" data-anim="up" data-d="3">Sept bugs, quatre versions. Pas un aveu d'erreurs — la trace assumée d'une démarche : chaque défaut identifié à l'usage, isolé, expliqué, puis corrigé par une modification calibrée.</p>
-    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
-      <span class="tag am">V1 → V4.2</span><span class="tag c">7 bugs résolus</span><span class="tag">Historique = livrable DOE</span>
-    </div>
-  </div>
-</section>
-
-<!-- 16 · TIMELINE DES 7 BUGS -->
-<section class="slide" data-screen-label="16">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">III</span> Frise des bugs B01 → B07</div>
-      <div class="tags"><span class="tag c">4 versions</span><span class="tag am">V4.2 livrée</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Quatre versions, sept bugs <span class="gr">tracés et corrigés</span></h2>
-    <div class="body">
-      <div class="tl" data-anim="up" data-d="2">
-        <div class="tl-col">
-          <div class="tl-head"><span class="tl-ver">V1</span><span class="tl-cap">première écriture</span></div>
-          <div class="tl-empty">base — 4 GRAFCETs séparés</div>
-        </div>
-        <div class="tl-col">
-          <div class="tl-head"><span class="tl-ver">V2</span><span class="tl-cap">refonte architecturale</span></div>
-          <div class="bug"><div class="bid">B01</div><div class="bsym">AUTO retombe au repos avant la cible</div><div class="bfix">→ écriture déplacée en action one-shot</div></div>
-          <div class="bug"><div class="bid">B02</div><div class="bsym">codeur AX2 décompte à l'envers</div><div class="bfix">→ signe négatif corrigé en REGULATION</div></div>
-        </div>
-        <div class="tl-col">
-          <div class="tl-head"><span class="tl-ver">V3</span><span class="tl-cap">stabilisation</span></div>
-          <div class="bug"><div class="bid">B03</div><div class="bsym">battement des distributeurs AX2/AX3</div><div class="bfix">→ anti-chattering 30/20 cycles</div></div>
-          <div class="bug"><div class="bid">B04</div><div class="bsym">import XSF refusé</div><div class="bfix">→ balises XML retirées</div></div>
-          <div class="bug"><div class="bid">B05</div><div class="bsym">position atteinte jamais validée</div><div class="bfix">→ comparaison codeur ± tolérance</div></div>
-        </div>
-        <div class="tl-col ship">
-          <div class="tl-head"><span class="tl-ver">V4.2</span><span class="tl-cap">version livrée</span></div>
-          <div class="bug"><div class="bid">B06</div><div class="bsym">INIT non relançable après défaut</div><div class="bfix">→ remise à zéro de INIT_OK</div></div>
-          <div class="bug"><div class="bid">B07</div><div class="bsym">oscillation HF — bruit codeur amplifié</div><div class="bfix">→ bascule PIDFF → PI1</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">Historique B01-B07</span> · conservé au DOE pour la maintenance</span><span class="mono">16</span></div>
-  </div>
-</section>
-
-<!-- 17 · LE TOURNANT MÉTHODE -->
-<section class="slide" data-screen-label="17">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">III</span> Le tournant V1 → V2</div>
-      <div class="tags"><span class="tag c">Décision d'architecture</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:20px;">Le moment décisif : <span class="gr">tout refondre</span> plutôt que rustiner</h2>
-    <div class="body" style="display:flex;align-items:center;">
-      <div class="grid g2" style="gap:38px; align-items:stretch; width:100%;">
-        <div class="ba-card before" data-anim="left" data-d="2" style="justify-content:center;">
-          <div class="ba-tag"><span class="dot"></span>V1 · ce qui coinçait</div>
-          <h4>Quatre GRAFCETs séparés</h4>
-          <p>Chacun écrivait directement sur les sorties physiques. Plusieurs endroits pilotaient la même sortie → conflits, fins de course oubliées, sécurité fragile. C'est là que naissaient B01 et B02.</p>
-        </div>
-        <div class="ba-card after" data-anim="right" data-d="3" style="justify-content:center;">
-          <div class="ba-tag"><span class="dot"></span>V2 · la refonte</div>
-          <h4>Un GRAFCET maître + M_CMD</h4>
-          <p>Fusion en un grafcet unique, centralisation des sorties via les flags <span class="code">M_CMD_*</span> et la section SECURITE. Deux bugs corrigés d'un coup — et une base saine pour toute la suite.</p>
-        </div>
-      </div>
-    </div>
-    <div class="strip" data-anim="up" data-d="4">
-      <span class="b gr"><span class="dot"></span>La leçon</span>
-      <p>Savoir reconnaître qu'un problème est <strong>architectural</strong>, pas ponctuel : reconstruire proprement a coûté du temps sur le moment, mais a payé sur les versions V3 et V4.2.</p>
-    </div>
-    <div class="foot"><span><span class="brandmark">V1 → V2</span> · refonte fondatrice</span><span class="mono">17</span></div>
-  </div>
-</section>
-
-<!-- 18 · ACTE IV DIVIDER -->
-<section class="slide divider" data-screen-label="18">
-  <div class="act-fx" aria-hidden="true"><div class="blob b1"></div></div>
-  <div class="pad">
-    <div class="dv-num mono" data-anim="up" data-d="1">ACTE&nbsp; IV &nbsp;·&nbsp; PREUVE</div>
-    <h2 class="dv-title" data-anim="up" data-d="2">Mettre<br>en <span class="em">service</span>.</h2>
-    <p class="dv-sub" data-anim="up" data-d="3">Huit essais contradictoires, des performances chiffrées, une fiche de réception signée devant le client. Le moment où le code devient une machine qui marche.</p>
-    <div style="display:flex;gap:14px;margin-top:38px;" data-anim="fade" data-d="4">
-      <span class="tag c">Essais E1 → E8</span><span class="tag">3 modes démontrés</span><span class="tag am">Réception signée</span>
-    </div>
-  </div>
-</section>
-
-<!-- 19 · ESSAIS E1-E8 + PERFS -->
-<section class="slide" data-screen-label="19">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">IV</span> Validation · protocole E1 → E8</div>
-      <div class="tags"><span class="tag c">8 / 8 OK</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Huit essais, <span class="gr">huit succès</span> — preuve chiffrée</h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1.1fr 1fr; gap:34px; align-items:stretch;">
-        <div data-anim="left" data-d="2" class="card" style="padding:22px 26px;">
-          <table class="t">
-            <thead><tr><th>N°</th><th>Essai</th><th style="text-align:right;">Rés.</th></tr></thead>
-            <tbody>
-              <tr><td class="mono">E1</td><td class="lead-col">Arrêt d'urgence en mouvement</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E2</td><td class="lead-col">Fin de course AX2</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E3</td><td class="lead-col">Fin de course AX3</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E4</td><td class="lead-col">Comptage codeur G/D butée à butée</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E5</td><td class="lead-col">Boucle PI à 50 % de course</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E6</td><td class="lead-col">Cycle apprentissage P1→P2→P3</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E7</td><td class="lead-col">Coupure groupe hydraulique</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-              <tr><td class="mono">E8</td><td class="lead-col">Repli sortie analogique (STOP CPU)</td><td style="text-align:right;"><span class="b ok">OK</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col" data-anim="right" data-d="3">
-          <div class="card edge-gr" style="padding:22px 26px;">
-            <div class="kicker">Essai E5 · performances de l'asservissement</div>
-            <table class="t" style="font-size:18px;">
-              <thead><tr><th>Échelon</th><th>Dépass.</th><th>t<sub>r</sub></th><th>ε stat.</th></tr></thead>
-              <tbody>
-                <tr><td class="lead-col">25 %</td><td><span class="gr">2,1 %</span></td><td><span class="gr">2,4 s</span></td><td><span class="gr">0,8 mm</span></td></tr>
-                <tr><td class="lead-col">50 %</td><td><span class="gr">3,4 %</span></td><td><span class="gr">2,7 s</span></td><td><span class="gr">1,1 mm</span></td></tr>
-                <tr><td class="lead-col">100 %</td><td><span class="gr">4,6 %</span></td><td><span class="gr">2,9 s</span></td><td><span class="gr">1,5 mm</span></td></tr>
-              </tbody>
-            </table>
-            <p style="font-size:16px;color:var(--fog);margin-top:10px;">Cibles : dépassement &lt; 5 % · t<sub>r</sub> &lt; 3 s · ε &lt; 2 mm — tenues sur les trois échelons.</p>
+          <div class="card accent">
+            <div class="strong" style="color:var(--accent-dark);">Vue Apprentissage</div>
+            <div class="s-text small">Enregistrement séquence de positions (jusqu'à 8 points). Mémoire conservée hors tension.</div>
           </div>
-          <div class="kpibar" style="grid-template-columns:1fr 1fr;padding-top:20px;margin-top:0;">
-            <div class="kpi"><span class="v">8/8</span><span class="l">essais validés</span></div>
-            <div class="kpi"><span class="v cy">&lt;5 mm</span><span class="l">précision de positionnement</span></div>
+          <div class="card accent">
+            <div class="strong" style="color:var(--accent-dark);">Vue Auto</div>
+            <div class="s-text small">Lecture séquence, défilement positions, compteur cycle, AU IHM.</div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="foot"><span><span class="brandmark">Essais</span> · sécurité · mesure · régulation · fonctionnel</span><span class="mono">19</span></div>
-  </div>
-</section>
-
-<!-- 20 · RÉCEPTION + BILAN COMPÉTENCES -->
-<section class="slide" data-screen-label="20">
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">IV</span> Réception client &amp; bilan de compétences</div>
-      <div class="tags"><span class="tag c">Fiche signée</span></div>
-    </div>
-    <h2 class="h2" data-anim="up" data-d="1" style="margin-top:18px;">Réceptionné, démontré, <span class="gr">formé</span></h2>
-    <div class="body">
-      <div class="grid g2" style="grid-template-columns:1.05fr 1fr; gap:34px; align-items:stretch;">
-        <div class="col" data-anim="left" data-d="2">
-          <div class="card edge-gr" style="padding:24px 28px;">
-            <div class="kicker">Séance de réception</div>
-            <p style="font-size:21px;">Devant <strong>MM. Thomas et Smuda</strong> jouant le client : conduite des 8 essais, puis démonstration des <strong>trois modes</strong> — manuel, apprentissage, automatique — sur un cycle complet en charge. Fiche remplie case par case et <strong>signée</strong>.</p>
-          </div>
-          <div class="card edge-cy" style="padding:24px 28px;">
-            <div class="kicker">Formation utilisateurs</div>
-            <p style="font-size:21px;">Une heure de prise en main de l'écran de réglage, appuyée sur une <strong>fiche réflexe A5</strong> : mise en service au recto, ajustement du PI par symptôme au verso.</p>
-          </div>
+        <div class="card dark-bg mt8">
+          <div class="s-text small" style="color:#fff;">Liaison <strong style="color:#64B5F6;">Modbus TCP/IP</strong> · automate <span class="mono">192.168.1.10</span> · 138 variables synchronisées · refresh 200 ms.</div>
         </div>
-        <div class="col" data-anim="right" data-d="3">
-          <div class="comp"><span class="cc">C14</span><p>Organiser le chantier &amp; câbler les entrées codeurs / la sortie analogique</p></div>
-          <div class="comp"><span class="cc">C15</span><p>Programmer l'automate &amp; l'IHM, paramétrer l'asservissement</p></div>
-          <div class="comp"><span class="cc">C16</span><p>Mettre en service et valider les 8 essais E1→E8</p></div>
-          <div class="comp"><span class="cc">C4</span><p>Réceptionner, former, conduire la communication de chantier</p></div>
-          <div class="strip" style="margin-top:4px;">
-            <span class="b gr"><span class="dot"></span>60 h</span>
-            <p style="font-size:19px;">de la première ligne du projet Control Expert à la signature de la réception.</p>
-          </div>
+      </div>
+      <div>
+        <div class="label mb4">Architecture variables IHM</div>
+        <table class="mt4">
+          <tr><th>Type</th><th>Préfixe</th><th>Rôle</th></tr>
+          <tr><td>Bit cmd</td><td class="mono">M_</td><td>Boutons IHM</td></tr>
+          <tr><td>Bit état</td><td class="mono">B_</td><td>Voyants</td></tr>
+          <tr><td>Mot int</td><td class="mono">MW_</td><td>Valeurs entières</td></tr>
+          <tr><td>Mot float</td><td class="mono">MF_</td><td>Consignes, tempos</td></tr>
+        </table>
+        <div class="card orange-bg mt8">
+          <div class="s-text strong" style="color:var(--warning);">Convention MW / MF</div>
+          <div class="s-text tiny">MF_ pour les valeurs continues réglables (temps, gains, mm). MW_ pour les index entiers (numéro position, compteur cycle).</div>
         </div>
       </div>
     </div>
-    <div class="foot"><span><span class="brandmark">Réception</span> · 3 modes en charge · fiche signée</span><span class="mono">20</span></div>
   </div>
-</section>
+  <div class="s-footer"><span>C14 — Programmer IHM · Vijeo Designer 6.3</span><span>Slide 11</span></div>
+</div>
 
-<!-- 21 · CONCLUSION -->
-<section class="slide" data-screen-label="21">
-  <div class="cover-fx" aria-hidden="true">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
-    <svg class="cover-trace" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
-      <path class="draw" style="--len:2600" d="M-40 720 H520 L620 640 H1020 L1120 720 H1520 L1620 520 H2000" fill="none" stroke="rgba(124,226,132,.45)" stroke-width="2"/>
-      <circle class="live" cx="620" cy="640" r="5" fill="var(--lime)"/>
-      <circle class="live" cx="1120" cy="720" r="5" fill="var(--lime)"/>
-    </svg>
-  </div>
-  <div class="pad">
-    <div class="chrome">
-      <div class="eyebrow"><span class="act">★</span> Conclusion</div>
-      <div class="tags"><span class="tag c">Merci</span></div>
-    </div>
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
-      <h1 class="cover-title" data-anim="up" data-d="1" style="font-size:78px;">Du <span class="em">fichier vide</span><br>à la machine qui obéit.</h1>
-      <p class="lead" data-anim="up" data-d="3" style="margin-top:28px;font-size:27px;">Configurer l'automate, architecturer le programme, asservir l'axe, débusquer sept bugs et prouver le tout en huit essais — la part automatisme d'un rétrofit mené, et réceptionné, en binôme.</p>
-      <div class="kpibar" data-anim="up" data-d="5" style="border-top:none;margin-top:34px;">
-        <div class="kpi"><span class="v">8/8</span><span class="l">essais validés à la réception</span></div>
-        <div class="kpi"><span class="v cy">V4.2</span><span class="l">version livrée, stable</span></div>
-        <div class="kpi"><span class="v am">&lt;5 mm</span><span class="l">précision de position</span></div>
-        <div class="kpi"><span class="v">C14·15·16·4</span><span class="l">compétences couvertes</span></div>
+<!-- ============================================================
+     S12 — T7.1 MISE EN SERVICE
+============================================================ -->
+<div class="prezi-slide" id="s12" style="left:4500px;top:2000px;">
+  <div class="s-header"><span>T7.1 — Mise en service progressive</span><span class="s-tag orange">Mettre en service</span></div>
+  <div class="s-body">
+    <div class="s-title">Approche en cinq paliers — jamais tout à la fois</div>
+    <div class="s-grid g3 mt8" style="gap:10px;">
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--gray);">1. HORS TENSION</div>
+        <div class="phase-body small">Vérif câblage : continuité, isolement &gt; 10 MΩ, polarité 24 V codeurs. Aucun défaut.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--accent);">2. AUTOMATE SEUL</div>
+        <div class="phase-body small">Mise sous tension CPU, vérif voyants RUN/ERR, transfert programme, simulation E/S forcées.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--accent-dark);">3. IHM RACCORDÉE</div>
+        <div class="phase-body small">Liaison Modbus testée. Toutes les variables M_/B_/MW_/MF_ lues correctement. Boutons fonctionnels.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--warning);">4. PUISSANCE PARTIELLE</div>
+        <div class="phase-body small">Mise sous pression hydraulique progressive. Test jog AX2 à vitesse réduite. Lecture codeurs OK.</div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-header" style="background:var(--success);">5. PRODUCTION</div>
+        <div class="phase-body small">Cycle complet INIT → AUTO → arrêt. Mesure performances asservissement. Validation E1 → E8.</div>
+      </div>
+      <div class="phase-card" style="background:#0D1B2A;border-color:#0D1B2A;">
+        <div class="phase-header" style="background:#C62828;">RÈGLE</div>
+        <div class="phase-body small" style="color:#fff;">Tout problème en palier N implique un retour au palier N−1. Pas de saut, pas de bricolage en marche.</div>
       </div>
     </div>
-    <div class="cover-sign" data-anim="fade" data-d="6">
-      <div class="who"><div class="name">Sullivan DEVALLIÈRE</div><div class="role mono">Merci de votre attention — place aux questions</div></div>
-      <div class="who right"><div class="name dim">MPH600 · U6.2</div><div class="role mono">BTS Électrotechnique · juin 2026</div></div>
+    <div class="card accent mt8">
+      <div class="s-text strong" style="color:var(--accent-dark);">Pourquoi cette méthode ?</div>
+      <div class="s-text small">Un défaut détecté tôt évite la propagation. Sur le MPH600, B02 (codeur AX2 inversé) a été identifié au palier 4 — corrigé en logiciel, pas de re-câblage.</div>
     </div>
   </div>
-</section>
+  <div class="s-footer"><span>C15 — Mettre en service</span><span>Slide 12</span></div>
+</div>
 
-</deck-stage>
+<!-- ============================================================
+     S13 — T7.2 VALIDATION E1-E8
+============================================================ -->
+<div class="prezi-slide" id="s13" style="left:5800px;top:2000px;">
+  <div class="s-header"><span>T7.2 — Essais E1 à E8 — validation 8/8</span><span class="s-tag orange">Mettre en service</span></div>
+  <div class="s-body">
+    <table class="mt4">
+      <tr><th>Essai</th><th>Objet</th><th>Critère</th><th>Résultat</th><th>Statut</th></tr>
+      <tr class="win"><td><strong>E1</strong></td><td>Communication Modbus</td><td>Liaison stable 1 h</td><td>0 timeout</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E2</strong></td><td>Lecture codeurs HSC</td><td>Concordance ±1 incrément</td><td>Vérifié 3 axes</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E3</strong></td><td>Homing GRAFCET_INIT</td><td>3 axes référencés</td><td>INIT_OK := TRUE</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E4</strong></td><td>Jog manuel 3 axes</td><td>Sens correct, FDC arrêtent</td><td>Anti-chattering OK</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E5</strong></td><td>Asservissement PI G/D</td><td>Erreur ±2 mm sur 200 mm</td><td>Mesuré : ±1,5 mm</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E6</strong></td><td>Apprentissage 8 positions</td><td>Mémoire persistante</td><td>Cycle complet OK</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E7</strong></td><td>Cycle AUTO continu</td><td>30 min sans défaut</td><td>OK + arrêt cyclique</td><td><span class="badge green">OK</span></td></tr>
+      <tr class="win"><td><strong>E8</strong></td><td>Sécurités (AU, défaut codeur)</td><td>Arrêt &lt; 500 ms</td><td>Repli AMM0600 vérifié</td><td><span class="badge green">OK</span></td></tr>
+    </table>
+    <div class="s-grid g3 mt8">
+      <div class="kpi"><div class="kv green">8/8</div><div class="kl">Essais réussis</div></div>
+      <div class="kpi"><div class="kv green">±1,5 mm</div><div class="kl">Précision G/D mesurée</div></div>
+      <div class="kpi"><div class="kv green">&lt; 500 ms</div><div class="kl">Temps arrêt sécurité</div></div>
+    </div>
+    <div class="card green-bg mt8">
+      <div class="s-text strong" style="color:var(--success);">PV d'essais signé par M. <em>[tuteur]</em> le 12 mai 2026.</div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C15 — Valider</span><span>Slide 13</span></div>
+</div>
 
-<script type="application/json" id="speaker-notes">
-[
-  "Bonjour. Je m'appelle Sullivan Devallière, deuxième année de BTS Électrotechnique. Je vais vous présenter ma partie d'un chantier de rétrofit : la remise à neuf de l'armoire électrique du bras manipulateur hydraulique MPH600. 60 heures de travail. Ma partie, c'est tout l'automatisme : créer le projet automate, le programmer, régler l'asservissement et le mettre en service. On va suivre ce parcours en quatre actes — créer, programmer, corriger, mettre en service.",
-  "Premier point essentiel : ce chantier a été mené en binôme avec Tom Froidefond. On s'est partagé deux métiers complémentaires. Tom a pris tout le câblage général de l'armoire — la puissance, la distribution, les borniers : il amène le courant. Moi j'ai pris tout l'automatisme : l'automate, le programme, l'IHM, l'asservissement, plus la soudure de l'embase de l'amplificateur. C'est vraiment deux mondes différents sur la même armoire. La frontière entre nous : les interfaces de signal — les entrées codeurs et la sortie analogique. Toute ma présentation suit ma partie à moi.",
-  "Quelques mots sur l'objet. Le MPH600 est un bras hydraulique pédagogique à trois axes. L'axe gauche-droite, AX1, est asservi en position par un distributeur proportionnel — c'est l'axe noble, celui qui demande une boucle de régulation. AX2 et AX3 sont en tout-ou-rien, plus une pince. Trois codeurs mesurent les positions. La mission : remplacer la commande obsolète par un automate Schneider M340 moderne et une IHM, sans toucher à la mécanique. L'étude — le choix du matériel — c'était l'unité U6.1 ; moi je suis sur U6.2, la réalisation. Quelques chiffres : 26 heures de programmation, 138 variables.",
-  "Acte I : créer le projet. C'est l'étape qu'on sous-estime toujours, mais si elle est ratée, plus rien ne marche ensuite. Avant la moindre ligne de code, il faut construire dans le logiciel la copie exacte de l'automate physique.",
-  "Ma toute première action a été de créer le fichier projet dans EcoStruxure Control Expert, l'atelier logiciel de Schneider. Mais créer un projet, ce n'est pas ouvrir un fichier vide : c'est d'abord déclarer du matériel. J'ai assigné l'automate — un M340 — puis déclaré un rack de 6 emplacements. Ensuite l'étape clé : placer et nommer chaque module dans son emplacement. Une place, un nom, une adresse pour chacun. Et je n'ai pas improvisé le positionnement : j'ai suivi les plans préliminaires réalisés en amont. La règle d'or : si un module est mal adressé, aucune entrée-sortie ne répond. C'est la fondation de tout.",
-  "Voici le rack, emplacement par emplacement. Slot 0 : l'alimentation, la BMX CPS 2000, qui alimente le rack. Slot 1 : le processeur, la BMX P34 2020, le cerveau. Slot 2 : 16 entrées tout-ou-rien pour les capteurs et fins de course. Slot 3 : 16 sorties relais pour les distributeurs. Slots 4 et 5, les deux modules signal placés côte à côte à droite : le comptage rapide EHC 0800 pour les codeurs, et l'analogique AMM 0600 pour la commande proportionnelle. Ces deux-là, c'est exactement la frontière avec le câblage de Tom.",
-  "Avant de programmer, comprenons la chaîne de signal. Trois temps : mesurer, décider, agir. Les codeurs mesurent la position et l'envoient au module EHC. La CPU décide : elle compare la consigne et la mesure, calcule la correction. Puis elle agit : la sortie analogique de l'AMM pilote, via l'amplificateur, le distributeur proportionnel. Le point important : la mesure revient en permanence vers la CPU. C'est cette boucle fermée qui permet d'asservir la position, et pas simplement d'ouvrir ou fermer. Tout le talent du programme est là-dedans.",
-  "Et là, un obstacle bien concret. L'amplificateur proportionnel — un Atos E-BM-AC-05F — arrivait avec une ancienne embase totalement obsolète, impossible à réutiliser. Aucun raccordement propre vers l'automate n'était possible en l'état. J'ai donc réalisé des soudures sur l'embase pour refaire un câblage neuf, reliant l'amplificateur à la sortie analogique de l'automate et au distributeur proportionnel. C'est un geste métier important à montrer : un automaticien ne fait pas que du logiciel — il faut aussi savoir reprendre le fer à souder quand le matériel ne suit pas.",
-  "Acte II : programmer le comportement. 26 heures de travail. C'est le cœur de ma partie : quatre sections, un principe d'architecture, un asservissement, et une IHM.",
-  "Le programme est organisé en quatre sections exécutées dans un ordre fixé : REGULATION qui lit les codeurs et exécute le PI ; le GRAFCET maître qui gère les cinq modes ; le GRAFCET d'init pour la prise d'origine ; et SECURITE. Le point que je veux vraiment expliquer, c'est le principe M_CMD. Aucun GRAFCET n'écrit directement sur une sortie physique. Chacun exprime seulement une intention — par exemple « je veux que AX2 monte » — en écrivant un flag M_CMD. Et c'est la section SECURITE, et elle seule, qui décide en fin de cycle si cette intention devient une action réelle. Avantage énorme : tous les interblocages, fins de course et sécurités sont au même endroit. Ajouter une sécurité, c'est modifier un seul bloc — pas parcourir tout le programme.",
-  "Le GRAFCET maître, c'est une étoile autour de l'étape REPOS. Depuis REPOS, quatre branches selon le mode demandé sur l'IHM : INIT, MANU, APP, AUTO. Chaque branche revient à REPOS quand le mode se termine, ou quand une CONDITION_SORTIE calculée dans SECURITE l'interrompt. À retenir : à l'origine j'avais quatre GRAFCETs séparés. Les fusionner en un seul maître a tout simplifié — j'y reviens à l'acte III, parce que ça a corrigé deux bugs d'un coup.",
-  "Concentrons-nous sur l'asservissement de l'axe G/D. Voici la boucle fermée. La consigne vient de l'IHM. On la compare à la position mesurée par le codeur : ça donne l'erreur. Le correcteur PI traite cette erreur et sort une commande de 0 à 100 %. Cette commande devient une tension 0-10 V sur la sortie analogique, amplifiée par l'Atos, qui ouvre le distributeur et déplace le vérin. Et le codeur referme la boucle. Tout ça tourne à chaque cycle automate, environ toutes les 10 millisecondes. Détail technique : les gains Kp et Ti sont des nombres réels, donc stockés en flottants, et exposés en secondes côté IHM pour que l'opérateur les lise facilement.",
-  "Comment j'ai réglé ce PI ? Pas au hasard. J'ai utilisé la méthode de Broïda : j'envoie un échelon de 0 à 100 % en boucle ouverte, je relève la réponse à l'oscilloscope intégré de Control Expert. Les seuils à 28 et 40 % me donnent t1 égale 2,53 secondes et t2 égale 2,77 secondes, et les formules de Broïda en déduisent un premier réglage théorique sur un correcteur PIDFF : Kp égale 4,61, Ti égale 2,16 secondes, Td égale 0,51 seconde. Mais au premier essai en boucle fermée, ce PIDFF se met à osciller à 50 hertz, bras immobile : le terme dérivé amplifie le bruit du codeur, à plus ou moins un incrément. J'ai donc supprimé la dérivée — je passe sur un bloc PI — et réajusté sur banc à Kp égale 4,0 et Ti égale 2 secondes. Ce sont les valeurs usine, laissées sur une fiche réflexe plastifiée près du pupitre pour que les enseignants les retrouvent en cas de dérive.",
-  "Dernière brique de la programmation : l'IHM, l'interface opérateur. Six écrans : accueil, manuel, apprentissage, auto, réglages, et défauts avec ses 8 lampes de diagnostic. Communication en Modbus TCP. Deux adaptations à assumer honnêtement : l'écran prévu à l'étude n'était plus disponible, j'ai donc tout refondu sur un écran HMIS5T plus petit ; et la licence d'import direct n'étant pas arrivée, j'ai contourné par un import CSV des 89 variables. Toutes les fonctions prévues sont bien là, simplement sur un format plus contraint.",
-  "Acte III : la mise au point. Sept bugs, quatre versions. Je l'assume complètement : ce n'est pas un aveu d'erreurs, c'est la trace d'une vraie démarche d'ingénieur. Chaque bug a été identifié à l'usage, isolé, expliqué, puis corrigé par une modification calibrée. Et cet historique est un livrable à part entière, conservé au dossier pour la maintenance future.",
-  "Voici la frise. V1, la première écriture, avec mes quatre GRAFCETs séparés. V2, la refonte : elle corrige B01, l'axe qui retombait au repos avant la cible, et B02, le codeur AX2 qui décomptait à l'envers. V3, la stabilisation : trois bugs corrigés sans toucher à l'architecture — le battement des distributeurs réglé par un anti-chattering, un import refusé, une position jamais validée. Et V4.2, la version livrée : l'INIT non relançable après défaut, et le plus intéressant, B07, une oscillation haute fréquence — le bruit du codeur amplifié par le terme dérivé du PIDFF. Je suis passé du bloc PIDFF au bloc PI, plus stable.",
-  "Je veux insister sur le tournant V1 vers V2, car c'est ma décision la plus importante. En V1, mes quatre GRAFCETs écrivaient chacun directement sur les sorties. Plusieurs endroits pilotaient la même sortie : conflits, sécurité fragile. J'aurais pu rustiner. J'ai choisi de tout refondre : un seul GRAFCET maître, et la centralisation des sorties via les flags M_CMD et la section SECURITE. Ça a corrigé deux bugs d'un coup et donné une base saine pour toute la suite. La leçon : savoir reconnaître qu'un problème est architectural, pas ponctuel.",
-  "Acte IV, le dernier : la mise en service. C'est le moment où le code devient une machine qui marche. Huit essais contradictoires, des performances chiffrées, et une réception signée devant le client.",
-  "Le protocole compte huit essais qui couvrent sécurité, mesure, régulation et fonctionnement automatique. Résultat : huit sur huit OK. Je détaille l'essai E5, les performances de l'asservissement, mesurées sur trois échelons. Sur 25, 50 et 100 % de course, le dépassement reste sous 5 %, le temps de réponse sous 3 secondes, et l'erreur statique sous 2 millimètres. Les marges sont confortables sur les petits déplacements, plus serrées sur le grand — c'est le comportement attendu. Précision finale de positionnement : moins de 5 millimètres.",
-  "La réception s'est tenue devant MM. Thomas et Smuda, qui jouaient le client. J'ai conduit les huit essais, puis démontré les trois modes — manuel, apprentissage, automatique — sur un cycle complet en charge. La fiche a été remplie case par case et signée. J'ai aussi assuré une heure de formation, appuyée sur une fiche réflexe. En termes de compétences, ce chantier couvre la conception et l'écriture du programme, la mise en service et le réglage de l'asservissement, et la réception-formation. 60 heures, du fichier vide à la signature.",
-  "Pour conclure : je suis parti d'un fichier projet vide et j'ai abouti à une machine qui obéit. J'ai configuré l'automate, architecturé le programme autour du principe M_CMD, asservi l'axe avec un PI réglé par la méthode de Broïda, débusqué et corrigé sept bugs, et prouvé le tout par huit essais validés à la réception. Le tout en binôme avec Tom sur la partie câblage. Je vous remercie de votre attention, et je suis prêt pour vos questions."
-]
+<!-- ============================================================
+     S14 — T7.3 RÉCEPTION + FORMATION
+============================================================ -->
+<div class="prezi-slide" id="s14" style="left:600px;top:2900px;">
+  <div class="s-header"><span>T7.3 — Réception, dossier &amp; formation</span><span class="s-tag orange">Réceptionner</span></div>
+  <div class="s-body">
+    <div class="s-grid g60-40" style="height:88%;">
+      <div>
+        <div class="s-title">Livraison à l'exploitant</div>
+        <div class="card accent mb6">
+          <div class="s-text strong" style="color:var(--accent-dark);">Dossier technique remis</div>
+          <div class="s-text small">Schémas QElectrotech à jour · folio armoire · table des variables 138 entrées · code source commenté · PV essais E1-E8 · notice utilisateur 4 vues IHM.</div>
+        </div>
+        <div class="card green mb6">
+          <div class="s-text strong" style="color:var(--success);">Formation opérateur</div>
+          <div class="s-text small">Démo en présence du chef d'atelier. Parcours des 4 vues IHM. Procédure de relance après AU. Procédure de re-INIT après arrêt général.</div>
+        </div>
+        <div class="card orange">
+          <div class="s-text strong" style="color:var(--warning);">Réserves consignées</div>
+          <div class="s-text small">Possibilité de paramétrer Td plus tard si production demande plus de réactivité. Anti-chattering ajustable si rebond FDC évolue avec l'usure.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label mb4">Documents livrés</div>
+        <table class="mt4">
+          <tr><th>Document</th><th>Format</th></tr>
+          <tr><td>Schéma armoire</td><td>QElectrotech .qet + PDF</td></tr>
+          <tr><td>Programme automate</td><td>Control Expert .stu</td></tr>
+          <tr><td>Programme IHM</td><td>Vijeo Designer .vdz</td></tr>
+          <tr><td>Table variables</td><td>Excel .xlsx</td></tr>
+          <tr><td>PV essais E1-E8</td><td>PDF signé</td></tr>
+          <tr><td>Notice utilisateur</td><td>PDF 6 pages</td></tr>
+          <tr><td>Sauvegarde projet</td><td>USB chiffrée</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C16 — Réceptionner</span><span>Slide 14</span></div>
+</div>
+
+<!-- ============================================================
+     S15 — T8.4 COMMUNICATION CHANTIER
+============================================================ -->
+<div class="prezi-slide" id="s15" style="left:1900px;top:2900px;">
+  <div class="s-header"><span>T8.4 — Communication de chantier</span><span class="s-tag">Conduire</span></div>
+  <div class="s-body">
+    <div class="s-grid g60-40" style="height:88%;">
+      <div>
+        <div class="s-title">Tracer pour transmettre</div>
+        <div class="s-text mb6">Sur les 60 h de chantier, j'ai tenu un suivi écrit qui m'a servi pour rendre compte au tuteur et qui sert maintenant au mainteneur futur.</div>
+        <div class="card accent mb6">
+          <div class="s-text strong" style="color:var(--accent-dark);">Comptes-rendus hebdo</div>
+          <div class="s-text small">Des CR courts envoyés à mon tuteur : avancement, points bloquants, demandes d'arbitrage. Le PDF V5 généré par Control Expert documente l'état final du programme.</div>
+        </div>
+        <div class="card green mb6">
+          <div class="s-text strong" style="color:var(--success);">Échanges avec Tom (BE)</div>
+          <div class="s-text small">Tom a mis à jour les schémas QElectrotech à partir de mes notes terrain. Aller-retour quotidien sur les évolutions de câblage.</div>
+        </div>
+        <div class="card red">
+          <div class="s-text strong" style="color:var(--danger);">Fiches de modification</div>
+          <div class="s-text small">Chaque bug B01 à B07 a sa fiche datée. C'est le journal du chantier : ce qui a changé, pourquoi, et qui l'a validé.</div>
+        </div>
+      </div>
+      <div>
+        <div class="label mb4">Boucle qualité</div>
+        <div class="vflow">
+          <div class="step init">Détection (essai ou retour terrain)</div>
+          <div class="trans">↓</div>
+          <div class="step">Fiche de modification ouverte</div>
+          <div class="trans">↓</div>
+          <div class="step">Diagnostic + proposition correction</div>
+          <div class="trans">↓</div>
+          <div class="step">Validation tuteur</div>
+          <div class="trans">↓</div>
+          <div class="step">Application + re-test</div>
+          <div class="trans">↓</div>
+          <div class="step" style="border-color:var(--success);background:#E8F5E9;color:var(--success);">Fiche clôturée + CR hebdo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>C16 — Communiquer</span><span>Slide 15</span></div>
+</div>
+
+<!-- ============================================================
+     S16 — BILAN COMPÉTENCES
+============================================================ -->
+<div class="prezi-slide" id="s16" style="left:3200px;top:2900px;">
+  <div class="s-header"><span>Bilan compétences C4 · C14 · C15 · C16</span><span class="s-tag">Bilan</span></div>
+  <div class="s-body">
+    <div class="s-grid g2 mt8" style="gap:14px;">
+      <div class="card accent">
+        <div class="s-text strong" style="color:var(--accent-dark);font-size:15px;">C4 — Organiser</div>
+        <div class="s-text small mt4">Consignation NF C 18-510, balisage zone câblage, préparation outillage. Planning 60 h respecté.</div>
+        <div class="badge green mt4">Acquis</div>
+      </div>
+      <div class="card green">
+        <div class="s-text strong" style="color:var(--success);font-size:15px;">C14 — Réaliser</div>
+        <div class="s-text small mt4">Câblage codeurs + AO Atos, sertissage, repérage, contrôles continuité/isolement. Programmation automate (4 sections, 138 var) + IHM (4 vues).</div>
+        <div class="badge green mt4">Acquis</div>
+      </div>
+      <div class="card orange">
+        <div class="s-text strong" style="color:var(--warning);font-size:15px;">C15 — Mettre en service</div>
+        <div class="s-text small mt4">Méthode 5 paliers, identification Broïda terrain, réglage PI, validation E1-E8. 7 bugs traités V2 → V4.2.</div>
+        <div class="badge green mt4">Acquis</div>
+      </div>
+      <div class="card red">
+        <div class="s-text strong" style="color:var(--danger);font-size:15px;">C16 — Réceptionner</div>
+        <div class="s-text small mt4">Dossier technique livré, PV signé, formation opérateur, fiches de modification archivées.</div>
+        <div class="badge green mt4">Acquis</div>
+      </div>
+    </div>
+    <div class="card dark-bg mt8">
+      <div class="s-text" style="color:#fff;">
+        <strong style="color:#64B5F6;">Ce que j'ai appris</strong> — Adapter un programme existant demande plus de méthode que d'écrire from scratch. Chaque bug rencontré m'a obligé à comprendre la chaîne complète : du codeur jusqu'à l'IHM. C'est cette vision système qui me sert maintenant en intervention.
+      </div>
+    </div>
+  </div>
+  <div class="s-footer"><span>Bilan U6.2</span><span>Slide 16</span></div>
+</div>
+
+<!-- ============================================================
+     S17 — CONCLUSION
+============================================================ -->
+<div class="prezi-slide dark" id="s17" style="left:4500px;top:2900px;">
+  <div style="width:960px;height:540px;background:linear-gradient(135deg,#0D1B2A 0%,#0D47A1 100%);padding:40px;position:relative;overflow:hidden;">
+    <div class="cover-circles"></div>
+    <div style="font-size:14px;color:#64B5F6;font-weight:600;letter-spacing:2px;margin-bottom:8px;">CONCLUSION &amp; PERSPECTIVES</div>
+    <div style="font-size:28px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:18px;">Un retrofit livré stable,<br>une méthode reproductible,<br>une V5 déjà identifiée.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+      <div style="background:rgba(139,195,74,0.15);border:1px solid rgba(139,195,74,0.35);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;color:#C5E1A5;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Résultat</div>
+        <div style="font-size:14px;color:#fff;line-height:1.5;">V4.2 stable · 8/8 essais validés · PV signé · formation opérateur réalisée · dossier technique remis.</div>
+      </div>
+      <div style="background:rgba(0,170,255,0.15);border:1px solid rgba(0,170,255,0.35);border-radius:8px;padding:14px;">
+        <div style="font-size:11px;color:#80DEEA;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Perspectives V5</div>
+        <div style="font-size:14px;color:#fff;line-height:1.5;">Activer Td après quelques semaines de production. Étudier supervision Modbus pour suivi distant. Documenter procédure de duplication sur autre bras.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;padding:10px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#fff;">60h</div>
+        <div style="font-size:10px;color:#90CAF9;text-transform:uppercase;">Volume chantier</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;padding:10px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#8BC34A;">8/8</div>
+        <div style="font-size:10px;color:#90CAF9;text-transform:uppercase;">Essais validés</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;padding:10px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#FFB74D;">7</div>
+        <div style="font-size:10px;color:#90CAF9;text-transform:uppercase;">Bugs corrigés</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;padding:10px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#fff;">±1,5 mm</div>
+        <div style="font-size:10px;color:#90CAF9;text-transform:uppercase;">Précision G/D</div>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid rgba(255,255,255,0.2);padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#fff;">Merci de votre attention</div>
+        <div style="font-size:12px;color:#90CAF9;margin-top:4px;">Questions ?</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:13px;color:#fff;font-weight:600;">Sullivan DEVALLIÈRE</div>
+        <div style="font-size:11px;color:#78909C;">BTS Électrotechnique · Session 2026 · CFAI du Limousin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /canvas -->
+</div><!-- /viewport -->
+
+<script>
+// ============================================================
+// NAVIGATION PREZI-STYLE
+// ============================================================
+const slides = Array.from(document.querySelectorAll('.prezi-slide'));
+const canvas = document.getElementById('canvas');
+const viewport = document.getElementById('viewport');
+const navEl = document.getElementById('nav');
+const progressEl = document.getElementById('progress');
+let currentSlide = 0;
+
+// Build nav
+slides.forEach((s, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot';
+  dot.textContent = i === 0 ? '★' : i;
+  dot.onclick = () => goToSlide(i);
+  navEl.appendChild(dot);
+});
+
+function goToSlide(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  currentSlide = idx;
+  const slide = slides[idx];
+  const slideX = parseInt(slide.style.left);
+  const slideY = parseInt(slide.style.top);
+  const slideW = 960;
+  const slideH = 540;
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  // marge nav 54 + petite marge à droite
+  const usableW = vpW - 54 - 40;
+  const usableH = vpH - 40;
+  const scale = Math.min(usableW / slideW, usableH / slideH);
+  const tx = (vpW - 54 - slideW * scale) / 2 - slideX * scale + 54;
+  const ty = (vpH - slideH * scale) / 2 - slideY * scale;
+  canvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  // Update nav
+  document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  // Update progress
+  progressEl.style.width = ((idx + 1) / slides.length * 100) + '%';
+}
+
+function goNext() { if (currentSlide < slides.length - 1) goToSlide(currentSlide + 1); }
+function goPrev() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
+function goHome() {
+  // Vue d'ensemble
+  const vpW = viewport.clientWidth;
+  const vpH = viewport.clientHeight;
+  const canvasW = 10000;
+  const canvasH = 8000;
+  // bornes utilisées : x de 600 à 5800+960=6760, y de 200 à 2900+540=3440
+  const minX = 600, maxX = 6760, minY = 200, maxY = 3440;
+  const usedW = maxX - minX;
+  const usedH = maxY - minY;
+  const scale = Math.min((vpW - 54 - 60) / usedW, (vpH - 60) / usedH);
+  const tx = (vpW - 54 - usedW * scale) / 2 - minX * scale + 54;
+  const ty = (vpH - usedH * scale) / 2 - minY * scale;
+  canvas.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  document.querySelectorAll('.nav-dot').forEach((d) => d.classList.remove('active'));
+  progressEl.style.width = '0%';
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); goNext(); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goPrev(); }
+  else if (e.key === 'Home' || e.key === 'h') { e.preventDefault(); goHome(); }
+  else if (e.key === 'End') { e.preventDefault(); goToSlide(slides.length - 1); }
+});
+
+// Wheel zoom-out -> home, zoom-in on slide rester
+// Resize handler
+window.addEventListener('resize', () => goToSlide(currentSlide));
+
+// Init
+window.addEventListener('load', () => goToSlide(0));
 </script>
-<script src="image-slot.js"></script>
-<script src="deck-stage.js"></script>
+
 </body>
 </html>

@@ -1,35 +1,31 @@
-# Soutenance U6.2 — Rétrofit MPH600
+# Soutenance U6.2 — Réalisation & mise en service MPH600
 
-Présentation (deck) de la soutenance de Sullivan DEVALLIÈRE — partie automatisme
-du rétrofit de l'armoire électrique du bras manipulateur hydraulique **MPH600**
-(BTS Électrotechnique, U6.2).
+Présentation de la soutenance de Sullivan DEVALLIÈRE (BTS Électrotechnique,
+épreuve U6.2) sur le rétrofit de l'armoire du bras hydraulique **MPH600**.
 
-Deck statique navigable au clavier / clicker, conçu avec Claude Design puis
-intégré ici. Il est servi directement par le serveur Express existant
-(`express.static('public')`).
+Diaporama au format **Prezi** : un canvas unique avec zoom/déplacement entre
+les diapositives, 18 vues structurées par tâches du référentiel
+(T6.1 → T8.4) et compétences **C4 · C14 · C15 · C16**.
+
+Fichier unique et autonome (CSS + JS intégrés, aucune ressource externe).
+Servi directement par le serveur Express existant (`express.static('public')`).
 
 ## Voir la présentation
 
 - En local : `npm start` puis ouvrir <http://localhost:3000/soutenance/>
 - En ligne (Render) : `https://<app>.onrender.com/soutenance/`
+- Hors serveur : ouvrir `Soutenance_MPH600.html` directement dans un navigateur.
 
 ## Navigation
 
-- **Flèches ← / →** (ou PageUp / PageDown d'un clicker) : slide précédent / suivant
-- **F** : plein écran · **G** : grille des miniatures · **S** : notes orateur
-- Voir l'aide intégrée du composant `deck-stage` pour les autres raccourcis.
+- **→ / Espace / PageDown** : diapositive suivante
+- **← / PageUp** : diapositive précédente
+- **Home / H** : vue d'ensemble · **End** : dernière diapositive
+- Panneau de pastilles à gauche, ou les boutons ⌂ ◀ ▶ en bas à droite.
 
 ## Fichiers
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | Les 21 slides + notes orateur (`#speaker-notes`) |
-| `styles.css` | Système visuel (thème vert SHEM/ENGIE sur fond sombre) |
-| `deck-stage.js` | Composant deck : nav clavier, notes, grille, export PDF |
-| `image-slot.js` | Emplacement photo (glisser-déposer, stocké en localStorage) |
-
-## Photo à ajouter
-
-Le slide 08 (soudure de l'embase de l'amplificateur Atos) contient un
-emplacement photo (`<image-slot id="mph_soudure">`). Glissez-y votre photo
-des soudures : elle est mémorisée dans le navigateur.
+| `index.html` | La présentation (servie sur `/soutenance/`) |
+| `Soutenance_MPH600.html` | Copie identique, à ouvrir/partager hors serveur |
