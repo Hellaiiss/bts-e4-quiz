@@ -795,35 +795,9 @@ tr.fix td { background: #FFF8E1; }
 </div>
 
 <!-- ============================================================
-     S10 — ITÉRATIONS V2 → V3 → V4.2
-============================================================ -->
-<div class="prezi-slide" id="s10" style="left:1900px;top:2000px;">
-  <div class="s-header"><span>T6.3a — Itérations : 7 bugs débusqués V2 → V4.2</span><span class="s-tag orange">Adapter</span></div>
-  <div class="s-body">
-    <div class="s-title">L'apprenti adapte, ajuste, corrige</div>
-    <div class="s-text small mb6">Je ne suis pas concepteur du programme. Je l'ai repris, testé, identifié les défauts en mise en service, proposé et appliqué les corrections version par version.</div>
-    <table class="mt4">
-      <tr><th>ID</th><th>Version</th><th>Symptôme observé</th><th>Cause</th><th>Correction</th></tr>
-      <tr class="fix"><td><strong>B01</strong></td><td>V2</td><td>Sortie auto figée</td><td>ACT_REPOS_AUTO écrasait la commande</td><td>Conditionner par MW_MODE</td></tr>
-      <tr class="fix"><td><strong>B02</strong></td><td>V2</td><td>AX2 décompte inversé</td><td>Codeur câblé A↔B</td><td>Inversion logicielle HSC</td></tr>
-      <tr class="fix"><td><strong>B03</strong></td><td>V3</td><td>Chattering FDC AX2/AX3</td><td>Rebond mécanique fin de course</td><td>Anti-chattering 30 ON / 20 OFF</td></tr>
-      <tr class="fix"><td><strong>B04</strong></td><td>V3</td><td>Compilation échoue</td><td>Imports XSF manquants</td><td>Import bibliothèque PIDFF</td></tr>
-      <tr class="fix"><td><strong>B05</strong></td><td>V3</td><td>T_POSITION_ATTEINTE jamais vraie</td><td>Tolérance 0 mm</td><td>Bande morte ±2 mm</td></tr>
-      <tr class="fix"><td><strong>B06</strong></td><td>V4.2</td><td>INIT non re-jouable</td><td>INIT_OK reste TRUE</td><td>INIT_OK := FALSE en début REF_AX23</td></tr>
-      <tr class="fix"><td><strong>B07</strong></td><td>V4.2</td><td>Dérive PIDFF en MANU</td><td>Intégrale active hors AUTO</td><td>Bascule PIDFF → PI1 simple</td></tr>
-    </table>
-    <div class="card green-bg mt8">
-      <div class="s-text strong" style="color:var(--success);">Apprentissage retenu</div>
-      <div class="s-text small">Chaque bug a généré une fiche de modification datée. La progression V2 → V3 → V4.2 est tracée. Cette discipline servira aussi au mainteneur futur — la mémoire du chantier reste dans le code et les commentaires.</div>
-    </div>
-  </div>
-  <div class="s-footer"><span>C14 — Adapter le programme</span><span>Slide 10</span></div>
-</div>
-
-<!-- ============================================================
      S11 — T6.3b IHM VIJEO
 ============================================================ -->
-<div class="prezi-slide" id="s11" style="left:3200px;top:2000px;">
+<div class="prezi-slide" id="s11" style="left:1900px;top:2000px;">
   <div class="s-header"><span>T6.3b — Programmation IHM Vijeo Designer</span><span class="s-tag green">Programmer</span></div>
   <div class="s-body">
     <div class="s-grid g60-40" style="height:88%;">
@@ -867,13 +841,13 @@ tr.fix td { background: #FFF8E1; }
       </div>
     </div>
   </div>
-  <div class="s-footer"><span>C14 — Programmer IHM · Vijeo Designer 6.3</span><span>Slide 11</span></div>
+  <div class="s-footer"><span>C14 — Programmer IHM · Vijeo Designer 6.3</span><span>Slide 10</span></div>
 </div>
 
 <!-- ============================================================
      S12 — T7.1 MISE EN SERVICE
 ============================================================ -->
-<div class="prezi-slide" id="s12" style="left:4500px;top:2000px;">
+<div class="prezi-slide" id="s12" style="left:3200px;top:2000px;">
   <div class="s-header"><span>T7.1 — Mise en service progressive</span><span class="s-tag orange">Mettre en service</span></div>
   <div class="s-body">
     <div class="s-title">Approche en cinq paliers — jamais tout à la fois</div>
@@ -908,13 +882,13 @@ tr.fix td { background: #FFF8E1; }
       <div class="s-text small">Un défaut détecté tôt évite la propagation. Sur le MPH600, B02 (codeur AX2 inversé) a été identifié au palier 4 — corrigé en logiciel, pas de re-câblage.</div>
     </div>
   </div>
-  <div class="s-footer"><span>C15 — Mettre en service</span><span>Slide 12</span></div>
+  <div class="s-footer"><span>C15 — Mettre en service</span><span>Slide 11</span></div>
 </div>
 
 <!-- ============================================================
      S13 — T7.2 VALIDATION E1-E8
 ============================================================ -->
-<div class="prezi-slide" id="s13" style="left:5800px;top:2000px;">
+<div class="prezi-slide" id="s13" style="left:4500px;top:2000px;">
   <div class="s-header"><span>T7.2 — Essais E1 à E8 — validation 8/8</span><span class="s-tag orange">Mettre en service</span></div>
   <div class="s-body">
     <table class="mt4">
@@ -937,7 +911,7 @@ tr.fix td { background: #FFF8E1; }
       <div class="s-text strong" style="color:var(--success);">PV d'essais signé par M. <em>[tuteur]</em> le 12 mai 2026.</div>
     </div>
   </div>
-  <div class="s-footer"><span>C15 — Valider</span><span>Slide 13</span></div>
+  <div class="s-footer"><span>C15 — Valider</span><span>Slide 12</span></div>
 </div>
 
 <!-- ============================================================
@@ -977,7 +951,7 @@ tr.fix td { background: #FFF8E1; }
       </div>
     </div>
   </div>
-  <div class="s-footer"><span>C16 — Réceptionner</span><span>Slide 14</span></div>
+  <div class="s-footer"><span>C16 — Réceptionner</span><span>Slide 13</span></div>
 </div>
 
 <!-- ============================================================
@@ -1021,7 +995,7 @@ tr.fix td { background: #FFF8E1; }
       </div>
     </div>
   </div>
-  <div class="s-footer"><span>C16 — Communiquer</span><span>Slide 15</span></div>
+  <div class="s-footer"><span>C16 — Communiquer</span><span>Slide 14</span></div>
 </div>
 
 <!-- ============================================================
@@ -1058,7 +1032,7 @@ tr.fix td { background: #FFF8E1; }
       </div>
     </div>
   </div>
-  <div class="s-footer"><span>Bilan U6.2</span><span>Slide 16</span></div>
+  <div class="s-footer"><span>Bilan U6.2</span><span>Slide 15</span></div>
 </div>
 
 <!-- ============================================================
